@@ -1,5 +1,181 @@
 # ngpro262_projek
 
+# Git Workflow
+
+This project uses **Git** and **GitLab** for version control. Each team member should work on their own branch and create a Merge Request when their work is ready to be reviewed. Avoid committing directly to the `main` branch.
+
+## Getting Started
+
+If this is your first time working on the project, clone the repository to your computer and navigate into the project folder.
+
+```bash
+git clone <repository-url>
+cd <repository-name>
+```
+
+## Keeping Your Local Repository Up to Date
+
+Before starting work each day, switch to the `main` branch and download the latest changes from the remote repository.
+
+```bash
+git checkout main
+git pull origin main
+```
+
+This ensures that you are starting from the latest version of the project before creating or updating your own branch.
+
+## Creating a Branch
+
+Create a new branch for the feature or bug fix you are working on. Choose a descriptive branch name so that other team members can easily identify its purpose.
+
+```bash
+git checkout -b feature/your-feature-name
+```
+
+For example:
+
+```bash
+git checkout -b feature/login-page
+```
+
+After creating the branch, all of your work should be committed to this branch rather than directly to `main`.
+
+## Making Changes and Committing
+
+After making changes to the project, check which files have been modified.
+
+```bash
+git status
+```
+
+Stage your changes for commit.
+
+```bash
+git add .
+```
+
+Create a commit with a clear and descriptive message explaining what was changed.
+
+```bash
+git commit -m "Describe your changes"
+```
+
+Good commit messages make it easier for other developers to understand the history of the project.
+
+## Pushing Your Branch
+
+The first time you push a new branch to GitLab, use:
+
+```bash
+git push -u origin feature/your-feature-name
+```
+
+The `-u` option links your local branch with the remote branch so that future pushes only require:
+
+```bash
+git push
+```
+
+## Creating a Merge Request
+
+Once your work is complete and has been pushed to GitLab:
+
+1. Open the project in GitLab.
+2. Select **Merge Requests** from the menu.
+3. Click **New Merge Request**.
+4. Select your feature branch as the **Source Branch**.
+5. Select `main` as the **Target Branch**.
+6. Add a meaningful title and description.
+7. Create the Merge Request for review.
+
+A team member can then review your changes before they are merged into the `main` branch.
+
+## Switching Between Branches
+
+To see all available branches, run:
+
+```bash
+git branch
+```
+
+To switch to another branch, use:
+
+```bash
+git checkout branch-name
+```
+
+For example:
+
+```bash
+git checkout main
+```
+
+or
+
+```bash
+git checkout feature/login-page
+```
+
+## Updating Your Branch
+
+If changes have been made to the `main` branch while you were working, update your branch before continuing.
+
+First, update your local copy of `main`:
+
+```bash
+git checkout main
+git pull origin main
+```
+
+Next, switch back to your feature branch:
+
+```bash
+git checkout feature/your-feature-name
+```
+
+Merge the latest changes from `main` into your branch:
+
+```bash
+git merge main
+```
+
+If Git reports merge conflicts, resolve the conflicts in the affected files, stage the resolved files, and complete the merge by creating the merge commit.
+
+```bash
+git add .
+git commit
+```
+
+Finally, push the updated branch:
+
+```bash
+git push
+```
+
+## Pulling Changes
+
+If you are already working on your branch and simply want to download the latest changes from GitLab, use:
+
+```bash
+git pull
+```
+
+## Useful Commands
+
+| Command                       | Purpose                                       |
+| ----------------------------- | --------------------------------------------- |
+| `git status`                  | Show modified files and repository status.    |
+| `git branch`                  | Display all local branches.                   |
+| `git checkout branch-name`    | Switch to another branch.                     |
+| `git checkout -b branch-name` | Create and switch to a new branch.            |
+| `git add .`                   | Stage all modified files.                     |
+| `git commit -m "message"`     | Save your changes locally.                    |
+| `git push`                    | Upload commits to GitLab.                     |
+| `git pull`                    | Download the latest changes from GitLab.      |
+| `git merge branch-name`       | Merge another branch into the current branch. |
+| `git log --oneline`           | View the commit history.                      |
+
+Following this workflow helps keep the repository organized, reduces merge conflicts, and allows every team member's work to be reviewed before being merged into the main project.
 
 
 ## Getting started
