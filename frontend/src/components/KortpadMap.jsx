@@ -1,6 +1,4 @@
-// Kaart-komponent (gebruik Leaflet) wat lokaal-nodes as pins wys, en die kortste pad sodra Dijkstra dit bereken
-import '../css/Style.css';
-import '../css/Gebruiker.css';
+
 // Laai die nodige modules in
 // react-leaflet vir die kaart-rendering
 import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';

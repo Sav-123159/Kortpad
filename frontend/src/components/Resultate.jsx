@@ -1,6 +1,4 @@
 // Vertoon 'n lys van beskikbare lokale wat van die soek-funksie gekry word
-import '../css/Style.css';
-import '../css/Gebruiker.css';
 
 // Resultate-komponent vat 'n prop lokale wat 'n lys van beskikbare lokale bevat, en vertoon dit in 'n lys van resultate
 function Resultate({ lokale }) {

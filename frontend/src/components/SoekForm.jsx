@@ -1,7 +1,5 @@
 // Form-komponent waar die gebruiker kampus, huidige lokaal, en tyd kies om vir 'n beskikbare studielokaal te soek
 // Fieldset komponent
-import '../css/Style.css';
-import '../css/Gebruiker.css';
 // SoekForm vat die onSoek funksie as prop, wat die soekdata hanteer wanneer die vorm ingedien word
 // Die onSoek funksie word van die App-komponent af gestuur, en sal die beskikbare lokale filter en deurgee aan Resultate en KortpadMap
 function SoekForm({ onSoek }) {
