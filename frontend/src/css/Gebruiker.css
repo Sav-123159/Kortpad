@@ -1,0 +1,72 @@
+:root {
+    --paper: #faf7f2;
+    --paper-deep: #ece0cc;
+    --ink: #241811;
+    --route: #8a5a34;
+    --route-dark: #241811;
+    --clay: #a15c2e;
+    --line: #d9c7a8;
+    --default-border: 2px solid var(--ink);
+    --default-border-radius: 15px;
+}
+
+body{
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-areas: 
+        "Soek  Map"
+        "Resultaat  Map";
+}
+
+#soekForm{
+    grid-area: Soek;
+}
+
+.Resultate{
+    grid-area: Resultaat;
+}
+
+.Map{
+    grid-area: Map;
+}
+
+.res-houer{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+        "Lokaal Gebou"
+        "Afstand Kapasiteit";
+    width: 350px;
+    margin: auto;
+    margin-top: 15px;
+    gap: 15px;
+    padding: 10px;
+    background-color: var(--paper);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+}
+
+.res-houer:hover{
+    background-color: var(--paper-deep);
+    transform: translateY(-2px);
+}
+
+.lokaal{
+    grid-area: Lokaal;
+}
+
+.gebou{
+    grid-area: Gebou;
+}
+
+.afstand{
+    grid-area: Afstand;
+}
+
+.kapasiteit{
+    grid-area: Kapasiteit;
+}
+
+.leaflet-container{
+    grid-area: Map;
+}
