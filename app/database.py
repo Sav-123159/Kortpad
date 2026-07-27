@@ -206,3 +206,88 @@ def create_views():
 def init_db():
     create_tables()
     create_views()
+
+def insert_test_data():
+    """Minimal test data covering every table and FK relationship."""
+    db_conn = get_db()
+    cursor = db_conn.cursor()
+
+    # CAMPUS
+    cursor.execute("INSERT INTO campus (campus_name) VALUES (?)", ("Main Campus",))
+    campus_id = cursor.lastrowid
+
+    # FACULTY
+    cursor.execute("INSERT INTO faculty (faculty_name) VALUES (?)", ("Faculty of Science",))
+    faculty_id = cursor.lastrowid
+
+    # BUILDING
+    cursor.execute(
+        "INSERT INTO building (campus_id, building_name, faculty_id) VALUES (?, ?, ?)",
+        (campus_id, "Building A", faculty_id),
+    )
+    building_id = cursor.lastrowid
+
+    # VENUE (two rows so we have something to book/equip/timetable, and to link to a vertex)
+    cursor.execute(
+        "INSERT INTO venue (building_id, venue_name, capacity) VALUES (?, ?, ?)",
+        (building_id, "Room 101", 30),
+    )
+    venue_id = cursor.lastrowid
+
+    # VERTEX (one at campus level, one at building level -> gives us 2 nodes for an edge)
+    cursor.execute(
+        "INSERT INTO vertex (level, campus_id, building_id, venue_id, latitude, longitude) "
+        "VALUES ('campus', ?, NULL, NULL, ?, ?)",
+        (campus_id, -26.190430, 28.026070),
+    )
+    vertex_campus_id = cursor.lastrowid
+
+    cursor.execute(
+        "INSERT INTO vertex (level, campus_id, building_id, venue_id, latitude, longitude) "
+        "VALUES ('building', NULL, ?, ?, ?, ?)",
+        (building_id, venue_id, -26.190500, 28.026200),
+    )
+    vertex_building_id = cursor.lastrowid
+
+    # EDGE (vertex_a must be < vertex_b)
+    vertex_a, vertex_b = sorted((vertex_campus_id, vertex_building_id))
+    cursor.execute(
+        "INSERT INTO edge (vertex_a, vertex_b, weight) VALUES (?, ?, ?)",
+        (vertex_a, vertex_b, 120.50),
+    )
+
+    # EQUIPMENT
+    cursor.execute(
+        "INSERT INTO equipment (venue_id, equip_name, equip_qty) VALUES (?, ?, ?)",
+        (venue_id, "Projector", 2),
+    )
+
+    # TIMETABLE
+    cursor.execute(
+        "INSERT INTO timetable (venue_id, day_of_week, start_time, end_time, module_code, "
+        "semester_start, semester_end) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (venue_id, "MON", "09:00", "10:00", "CS101", "2026-07-27", "2026-11-13"),
+    )
+
+    # APP_USER
+    cursor.execute(
+        "INSERT INTO app_user (fname, sname, email) VALUES (?, ?, ?)",
+        ("John", "Doe", "john.doe@example.com"),
+    )
+    user_id = cursor.lastrowid
+
+    # AUTH
+    cursor.execute(
+        "INSERT INTO auth (user_id, username, password, email) VALUES (?, ?, ?, ?)",
+        (user_id, "johndoe", "hashed_password_placeholder", "john.doe@example.com"),
+    )
+
+    # BOOKING
+    cursor.execute(
+        "INSERT INTO booking (venue_id, user_id, start_time, end_time, booking_date) "
+        "VALUES (?, ?, ?, ?, ?)",
+        (venue_id, user_id, "14:00", "15:00", "2026-07-24"),
+    )
+
+    db_conn.commit()
+    db_conn.close()
