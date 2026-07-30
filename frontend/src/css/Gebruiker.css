@@ -1,33 +1,12 @@
 :root {
-    --paper: #faf7f2;
-    --paper-deep: #ece0cc;
-    --ink: #241811;
-    --route: #8a5a34;
-    --route-dark: #241811;
-    --clay: #a15c2e;
+    --paper: #e3eed4;
+    --paper-deep: #aec3b0;
+    --ink: #2E2F22;
+    --pine: #375534;
+    --pine-dark: #0f2a1d;
     --line: #d9c7a8;
     --default-border: 2px solid var(--ink);
     --default-border-radius: 15px;
-}
-
-body{
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    grid-template-areas: 
-        "Soek  Map"
-        "Resultaat  Map";
-}
-
-#soekForm{
-    grid-area: Soek;
-}
-
-.Resultate{
-    grid-area: Resultaat;
-}
-
-.Map{
-    grid-area: Map;
 }
 
 .res-houer{
@@ -67,6 +46,11 @@ body{
     grid-area: Kapasiteit;
 }
 
-.leaflet-container{
-    grid-area: Map;
+.MapPaneel .leaflet-container{
+    width:100%;
+    height:100%;
+    border:var(--default-border);
+    border-radius:40px;
 }
+
+
