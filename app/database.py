@@ -108,7 +108,7 @@ def create_tables():
             semester_end DATE NOT NULL,
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id),
             CHECK (end_time > start_time)
-        )             
+        )        
     ''')
     
     # APP_USER Table

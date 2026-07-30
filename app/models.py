@@ -1,11 +1,16 @@
 from pydantic import BaseModel
 from datetime import time, date, datetime
 
-class User(BaseModel):
-    user_id : int
+class UserBase(BaseModel):
     fname : str
     sname : str
     email : str
+
+class UserCreate(UserBase):
+    pass
+
+class User(UserBase):
+    user_id : int
 
 class CampusBase(BaseModel):
     campus_name : str
