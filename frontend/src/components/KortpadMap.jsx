@@ -6,15 +6,26 @@ import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 
 // KortpadMap-komponent vat 'n prop lokale, pad, en middelpunt, en render 'n kaart met die beskikbare lokale as pins, en die kortste pad as 'n lyn
-function KortpadMap({ lokale = [], pad = [], middelpunt = [-25.7479, 28.2293] }) {
+function KortpadMap({ lokale = [], pad = [], middelpunt = [-25.8460365, 28.1781282] }) {
     // Render die kaart met die beskikbare lokale as pins, en die kortste pad as 'n lyn
+
+    const bounds = [
+    [-25.8453419, 28.1779], // Southwest coordinates
+    [-25.8470878, 28.1787890] // Northeast coordinates
+    ];
+
     return (
         // MapContainer is die hoof-komponent van react-leaflet wat die kaart render
         // center is die middelpunt van die kaart, zoom is die zoom-vlak, style is die styl van die kaart
         <MapContainer
             center={middelpunt}
-            zoom={17}
-            style={{ height: '500px', width: '100%', borderRadius: '15px'}}
+            zoom={100}
+            className="leaflet-container"
+            maxBounds={bounds}
+            scrollWheelZoom={false}
+            doubleClickZoom={false}
+            touchZoom={false}
+            zoomControl={false}
         >
             {/* TileLayer is die laag wat die kaart-afbeeldings wys */}
             <TileLayer

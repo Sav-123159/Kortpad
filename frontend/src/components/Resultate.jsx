@@ -1,36 +1,86 @@
-// Vertoon 'n lys van beskikbare lokale wat van die soek-funksie gekry word
+import { useState, useEffect } from "react";
 
-// Resultate-komponent vat 'n prop lokale wat 'n lys van beskikbare lokale bevat, en vertoon dit in 'n lys van resultate
-function Resultate({ lokale }) {
+function Resultate({ getTime, time }) {
+    const [timetables, setTimetables] = useState([]);
+    const [venues, setVenues] = useState([]);
+    const [buildings, setBuildings] = useState([]);
+
+    useEffect(() => {
+        fetch("http://127.0.0.1:8000/timetables")
+            .then(res => res.json())
+            .then(data => setTimetables(data))
+            .then((error) => console.error("Failed to fetch timetables:", error));
+
+        fetch("http://127.0.0.1:8000/venues")
+            .then(res => res.json())
+            .then(data => setVenues(data))
+            .then((error) => console.error("Failed to fetch venues:", error));
+
+        fetch("http://127.0.0.1:8000/buildings")
+            .then(res => res.json())
+            .then(data => setBuildings(data))
+            .then((error) => console.error("Failed to fetch buildings:", error));
+
+    }, []);
+
+    const now = new Date();
+
+    const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    const currentDay = days[now.getDay()];
+    const currentTime = now.toTimeString().slice(0, 8);
+
+    const targetTime = (getTime && time) ? time : currentTime;
+
+    const occupiedVenueIds = timetables
+        .filter(timetable =>
+            timetable.day_of_week === currentDay &&
+            timetable.start_time <= targetTime &&
+            timetable.end_time > targetTime
+        )
+        .map(timetable => timetable.venue_id);
+
+
+    const availableVenues = venues.filter(
+        venue => !occupiedVenueIds.includes(venue.venue_id)
+    );
+
     return (
         <section className="Resultate">
-            {lokale.map((lokaal) => (
-                <div className="res-houer" key={lokaal.id}>
-                    <div className="lokaal">
-                        <b>Lokaal Naam: </b>
-                        <br />
-                        {lokaal.naam}
+            {availableVenues.map((venue) => {
+
+                const building = buildings.find(
+                    building => building.building_id === venue.building_id
+                );
+
+                return (
+                    <div className="res-houer" key={venue.venue_id}>
+                        <div className="lokaal">
+                            <b>Lokaal Naam:</b>
+                            <br />
+                            {venue.venue_name}
+                        </div>
+
+                        <div className="gebou">
+                            <b>Gebou Naam:</b>
+                            <br />
+                            {building ? building.building_name : "Onbekend"}
+                        </div>
+
+                        <div className="afstand">
+                            <b>Afstand:</b>
+                            <br />
+                            Onbekend
+                        </div>
+
+                        <div className="kapasiteit">
+                            <b>Kapasiteit:</b>
+                            <br />
+                            {venue.capacity}
+                        </div>
                     </div>
-                    <div className="gebou">
-                        <b>Gebou Naam: </b>
-                        <br />
-                        {lokaal.gebou}
-                    </div>
-                    <div className="afstand">
-                        <b>Afstand: </b>
-                        <br />
-                        {lokaal.afstand}m
-                    </div>
-                    <div className="kapasiteit">
-                        <b>Kapasiteit: </b>
-                        <br />
-                        {lokaal.kapasiteit}
-                    </div>
-                </div>
-            ))}
+                );
+            })}
         </section>
     );
 }
-
-// Stuur die Resultate-komponent na die App-komponent
 export default Resultate;

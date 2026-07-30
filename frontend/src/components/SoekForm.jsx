@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function SoekForm({ onSoek }) {
+function SoekForm({ onSoek, onTimeChange }) {
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
 
@@ -20,6 +20,7 @@ function SoekForm({ onSoek }) {
         e.preventDefault();
         const formData = new FormData(e.target);
 
+
         onSoek({
             kampus: formData.get("kampusNaam"),
             lokaal: formData.get("lokaal"),
@@ -37,6 +38,11 @@ function SoekForm({ onSoek }) {
                             {campus.campus_name}
                         </option>
                     ))}
+                    {campuses.map((campus) => (
+                        <option key={campus.campus_id} value={campus.campus_name}>
+                            {campus.campus_name}
+                        </option>
+                    ))}
                 </select>
 
                 <label htmlFor="lokaal">Huidige Lokaal:</label>
@@ -46,10 +52,19 @@ function SoekForm({ onSoek }) {
                             {venue.venue_name}
                         </option>
                     ))}
+                    {venues.map((venue) => (
+                        <option key={venue.venue_id} value={venue.venue_name}>
+                            {venue.venue_name}
+                        </option>
+                    ))}
                 </select>
 
                 <label htmlFor="tyd">Tyd (Opsioneel):</label>
-                <input type="time" id="tyd" name="tyd" />
+                <input 
+                    type="time" 
+                    id="form-time"
+                    onChange={(e) => onTimeChange(e.target.value)} 
+                />
 
                 <button type="submit" className="soek-btn" id="soek">
                     Soek Lokaal
@@ -60,3 +75,4 @@ function SoekForm({ onSoek }) {
 }
 
 export default SoekForm;
+
