@@ -1,15 +1,25 @@
-// Form-komponent waar die gebruiker kampus, huidige lokaal, en tyd kies om vir 'n beskikbare studielokaal te soek
-// Fieldset komponent
-// SoekForm vat die onSoek funksie as prop, wat die soekdata hanteer wanneer die vorm ingedien word
-// Die onSoek funksie word van die App-komponent af gestuur, en sal die beskikbare lokale filter en deurgee aan Resultate en KortpadMap
+import { useState, useEffect } from "react";
+
 function SoekForm({ onSoek }) {
-    // Hanteer die vorm indiening, en stuur die data na die onSoek funksie
+    const [campuses, setCampuses] = useState([]);
+    const [venues, setVenues] = useState([]);
+
+    useEffect(() => {
+        fetch("http://127.0.0.1:8000/campuses")
+            .then((response) => response.json())
+            .then((data) => setCampuses(data))
+            .then((error) => console.error("Failed to fetch campuses:", error));
+
+        fetch("http://127.0.0.1:8000/venues")
+            .then((response) => response.json())
+            .then((data) => setVenues(data))
+            .then((error) => console.error("Failed to fetch venues:", error));
+    }, []); // [] Needed. Without them on load React indefinitely calls the API
+
     const handleSubmit = (e) => {
-        // Voorkom dat die vorm die bladsy herlaai
         e.preventDefault();
-        // Skep 'n FormData objek van die vorm, en stuur die data na die onSoek funksie
         const formData = new FormData(e.target);
-        // Stuur die data na die onSoek funksie as 'n objek met kampus, lokaal, en tyd
+
         onSoek({
             kampus: formData.get("kampusNaam"),
             lokaal: formData.get("lokaal"),
@@ -17,22 +27,25 @@ function SoekForm({ onSoek }) {
         });
     };
 
-    // Render die vorm met 'n veld vir kampus, lokaal, en tyd, en 'n soek-knoppie
     return (
         <fieldset>
             <form id="soekForm" onSubmit={handleSubmit}>
                 <label htmlFor="kampus">Kampus:</label>
                 <select id="kampus" name="kampusNaam" required>
-                    <option value="Leriba">Leriba</option>
-                    <option value="GerhardStraat">GerhardStraat</option>
-                    <option value="Paarl">Paarl</option>
+                    {campuses.map((campus) => (
+                        <option key={campus.campus_id} value={campus.campus_name}>
+                            {campus.campus_name}
+                        </option>
+                    ))}
                 </select>
 
                 <label htmlFor="lokaal">Huidige Lokaal:</label>
                 <select id="lokaal" name="lokaal" required>
-                    <option value="Sowel-As">Sowel-As</option>
-                    <option value="Bosvy">Bosvy</option>
-                    <option value="Koning Protea">Koning Protea</option>
+                    {venues.map((venue) => (
+                        <option key={venue.venue_id} value={venue.venue_name}>
+                            {venue.venue_name}
+                        </option>
+                    ))}
                 </select>
 
                 <label htmlFor="tyd">Tyd (Opsioneel):</label>
@@ -46,5 +59,4 @@ function SoekForm({ onSoek }) {
     );
 }
 
-// Stuur die SoekForm-komponent na die App-komponent
 export default SoekForm;
