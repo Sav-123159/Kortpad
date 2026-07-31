@@ -134,6 +134,18 @@ def get_timetable(id : int):
 
     return timetable
 
+@app.get('/timetable/by-venue/{venue_id}')
+def get_timetable(venue_id : int):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute('SELECT * FROM timetable WHERE venue_id = ?', (venue_id,)).fetchall()
+    timetables = [Timetable(**dict(d)) for d in data]
+
+    conn.close()
+
+    return timetables
+
 @app.get('/timetables')
 def get_timetables():
     conn = get_db()
@@ -461,6 +473,24 @@ def get_venue(id : int):
     conn.close()
 
     return venue
+
+@app.get('/venue/by-campus/{campus_id}')
+def get_venue(campus_id : int):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute('''
+                            SELECT venue.* 
+                            FROM venue 
+                            JOIN building 
+                            ON venue.building_id = building.building_id  
+                            WHERE campus_id = ?
+                        ''', (campus_id,)).fetchall()
+    venues = [Venue(**dict(d)) for d in data]
+    
+    conn.close()
+    
+    return venues
 
 @app.get('/venues')
 def get_all_venues():
