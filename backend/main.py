@@ -8,15 +8,15 @@ from datetime import date, time
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173"
+    'http://localhost:5173'
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_methods=['*'],
+    allow_headers=['*']
 )
 
 init_db()
@@ -26,17 +26,23 @@ def root():
     return {'message': 'API'}
 
 # ==================== USER ====================
-@app.get('/user/{id}')
-def get_user(id : int):
+@app.get('/user/{user_id}')
+def get_user(user_id : int):
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail='User id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    data = cursor.execute('SELECT * FROM app_user WHERE user_id = ?', (id,)).fetchone()
-    user = User(**dict(data)) if data else None
-
-    conn.close()
-
-    return user
+        data = cursor.execute('SELECT * FROM app_user WHERE user_id = ?', (user_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='User does not exist')
+        
+        return User(**dict(data))
+    
+    finally:
+        conn.close()
 
 @app.get('/users')
 def get_users():
@@ -61,44 +67,59 @@ def create_user(user : UserCreate):
         conn.commit()
 
         return User(user_id=cursor.lastrowid, **user.model_dump())
-
+    
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Email already exists")
+        raise HTTPException(status_code=400, detail='Email already exists')
     finally:
         conn.close()
 
-@app.delete('/user/{id}')
-def delete_user(id : int):
+@app.delete('/user/{user_id}')
+def delete_user(user_id : int):
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail='User id needs to be greater than 0')
+    
     conn = get_db()
     try:
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM app_user WHERE user_id = ?', (id,))
+        cursor.execute('DELETE FROM app_user WHERE user_id = ?', (user_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='User does not exist')
+        
         conn.commit()
         
-        return {'message': 'User has been deleted'}
+        return {'message': f'User {user_id} has been deleted'}
     
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
-@app.put('/user/{id}')
-def update_user(id : int, fname : str, sname : str, email : str):
+@app.put('/user/{user_id}')
+def update_user(user_id : int, user : UserBase):
+    if user_id <= 0:
+        raise HTTPException(status_code=400, detail='User id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute('UPDATE app_user SET fname = ?, sname = ?, email = ? WHERE user_id = ?',
-    (fname, sname, email, id)
-    )
-    conn.commit()
+        cursor.execute('UPDATE app_user SET fname = ?, sname = ?, email = ? WHERE user_id = ?',
+        (user.fname, user.sname, user.email, user_id)
+        )
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='User does not exist')
+        
+        conn.commit()
+        
+        return {'message': f'User {user_id} has been updated'}
 
-    data = cursor.execute('SELECT * FROM app_user WHERE user_id = ?', (id,)).fetchone()
-    user = User(**dict(data)) if data else None
-
-    conn.close()
-
-    return user
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
 
 # ==================== TIMETABLE ==================== 
 @app.get('/timetable/{id}')
@@ -151,7 +172,7 @@ def create_timetable(timetable : TimetableCreate):
         return Timetable(timetable_id=cursor.lastrowid, **timetable.model_dump())
 
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -164,10 +185,10 @@ def delete_timetable(id : int):
         cursor.execute('DELETE FROM timetable WHERE timetable_id = ?', (id,))
         conn.commit()
         
-        return {"message": "Timetable has been deleted"}
+        return {'message': 'Timetable has been deleted'}
         
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -239,7 +260,7 @@ def create_booking(booking : BookingCreate):
         return Booking(booking_id=row[0], booking_created_at=row[1], **booking.model_dump())
 
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -252,10 +273,10 @@ def delete_booking(id : int):
         cursor.execute('DELETE FROM booking WHERE booking_id = ?', (id,))
         conn.commit()
     
-        return {"message": "Booking has been deleted"}
+        return {'message': 'Booking has been deleted'}
     
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -315,7 +336,7 @@ def create_campus(campus : CampusCreate):
         return Campus(campus_id=cursor.lastrowid, **campus.model_dump())
     
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -328,10 +349,10 @@ def delete_campus(id : int):
         cursor.execute('DELETE FROM campus WHERE campus_id = ?', (id,))
         conn.commit()
         
-        return {"message": "Campus has been deleted"}
+        return {'message': 'Campus has been deleted'}
 
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -391,7 +412,7 @@ def create_building(building : BuildingCreate):
         return Building(building_id=cursor.lastrowid, **building.model_dump())
 
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -404,10 +425,10 @@ def delete_building(id : int):
         cursor.execute('DELETE FROM building WHERE building_id = ?', (id,))
         conn.commit()
         
-        return {"message": "Building has been deleted"}
+        return {'message': 'Building has been deleted'}
     
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -467,7 +488,7 @@ def create_venue(venue : VenueCreate):
         return Venue(venue_id=cursor.lastrowid, **venue.model_dump())
         
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
@@ -480,10 +501,10 @@ def delete_venue(id : int):
         cursor.execute('DELETE FROM venue WHERE venue_id = ?', (id,))
         conn.commit()
         
-        return {"message": "Venue has been deleted"}
+        return {'message': 'Venue has been deleted'}
 
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Something went wrong")
+        raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 

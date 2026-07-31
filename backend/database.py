@@ -1,6 +1,6 @@
 import sqlite3
 
-DATABASE_NAME = "./data/database.db"
+DATABASE_NAME = "../data/database.db"
 
 def get_db():
     db_conn = sqlite3.connect(DATABASE_NAME)
