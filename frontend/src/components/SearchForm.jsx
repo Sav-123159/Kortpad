@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function SoekForm({ onSoek, onTimeChange, onCampusChange }) {
+function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
@@ -8,14 +8,19 @@ function SoekForm({ onSoek, onTimeChange, onCampusChange }) {
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
             .then((response) => response.json())
-            .then((data) => setCampuses(data))
+            .then((data) => {
+                setCampuses(data);
+                if (data.length > 0) {
+                    setSelectedCampus(data[0].campus_id);
+                }
+            })
             .catch((error) => console.error("Failed to fetch campuses:", error));
     }, []); // [] Needed. Without them on load React indefinitely calls the API
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        onSoek({
+        onSearch({
             kampus: formData.get("kampusNaam"),
             lokaal: formData.get("lokaal"),
             tyd: formData.get("tyd"),
@@ -78,5 +83,5 @@ function SoekForm({ onSoek, onTimeChange, onCampusChange }) {
     );
 }
 
-export default SoekForm;
+export default SearchForm;
 

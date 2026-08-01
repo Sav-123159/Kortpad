@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function Resultate({ getTime, time, campus}) {
+function Results({ getTime, time, campus}) {
     const [timetables, setTimetables] = useState([]);
     const [venues, setVenues] = useState([]);
     const [buildings, setBuildings] = useState([]);
@@ -48,7 +48,7 @@ function Resultate({ getTime, time, campus}) {
     );
 
     return (
-        <section className="Resultate">
+        <section className="Results">
             {availableVenues.map((venue) => {
 
                 const building = buildings.find(
@@ -86,4 +86,4 @@ function Resultate({ getTime, time, campus}) {
         </section>
     );
 }
-export default Resultate;
+export default Results;

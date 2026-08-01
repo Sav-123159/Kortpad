@@ -54,3 +54,142 @@
 }
 
 
+.booking-page {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(46, 47, 34, 0.45);
+    backdrop-filter: blur(6px);
+
+    z-index: 999;
+}
+
+.booking-modal {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 25px;
+
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+
+    padding: 25px;
+
+    background: var(--paper);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+
+    overflow: auto;
+}
+
+.booking-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.booking-sidebar h3 {
+    margin: 0 0 8px 0;
+    color: var(--ink);
+}
+
+.booking-selection {
+    padding: 10px;
+    background: var(--paper-deep);
+    border-radius: 8px;
+    border: 1px solid var(--line);
+}
+
+.booking-selection-times {
+    margin-top: 6px;
+    font-size: 0.95rem;
+}
+
+.booking-clear {
+    margin-top: 8px;
+
+    background: none;
+    border: none;
+
+    color: #b91c1c;
+
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.booking-actions {
+    margin-top: auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.booking-confirm:disabled {
+    background: var(--pine);
+    cursor: not-allowed;
+}
+
+.booking-grid {
+    overflow-x: auto;
+}
+
+.booking-grid-header {
+    margin-bottom: 15px;
+}
+
+.booking-grid-header h4 {
+    margin: 0 0 4px 0;
+    color: var(--ink);
+}
+
+.booking-grid-header p {
+    margin: 0;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.time-label {
+    background: white;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.available {
+    background: white;
+    cursor: pointer;
+}
+
+.available:hover {
+    background: var(--pine);
+    color: white;
+}
+
+.selected {
+    background: var(--pine-dark);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.occupied {
+    background: #ef5350;
+    color: black;
+    cursor: not-allowed;
+}
+
+.disabled {
+    background: #d9d9d9;
+    color: #64748b;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.disabled-header {
+    background: #b9c9ba !important;
+    color: #4b5563 !important;
+}
