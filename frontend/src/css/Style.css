@@ -4,7 +4,6 @@
     --ink: #2E2F22;
     --pine: #375534;
     --pine-dark: #0f2a1d;
-    --line: #d9c7a8;
     --default-border: 2px solid var(--ink);
     --default-border-radius: 15px;
 }
@@ -142,5 +141,23 @@ button:hover{
     flex:1;
     padding:20px;
     background:var(--paper);
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--paper-deep);
+    color: var(--ink);
+}
+
+th, td{
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    border: var(--default-border);
+}
+
+h3{
+    color: var(--ink);
 }
 

@@ -480,12 +480,11 @@ def get_venue(campus_id : int):
     cursor = conn.cursor()
 
     data = cursor.execute('''
-                            SELECT venue.* 
-                            FROM venue 
-                            JOIN building 
-                            ON venue.building_id = building.building_id  
-                            WHERE campus_id = ?
-                        ''', (campus_id,)).fetchall()
+        SELECT venue.* 
+        FROM venue 
+        JOIN building 
+        ON venue.building_id = building.building_id  
+        WHERE campus_id = ?''', (campus_id,)).fetchall()
     venues = [Venue(**dict(d)) for d in data]
     
     conn.close()

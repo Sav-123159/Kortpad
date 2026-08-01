@@ -5,14 +5,14 @@ import KortpadMap from "./components/KortpadMap";
 import { lokale } from "./data/mockData";
 
 function App() {
-    const [resultate, setResultate] = useState(
+    const [results, setResults] = useState(
         lokale.filter((l) => l.beskikbaar)
     );
 
     const handleSoek = (soekData) => {
         console.log(soekData);
 
-        setResultate(
+        setResults(
             lokale.filter((l) => l.beskikbaar)
         );
     };
@@ -22,13 +22,14 @@ function App() {
             <Header />
             <div className="Container">
                 <LeftPanel
-                    resultate={resultate}
-                    onSoek={handleSoek}
+                    results={results}
+                    onSearch={handleSoek}
                 />
                 <div className="MapPaneel">
-                    <KortpadMap lokale={resultate}/>
+                    <KortpadMap lokale={results}/>
                 </div>
             </div>
+            
         </div>
     );
 }
