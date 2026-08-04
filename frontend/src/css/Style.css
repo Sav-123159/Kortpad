@@ -16,11 +16,11 @@ body{
     padding: 0;
 }
 
+
 fieldset {
     display: block;
     justify-content: left;
     align-items: center;
-    height: 100%;
     width: auto;
     min-width: 300px;
     background-color: var(--paper);
@@ -51,6 +51,7 @@ form textarea:focus {
     outline: none;
     border-color: var(--clay);
 }
+
 
 button{
     padding: 10px;
@@ -118,6 +119,25 @@ button:hover{
     background-color: var(--paper-deep); 
 }
 
+.button-group{
+    display: flex;
+}
+
+button.form-button{
+    width: 50%;
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+    color: white;
+    background-color:var(--pine-dark);
+}
+
+button.form-button:hover {
+    background-color: var(--pine);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
 /* Laat die 2 sections langs mekaar vertoon */
 .Container{
     display:flex;
@@ -161,3 +181,231 @@ h3{
     color: var(--ink);
 }
 
+table{
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--paper-deep);
+    color: var(--ink);
+}
+
+th, td{
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    border: var(--default-border);
+}
+
+h1{
+    margin: 0px;
+    color: var(--ink);
+}
+
+h3{
+    margin: 0px;
+    color: var(--ink);
+}
+
+.login-page {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(46, 47, 34, 0.45);
+    backdrop-filter: blur(6px);
+
+    z-index: 999;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: row;      /* Side by side */
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+
+    width: 850px;
+    max-width: 90vw;
+    height: 550px;
+    padding: 40px;
+
+    background: var(--paper);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+    box-sizing: border-box;
+}
+
+/* Left side (login form) */
+.form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+form.login{
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+.form-button button{
+    width: 50%;
+}
+
+/* Right side (animation) */
+.deco {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.deco svg {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+}
+
+img.login-logo{
+    width: 400px;
+    height: 150px;
+
+}
+
+.node{
+    fill: var(--pine-dark);
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+/* Left node */
+#node1{
+    animation: pulse1 16s ease-in-out infinite;
+}
+
+/* Top node */
+#node2{
+    animation: pulse2 16s ease-in-out infinite;
+}
+
+/* Bottom node */
+#node3{
+    animation: pulse3 16s ease-in-out infinite;
+}
+
+/* Right node */
+#node4{
+    animation: pulse4 16s ease-in-out infinite;
+}
+
+@keyframes pulse1{
+    0%,14%,100%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+
+    16%,20%{
+        transform:scale(1.35);
+        fill:#5fcf7d;
+    }
+
+    22%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+}
+
+@keyframes pulse2{
+    0%,24%,100%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+
+    26%,30%{
+        transform:scale(1.35);
+        fill:#5fcf7d;
+    }
+
+    32%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+}
+
+@keyframes pulse3{
+    0%,34%,100%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+
+    36%,40%{
+        transform:scale(1.35);
+        fill:#5fcf7d;
+    }
+
+    42%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+}
+
+@keyframes pulse4{
+    0%,44%,100%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+
+    46%,50%{
+        transform:scale(1.35);
+        fill:#5fcf7d;
+    }
+
+    52%{
+        transform:scale(1);
+        fill:var(--pine-dark);
+    }
+}
+
+.animated-path{
+    fill:none;
+    stroke:var(--pine-dark);
+    stroke-width:8;
+    stroke-linecap:round;
+
+    stroke-dasharray:340;
+    stroke-dashoffset:340;
+
+    animation:drawPath 16s linear infinite;
+}
+
+@keyframes drawPath{
+
+    0%,60%{
+        stroke-dashoffset:340;
+    }
+
+    /* Appear */
+    61%{
+        opacity:1;
+    }
+
+    /* Slow draw */
+    85%{
+        stroke-dashoffset:0;
+        opacity:1;
+    }
+
+    /* Hold */
+    93%{
+        stroke-dashoffset:0;
+        opacity:1;
+    }
+
+    /* Fade away */
+    100%{
+        stroke-dashoffset:-340;
+    }
+}
