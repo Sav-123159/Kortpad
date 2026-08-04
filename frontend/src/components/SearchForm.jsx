@@ -12,10 +12,12 @@ function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
                 setCampuses(data);
                 if (data.length > 0) {
                     setSelectedCampus(data[0].campus_id);
+                    onCampusChange?.(data[0].campus_id);
                 }
             })
             .catch((error) => console.error("Failed to fetch campuses:", error));
     }, []); // [] Needed. Without them on load React indefinitely calls the API
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -84,4 +86,3 @@ function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
 }
 
 export default SearchForm;
-

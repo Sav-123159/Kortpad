@@ -177,8 +177,8 @@
 }
 
 .occupied {
-    background: #ef5350;
-    color: black;
+    background: var(--ink);
+    color: white;
     cursor: not-allowed;
 }
 

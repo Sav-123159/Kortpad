@@ -1,4 +1,16 @@
+import { useState, useEffect, useRef } from "react";
+import LogIn from "./LogIn";
+
 export default function Header(){
+    const [show, setShow] = useState(false);
+    
+        const showModal = () => {
+            setShow(true)
+        }
+    
+        const hideModal = () => {
+            setShow(false)
+        }
     return (
         <header className="HeadNav">
             <div className="Logo">
@@ -11,6 +23,10 @@ export default function Header(){
                 <button>
                     Admin
                 </button>
+                <button onClick={showModal}>
+                    Log In
+                </button>
+                <LogIn show={show} onClose={hideModal}/>
             </div>
         </header>
     );
