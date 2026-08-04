@@ -8,8 +8,10 @@ import ReactDOM from 'react-dom/client';
 // App-komponent wat al die ander komponente saambind
 import App from './App.jsx';
 // Laai die globale CSS-lêers in
-import './css/Style.css';
+import './css/Admin.css';
 import './css/Gebruiker.css';
+import './css/Style.css';
+
 
 // Render die App-komponent in die root-element van die html
 ReactDOM.createRoot(document.getElementById('root')).render(

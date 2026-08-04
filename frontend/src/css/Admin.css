@@ -1,0 +1,312 @@
+:root {
+    --paper: #e3eed4;
+    --paper-deep: #aec3b0;
+    --ink: #2E2F22;
+    --pine: #375534;
+    --pine-dark: #0f2a1d;
+    --line: #d9c7a8;
+    --default-border: 2px solid var(--ink);
+    --default-border-radius: 15px;
+    --button-font: 'Times New Roman', Times, serif;
+}
+
+/* =================== Hoof ontwerp ===================== */
+/* Vat onnodige spasie weg */
+/* Fix layout */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Default ontwerp van elke knoppie */
+button{
+    font-weight: bold;
+    border-radius: var(--default-border-radius);
+}
+
+/* Laat die 2 sections langs mekaar vertoon */
+.Houer{
+    display: flex;
+    flex-direction: row;
+}
+
+/* ==================== Linker paneel ==================== */
+.LinkerPaneel div{
+    color: var(--ink);
+    font-size: 25px;
+    font-weight: bold;
+    font-family: var(--button-font);
+    
+    padding: 10px;
+}
+
+/* Knoppies om tussen funksies op die admin blad te beweeg */
+.Opsies{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 3vw;
+}
+
+.Opsies button{
+    padding: 20px;
+    
+    color: var(--paper);
+    background-color: var(--pine-dark);
+
+    font-size: medium;
+    font-family: var(--button-font);
+    text-align: left; 
+    border: none;
+}
+
+.Opsies button:hover{
+    background-color: var(--pine);
+    transform: translateY(-2px);
+}
+
+/* Kode moet nog bygevoeg word of die gaan weggevat word om dit te maak werk */
+.Opsies button.Opsie_Knoppie--active{
+    background-color: var(--pine);
+    transform: translateY(-2px);
+    /* font-size: large; */
+}
+
+/* ==================== Regter paneel ==================== */
+.RegterPaneel{
+    background-color: var(--paper);
+    color: var(--ink);
+
+    height: 80.5vh;
+    width: 100vw;
+    padding: 10px;
+}
+
+/* Normale uitleg van die titels */
+h2{
+    font-family: var(--button-font);
+}
+
+h3{
+    font-family: var(--button-font);
+    font-size: medium;
+
+    display: inline;
+    margin-right: 10px;
+}
+
+/* ============================ Lokaal en Toerusting gedeeld ============================== */
+.Lokale__Inligting button, .Toerusting__title button{
+    position: absolute;
+    left: 85%;
+}
+
+/* ==================== Gerigistreerde Lokale ontwerp ==================== */
+.Lokaal__titel, .Toerusting__title{
+    display: flex;
+    flex-direction: row;
+}
+
+.Lokale__Inligting{
+    position: relative;
+}
+
+.Lokale__kampus{
+    background-color: var(--pine);
+    color: var(--paper);
+
+    padding: 10px;
+    border-radius: var(--default-border-radius);
+    gap: 10px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    margin-left: 5%;
+    margin-right: 5%;
+
+    text-align: center;
+    font-size: medium;
+}
+
+.Lokale__kampus select{
+    border-radius: var(--default-border-radius);
+    padding: 5px;
+
+    font-family: var(--button-font);
+    font-size: medium;
+}
+
+/* ----- Lys van al die lokale gerigistreerd se ontwerp */
+.Lokale__lys{
+    background-color: var(--pine);
+    color: var(--paper);
+
+    padding: 15px 25px;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 7px;
+    border-radius: var(--default-border-radius);  
+}
+
+.Lokale__lys button{
+    background-color: var(--pine);
+    left: 80%;
+    font-size: large;
+    border: none;
+}
+
+.Lokale__lys button:hover{
+    background-color: var(--pine-dark);
+}
+
+/* ==================== Eksamen en Semester ontwerp ==================== */
+#eksamenl{
+    margin-right: 25%;
+}
+
+/* Die sal seker net savvi se een wees, net op die admin blad */
+.rooster{
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr 2fr 2fr 2fr;
+    grid-template-rows: repeat(11, 1fr);
+    
+    background-color: var(--paper-deep);
+    padding: 8px;
+    border-radius: var(--default-border-radius);
+    text-align: center;
+}
+
+.bespreek{
+    background-color: var(--paper);
+    border: solid 1px var(--ink);
+}
+
+.dag{
+    border: solid 1px var(--ink);
+    padding: 8px;
+    background-color: var(--paper-deep);
+
+    font-size: medium;
+    font-weight: bold;
+}
+
+.tye{
+    font-size: small;
+    font-weight: bold;
+    
+    padding: 5px;
+    background-color: var(--paper-deep);
+    border: solid 1px var(--ink);
+}
+
+/* ======================= Besprekings ======================== */
+.Besprekings__Inligting div{
+    background-color: var(--pine);
+    border-radius: var(--default-border-radius);
+    margin-top: 10px;
+    padding: 10px;
+
+    display: flex;
+    justify-content: center;
+}
+
+.Besprekings__Inligting button{
+    background-color: var(--pine);
+    font-size: medium;
+}
+
+.Besprekings__Inligting button:hover{
+    background-color: var(--pine-dark);
+}
+
+.Besprekings__Inligting div{
+    background-color: var(--pine);
+    border-radius: var(--default-border-radius);
+    margin-top: 10px;
+    padding: 10px;
+
+    display: flex;
+    justify-content: center;
+}
+
+.Besprekings__Inligting button{
+    background-color: var(--pine);
+    font-size: medium;
+}
+
+.Besprekings__Inligting button:hover{
+    background-color: var(--pine-dark);
+}
+
+/* Form uitleg */
+.Besprekings__Inligting form {
+    display: flex;
+    margin-top: 40px;
+}
+
+.Besprekings__Inligting fieldset {
+    display: block;
+    justify-content: left;
+    align-items: center;
+
+    height: 100%;
+    width: auto;
+    min-width: 300px;
+    padding: 30px;
+    margin: auto;
+
+    background-color: var(--pine);
+    border: none;
+    border-radius: var(--default-border-radius);
+}
+
+.Besprekings__Inligting fieldset label{
+    display: inline-block;
+    width: 50%;
+
+    font-size: large;
+    color: var(--paper);
+}
+
+.Besprekings__Inligting fieldset input,
+.Besprekings__Inligting fieldset select{
+    display: inline-block;
+    width: 50%;
+    height: 42px;
+    padding: 0 12px;
+    margin-bottom: 20px;
+
+    border: 1px solid var(--line);
+    border-radius: var(--default-border-radius);
+    background-color: var(--paper);
+
+    color: var(--ink);
+    font-size: 16px;
+}
+
+.Besprekings__Inligting form button{
+    padding: 20px;
+    width: 200px;
+    border: none;             
+    outline: none;
+    border-radius: var(--default-border-radius);
+    background: var(--pine-dark);
+    margin: auto;
+    
+    color: var(--paper);
+    font-size: large;
+    font-weight: bold;
+}
+
+.Besprekings__Inligting form button:hover{
+    background: var(--pine);
+    transform: scale(1.05);
+}
+
+.Besprekings__Inligting form input:focus,
+.Besprekings__Inligting form select:focus{
+    outline: none;
+    border-color: var(--pine);
+    transform: scale(1.05);
+}
+
