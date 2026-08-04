@@ -133,7 +133,6 @@ def create_tables():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS auth (
             user_id  INTEGER PRIMARY KEY,
-            username VARCHAR(50) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
             email VARCHAR(100),
             FOREIGN KEY (user_id) REFERENCES app_user(user_id),
