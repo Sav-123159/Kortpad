@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import LogIn from "./LogIn";
 
+import "../css/Admin.css"; 
+
 export default function Header(){
     const [show, setShow] = useState(false);
     
