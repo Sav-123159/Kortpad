@@ -32,6 +32,10 @@ button{
 }
 
 /* ==================== Linker paneel ==================== */
+.LinkerPaneel{
+    height: 85vh;
+}
+
 .LinkerPaneel div{
     color: var(--ink);
     font-size: 25px;
@@ -46,7 +50,7 @@ button{
     display: flex;
     flex-direction: column;
     gap: 30px;
-    margin-top: 3vw;
+    margin-top: 1vw;
 }
 
 .Opsies button{
@@ -66,7 +70,6 @@ button{
     transform: translateY(-2px);
 }
 
-/* Kode moet nog bygevoeg word of die gaan weggevat word om dit te maak werk */
 .Opsies button.Opsie_Knoppie--active{
     background-color: var(--pine);
     transform: translateY(-2px);
@@ -79,7 +82,7 @@ button{
     color: var(--ink);
 
     height: 80.5vh;
-    width: 100vw;
+    width: 80%;
     padding: 10px;
 }
 
@@ -88,12 +91,13 @@ h2{
     font-family: var(--button-font);
 }
 
-h3{
+.Lokale__Inligting h3{
     font-family: var(--button-font);
     font-size: medium;
 
     display: inline;
     margin-right: 10px;
+    color: var(--paper);
 }
 
 /* ============================ Lokaal en Toerusting gedeeld ============================== */
@@ -106,6 +110,7 @@ h3{
 .Lokaal__titel, .Toerusting__title{
     display: flex;
     flex-direction: row;
+    margin-bottom: 20px;
 }
 
 .Lokale__Inligting{

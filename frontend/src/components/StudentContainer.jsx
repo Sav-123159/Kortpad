@@ -19,7 +19,6 @@ function StudentContainer() {
 
     return (
         <div className="app">
-            <Header />
             <div className="Container">
                 <LeftPanel
                     results={results}

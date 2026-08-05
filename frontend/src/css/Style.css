@@ -105,7 +105,7 @@ button:hover{
     padding: 3px;
 }
 
-.Nav button{
+.Nav_Knoppie{
     background-color: var(--paper);
     color: var(--ink);
 
@@ -119,6 +119,12 @@ button:hover{
 
 .Nav button:hover{
     background-color: var(--paper-deep); 
+    color: var(--ink);
+}
+
+.Nav_Knoppie--active{
+   background-color: var(--paper-deep); 
+    transform: translateY(-2px);
 }
 
 .button-group{
