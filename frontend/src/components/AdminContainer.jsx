@@ -1,31 +1,27 @@
-import React from "react";
-import { act, useState } from "react";
-import Header from "./Header";
-import AdminLPaneel from "../adminComponents/AdminLPaneel";
-import AdminLokaleInfo from "../adminComponents/AdminLokaleInfo";
-import AdminToerusting from "../adminComponents/AdminToerusting";
-import AdminRoosters from "../adminComponents/AdminRoosters";
-import AdminBesprekings from "../adminComponents/AdminBesprekings";
-
+import React, { useState } from "react";
+import AdminLPaneel from "./AdminLPaneel";
+import AdminLokaleInfo from "./AdminLokaleInfo.jsx";
+import AdminToerusting from "./AdminToerusting.jsx";
+import AdminRoosters from "./AdminRoosters.jsx";
+import AdminBesprekings from "./AdminBesprekings.jsx";
+// import AdminLPaneel from "./AdminLPaneel";
 
 function AdminContainer() {
-    const [activeTab, setActiveTab] = useState("AdminLokaleInfo");
-    console.log(activeTab);
+    
+    const [aktieweTab, setAktieweTab] = useState("AdminLokaleInfo");
 
     return(
         <div className="app">
-            <Header />
             <div className="Houer">
-                <AdminLPaneel 
-                    activeTab= {activeTab}
-                    setActiveTab = {setActiveTab}
+                <AdminLPaneel
+                    aktieweTab={aktieweTab}
+                    setAktieweTab={setAktieweTab}
                 />
-                
                 <div className="RegterPaneel">
-                    {activeTab === "AdminLokaleInfo" && <AdminLokaleInfo />}
-                    {activeTab === "AdminToerusting" && <AdminToerusting />}
-                    {activeTab === "AdminRoosters" && <AdminRoosters />}
-                    {activeTab === "AdminBesprekings" && <AdminBesprekings />}                    
+                    {aktieweTab === "AdminLokaleInfo" && <AdminLokaleInfo />}
+                    {aktieweTab === "AdminToerusting" && <AdminToerusting />}
+                    {aktieweTab === "AdminRoosters" && <AdminRoosters />}
+                    {aktieweTab === "AdminBesprekings" && <AdminBesprekings />}
                 </div>
             </div>
         </div>

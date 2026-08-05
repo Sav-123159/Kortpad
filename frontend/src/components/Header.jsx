@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import LogIn from "./LogIn";
 
-import "../css/Admin.css"; 
-
-export default function Header(){
+export default function Header({aktieweContainer, setAktieweContainer}){
     const [show, setShow] = useState(false);
     
         const showModal = () => {
@@ -19,13 +17,15 @@ export default function Header(){
                 <img src="/Kortpad_LOGO.jpeg" alt="Kortpad logo"/>
             </div>
             <div className="Nav">
-                <button>
+                <button className = {aktieweContainer === "StudentContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
+                onClick={() => setAktieweContainer("StudentContainer")}>
                     Student
                 </button>
-                <button>
+                <button className = {aktieweContainer === "AdminContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
+                onClick={() => setAktieweContainer("AdminContainer")}>
                     Admin
                 </button>
-                <button onClick={showModal}>
+                <button className="Nav_Knoppie" onClick={showModal}>
                     Log In
                 </button>
                 <LogIn show={show} onClose={hideModal}/>
