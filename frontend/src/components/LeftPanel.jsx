@@ -23,7 +23,7 @@ export default function LeftPanel({ results, onSearch }) {
     };
 
     return (
-        <section className="LinkerPaneel">
+        <section className="LeftPanel">
             <button onClick={showModal}>
                 Bespreek Lokaal
             </button>
