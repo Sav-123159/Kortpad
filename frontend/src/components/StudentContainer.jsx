@@ -3,6 +3,8 @@ import Header from "./Header";
 import LeftPanel from "./LeftPanel";
 import KortpadMap from "./KortpadMap";
 import { lokale } from "../data/mockData";
+import '../css/Gebruiker.css';
+import '../css/Style.css';
 
 function StudentContainer() {
     const [results, setResults] = useState(

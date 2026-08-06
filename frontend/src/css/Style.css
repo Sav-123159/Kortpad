@@ -23,6 +23,7 @@ fieldset {
     align-items: center;
     width: auto;
     min-width: 300px;
+    padding: 10px;
     background-color: var(--paper);
     border: var(--default-border);
     border-radius: var(--default-border-radius);
@@ -133,6 +134,7 @@ button:hover{
 
 button.form-button{
     width: 50%;
+    margin: 5px;
     border: var(--default-border);
     border-radius: var(--default-border-radius);
     color: white;
@@ -152,6 +154,7 @@ button.form-button:hover {
     height:calc(100vh - 120px);
 }
 
+.LeftPanel, 
 .LinkerPaneel{
     width:360px;
     padding:20px;
@@ -256,10 +259,12 @@ h3{
 form.login{
     max-height: 300px;
     overflow-y: scroll;
+    scrollbar-width: 0px;
 }
 
 .form-button button{
     width: 50%;
+    margin: 5px;
 }
 
 /* Right side (animation) */

@@ -4,6 +4,8 @@ import AdminLokaleInfo from "./AdminLokaleInfo.jsx";
 import AdminToerusting from "./AdminToerusting.jsx";
 import AdminRoosters from "./AdminRoosters.jsx";
 import AdminBesprekings from "./AdminBesprekings.jsx";
+import '../css/Admin.css';
+import "../css/Style.css";
 // import AdminLPaneel from "./AdminLPaneel";
 
 function AdminContainer() {
