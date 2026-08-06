@@ -9,300 +9,322 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.database import get_db
 
+from datetime import datetime, timedelta
+from sqlite3 import Error
+
+
 def seed_data():
     conn = get_db()
     cursor = conn.cursor()
-    
+
+    # Idempotency guard: none of these tables have a UNIQUE constraint on
+    # their name columns, so INSERT OR IGNORE does NOT stop duplicate rows
+    # on re-run. Check first instead.
+    cursor.execute("SELECT COUNT(*) FROM campus")
+    if cursor.fetchone()[0] > 0:
+        print("Data already seeded — skipping to avoid duplicates.")
+        conn.close()
+        return True
+
     print("Seeding test data...")
-    
+
     try:
+        campus_map = {}
+        faculty_map = {}
+        building_map = {}
+        venue_map = {}
+        vertex_map = {}
+
         # ==========================================
-        # 1. CAMPUS Data
+        # 1. CAMPUS
         # ==========================================
         print("Seeding campuses...")
         campuses = [
-            ("Main Campus",),
-            ("North Campus",),
-            ("South Campus",),
-            ("East Campus",),
-            ("West Campus",),
+            ("main", "Main Campus"),
+            ("north", "North Campus"),
+            ("south", "South Campus"),
+            ("east", "East Campus"),
+            ("west", "West Campus"),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO campus (campus_name)
-            VALUES (?)
-        """, campuses)
-        
+        for key, name in campuses:
+            cursor.execute("INSERT INTO campus (campus_name) VALUES (?)", (name,))
+            campus_map[key] = cursor.lastrowid
+
         # ==========================================
-        # 2. FACULTY Data
+        # 2. FACULTY
         # ==========================================
         print("Seeding faculties...")
         faculties = [
-            ("Faculty of Engineering",),
-            ("Faculty of Science",),
-            ("Faculty of Arts",),
-            ("Faculty of Business",),
-            ("Faculty of Medicine",),
+            ("engineering", "Faculty of Engineering"),
+            ("science", "Faculty of Science"),
+            ("arts", "Faculty of Arts"),
+            ("business", "Faculty of Business"),
+            ("medicine", "Faculty of Medicine"),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO faculty (faculty_name)
-            VALUES (?)
-        """, faculties)
-        
+        for key, name in faculties:
+            cursor.execute("INSERT INTO faculty (faculty_name) VALUES (?)", (name,))
+            faculty_map[key] = cursor.lastrowid
+
         # ==========================================
-        # 3. BUILDING Data
+        # 3. BUILDING
+        # (key, campus_key, name, faculty_key) -- campus_key is the source
+        # of truth for which campus this building belongs to; the vertex/
+        # edge section below is built FROM this, not independently guessed.
         # ==========================================
         print("Seeding buildings...")
         buildings = [
-            # Main Campus (campus_id=1)
-            (1, "Engineering Tower", 1),
-            (1, "Science Hall", 2),
-            (1, "Arts Building", 3),
-            (1, "Business School", 4),
-            (1, "Medical Center", 5),
-            # North Campus (campus_id=2)
-            (2, "Engineering Annex", 1),
-            (2, "Science Lab", 2),
-            (2, "Arts Studio", 3),
-            # South Campus (campus_id=3)
-            (3, "Business Hub", 4),
-            (3, "Medical Clinic", 5),
-            # East Campus (campus_id=4)
-            (4, "Research Center", 2),
-            (4, "Innovation Lab", 1),
-            # West Campus (campus_id=5)
-            (5, "Performing Arts", 3),
-            (5, "Entrepreneurship Center", 4),
+            ("engineering_tower", "main", "Engineering Tower", "engineering"),
+            ("science_hall", "main", "Science Hall", "science"),
+            ("arts_building", "main", "Arts Building", "arts"),
+            ("business_school", "main", "Business School", "business"),
+            ("medical_center", "main", "Medical Center", "medicine"),
+
+            ("engineering_annex", "north", "Engineering Annex", "engineering"),
+            ("science_lab", "north", "Science Lab", "science"),
+            ("arts_studio", "north", "Arts Studio", "arts"),
+
+            ("business_hub", "south", "Business Hub", "business"),
+            ("medical_clinic", "south", "Medical Clinic", "medicine"),
+
+            ("research_center", "east", "Research Center", "science"),
+            ("innovation_lab", "east", "Innovation Lab", "engineering"),
+
+            ("performing_arts", "west", "Performing Arts", "arts"),
+            ("entrepreneurship_center", "west", "Entrepreneurship Center", "business"),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO building (campus_id, building_name, faculty_id)
-            VALUES (?, ?, ?)
-        """, buildings)
-        
+        for key, campus_key, name, faculty_key in buildings:
+            cursor.execute("""
+                INSERT INTO building (campus_id, building_name, faculty_id)
+                VALUES (?, ?, ?)
+            """, (campus_map[campus_key], name, faculty_map[faculty_key]))
+            building_map[key] = cursor.lastrowid
+
         # ==========================================
-        # 4. VENUE Data
+        # 4. VENUE
         # ==========================================
         print("Seeding venues...")
         venues = [
-            # Engineering Tower (building_id=1)
-            (1, "Room 101", 40),
-            (1, "Room 102", 30),
-            (1, "Lecture Hall A", 120),
-            (1, "Computer Lab", 25),
-            (1, "Seminar Room", 20),
-            # Science Hall (building_id=2)
-            (2, "Room 201", 35),
-            (2, "Room 202", 35),
-            (2, "Chemistry Lab", 24),
-            (2, "Physics Lab", 24),
-            (2, "Lecture Hall B", 100),
-            # Arts Building (building_id=3)
-            (3, "Studio 1", 15),
-            (3, "Studio 2", 15),
-            (3, "Gallery Space", 50),
-            (3, "Music Room", 20),
-            (3, "Drama Theater", 80),
-            # Business School (building_id=4)
-            (4, "Room 401", 30),
-            (4, "Room 402", 30),
-            (4, "Case Study Room", 20),
-            (4, "Executive Suite", 10),
-            (4, "Lecture Hall C", 90),
-            # Medical Center (building_id=5)
-            (5, "Clinic Room 1", 5),
-            (5, "Clinic Room 2", 5),
-            (5, "Lecture Hall D", 80),
-            (5, "Anatomy Lab", 30),
-            (5, "Seminar Room", 15),
-            # Engineering Annex (building_id=6)
-            (6, "Room 601", 25),
-            (6, "Room 602", 25),
-            (6, "Workshop", 15),
-            # Science Lab (building_id=7)
-            (7, "Microbiology Lab", 20),
-            (7, "Genetics Lab", 20),
-            # Arts Studio (building_id=8)
-            (8, "Painting Studio", 12),
-            (8, "Sculpture Studio", 12),
-            # Business Hub (building_id=9)
-            (9, "Boardroom A", 15),
-            (9, "Boardroom B", 15),
-            # Medical Clinic (building_id=10)
-            (10, "Treatment Room", 4),
-            (10, "Consultation Room", 3),
+            ("room_101", "engineering_tower", "Room 101", 40),
+            ("room_102", "engineering_tower", "Room 102", 30),
+            ("lecture_hall_a", "engineering_tower", "Lecture Hall A", 120),
+            ("computer_lab", "engineering_tower", "Computer Lab", 25),
+            ("eng_seminar_room", "engineering_tower", "Seminar Room", 20),
+
+            ("room_201", "science_hall", "Room 201", 35),
+            ("room_202", "science_hall", "Room 202", 35),
+            ("chemistry_lab", "science_hall", "Chemistry Lab", 24),
+            ("physics_lab", "science_hall", "Physics Lab", 24),
+            ("lecture_hall_b", "science_hall", "Lecture Hall B", 100),
+
+            ("studio_1", "arts_building", "Studio 1", 15),
+            ("studio_2", "arts_building", "Studio 2", 15),
+            ("gallery_space", "arts_building", "Gallery Space", 50),
+            ("music_room", "arts_building", "Music Room", 20),
+            ("drama_theater", "arts_building", "Drama Theater", 80),
+
+            ("room_401", "business_school", "Room 401", 30),
+            ("room_402", "business_school", "Room 402", 30),
+            ("case_study_room", "business_school", "Case Study Room", 20),
+            ("executive_suite", "business_school", "Executive Suite", 10),
+            ("lecture_hall_c", "business_school", "Lecture Hall C", 90),
+
+            ("clinic_room_1", "medical_center", "Clinic Room 1", 5),
+            ("clinic_room_2", "medical_center", "Clinic Room 2", 5),
+            ("lecture_hall_d", "medical_center", "Lecture Hall D", 80),
+            ("anatomy_lab", "medical_center", "Anatomy Lab", 30),
+            ("med_seminar_room", "medical_center", "Seminar Room", 15),
+
+            ("room_601", "engineering_annex", "Room 601", 25),
+            ("room_602", "engineering_annex", "Room 602", 25),
+            ("workshop", "engineering_annex", "Workshop", 15),
+
+            ("microbiology_lab", "science_lab", "Microbiology Lab", 20),
+            ("genetics_lab", "science_lab", "Genetics Lab", 20),
+
+            ("painting_studio", "arts_studio", "Painting Studio", 12),
+            ("sculpture_studio", "arts_studio", "Sculpture Studio", 12),
+
+            ("boardroom_a", "business_hub", "Boardroom A", 15),
+            ("boardroom_b", "business_hub", "Boardroom B", 15),
+
+            ("treatment_room", "medical_clinic", "Treatment Room", 4),
+            ("consultation_room", "medical_clinic", "Consultation Room", 3),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO venue (building_id, venue_name, capacity)
-            VALUES (?, ?, ?)
-        """, venues)
-        
+        for key, building_key, name, capacity in venues:
+            cursor.execute("""
+                INSERT INTO venue (building_id, venue_name, capacity)
+                VALUES (?, ?, ?)
+            """, (building_map[building_key], name, capacity))
+            venue_map[key] = cursor.lastrowid
+
         # ==========================================
-        # 5. EQUIPMENT Data
+        # 5. EQUIPMENT
         # ==========================================
-        print("🔧 Seeding equipment...")
+        print("Seeding equipment...")
         equipment = [
-            # Computer Lab (venue_id=5)
-            (5, "Desktop Computer", 25),
-            (5, "Monitor", 25),
-            (5, "Keyboard", 25),
-            (5, "Mouse", 25),
-            (5, "Projector", 1),
-            # Chemistry Lab (venue_id=8)
-            (8, "Microscope", 12),
-            (8, "Centrifuge", 3),
-            (8, "Bunsen Burner", 15),
-            (8, "Safety Goggles", 24),
-            (8, "Lab Coats", 24),
-            # Physics Lab (venue_id=9)
-            (9, "Oscilloscope", 8),
-            (9, "Multimeter", 12),
-            (9, "Circuit Kits", 12),
-            (9, "Optics Bench", 6),
-            (9, "Data Logger", 6),
-            # Music Room (venue_id=14)
-            (14, "Piano", 1),
-            (14, "Guitar", 3),
-            (14, "Drum Kit", 1),
-            (14, "Amplifier", 2),
-            (14, "Microphone Stand", 4),
-            # Anatomy Lab (venue_id=24)
-            (24, "Anatomical Models", 10),
-            (24, "Skeleton", 2),
-            (24, "Dissection Kit", 12),
-            (24, "Refrigerator", 2),
-            (24, "Sterilizer", 2),
-            # Workshop (venue_id=27)
-            (27, "Drill Press", 2),
-            (27, "Table Saw", 1),
-            (27, "Welding Kit", 3),
-            (27, "Safety Gear", 15),
-            (27, "Workbench", 8),
+            ("computer_lab", "Desktop Computer", 25),
+            ("computer_lab", "Monitor", 25),
+            ("computer_lab", "Keyboard", 25),
+            ("computer_lab", "Mouse", 25),
+            ("computer_lab", "Projector", 1),
+
+            ("chemistry_lab", "Microscope", 12),
+            ("chemistry_lab", "Centrifuge", 3),
+            ("chemistry_lab", "Bunsen Burner", 15),
+            ("chemistry_lab", "Safety Goggles", 24),
+            ("chemistry_lab", "Lab Coats", 24),
+
+            ("physics_lab", "Oscilloscope", 8),
+            ("physics_lab", "Multimeter", 12),
+            ("physics_lab", "Circuit Kits", 12),
+            ("physics_lab", "Optics Bench", 6),
+            ("physics_lab", "Data Logger", 6),
+
+            ("music_room", "Piano", 1),
+            ("music_room", "Guitar", 3),
+            ("music_room", "Drum Kit", 1),
+            ("music_room", "Amplifier", 2),
+            ("music_room", "Microphone Stand", 4),
+
+            ("anatomy_lab", "Anatomical Models", 10),
+            ("anatomy_lab", "Skeleton", 2),
+            ("anatomy_lab", "Dissection Kit", 12),
+            ("anatomy_lab", "Refrigerator", 2),
+            ("anatomy_lab", "Sterilizer", 2),
+
+            ("workshop", "Drill Press", 2),
+            ("workshop", "Table Saw", 1),
+            ("workshop", "Welding Kit", 3),
+            ("workshop", "Safety Gear", 15),
+            ("workshop", "Workbench", 8),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO equipment (venue_id, equip_name, equip_qty)
-            VALUES (?, ?, ?)
-        """, equipment)
-        
+        for venue_key, equip_name, qty in equipment:
+            cursor.execute("""
+                INSERT INTO equipment (venue_id, equip_name, equip_qty)
+                VALUES (?, ?, ?)
+            """, (venue_map[venue_key], equip_name, qty))
+
         # ==========================================
-        # 6. VERTEX Data
+        # 6. VERTEX
+        # Schema only allows level IN ('campus', 'building') -- no 'venue'
+        # option exists on the CHECK constraint. Room-level vertices are
+        # therefore NOT valid data right now and have been left out.
+        # See note at the bottom of this file about adding that level.
         # ==========================================
         print("Seeding vertices...")
-        vertices = [
-            # Campus level vertices (campus_id, level, latitude, longitude)
-            (1, None, None, 'campus', -33.932608, 18.864631),  # Main Campus
-            (2, None, None, 'campus', -33.925000, 18.870000),  # North Campus
-            (3, None, None, 'campus', -33.940000, 18.860000),  # South Campus
-            (4, None, None, 'campus', -33.930000, 18.880000),  # East Campus
-            (5, None, None, 'campus', -33.935000, 18.850000),  # West Campus
-            
-            # Building level vertices (campus_id, building_id, level, latitude, longitude)
-            (None, 1, None, 'building', -33.932608, 18.864631),  # Engineering Tower
-            (None, 2, None, 'building', -33.932700, 18.864800),  # Science Hall
-            (None, 3, None, 'building', -33.932800, 18.864900),  # Arts Building
-            (None, 4, None, 'building', -33.932900, 18.865000),  # Business School
-            (None, 5, None, 'building', -33.933000, 18.865100),  # Medical Center
-            (None, 6, None, 'building', -33.925000, 18.870000),  # Engineering Annex
-            (None, 7, None, 'building', -33.925100, 18.870100),  # Science Lab
-            (None, 8, None, 'building', -33.925200, 18.870200),  # Arts Studio
-            (None, 9, None, 'building', -33.940000, 18.860000),  # Business Hub
-            (None, 10, None, 'building', -33.940100, 18.860100), # Medical Clinic
-            
-            # Venue level vertices (building_id, venue_id, level, latitude, longitude)
-            (None, None, 1, 'venue', -33.932610, 18.864632),  # Room 101
-            (None, None, 2, 'venue', -33.932620, 18.864633),  # Room 102
-            (None, None, 3, 'venue', -33.932630, 18.864634),  # Lecture Hall A
-            (None, None, 4, 'venue', -33.932640, 18.864635),  # Computer Lab
-            (None, None, 5, 'venue', -33.932650, 18.864636),  # Seminar Room
-            (None, None, 10, 'venue', -33.932700, 18.864800), # Room 201
-            (None, None, 15, 'venue', -33.932800, 18.864900), # Studio 1
+        vertex_data = [
+            # (key, level, campus_key_or_None, building_key_or_None, lat, lon)
+            ("main_campus_v",  "campus", "main",  None, -33.932608, 18.864631),
+            ("north_campus_v", "campus", "north", None, -33.925000, 18.870000),
+            ("south_campus_v", "campus", "south", None, -33.940000, 18.860000),
+            ("east_campus_v",  "campus", "east",  None, -33.930000, 18.880000),
+            ("west_campus_v",  "campus", "west",  None, -33.935000, 18.850000),
+
+            ("engineering_tower_v", "building", None, "engineering_tower", -33.932608, 18.864631),
+            ("science_hall_v",      "building", None, "science_hall",      -33.932700, 18.864800),
+            ("arts_building_v",     "building", None, "arts_building",     -33.932800, 18.864900),
+            ("business_school_v",   "building", None, "business_school",   -33.932900, 18.865000),
+            ("medical_center_v",    "building", None, "medical_center",    -33.933000, 18.865100),
+            ("engineering_annex_v", "building", None, "engineering_annex", -33.925000, 18.870000),
+            ("science_lab_v",       "building", None, "science_lab",       -33.925100, 18.870100),
+            ("arts_studio_v",       "building", None, "arts_studio",       -33.925200, 18.870200),
+            ("business_hub_v",      "building", None, "business_hub",      -33.940000, 18.860000),
+            ("medical_clinic_v",    "building", None, "medical_clinic",    -33.940100, 18.860100),
+            ("research_center_v",   "building", None, "research_center",   -33.930100, 18.880100),
+            ("innovation_lab_v",    "building", None, "innovation_lab",    -33.930200, 18.880200),
+            ("performing_arts_v",   "building", None, "performing_arts",   -33.935100, 18.850100),
+            ("entrepreneurship_center_v", "building", None, "entrepreneurship_center", -33.935200, 18.850200),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO vertex 
-            (campus_id, building_id, venue_id, level, latitude, longitude)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, vertices)
-        
+        for key, level, campus_key, building_key, lat, lon in vertex_data:
+            campus_id = campus_map[campus_key] if campus_key else None
+            building_id = building_map[building_key] if building_key else None
+            cursor.execute("""
+                INSERT INTO vertex (campus_id, building_id, venue_id, level, latitude, longitude)
+                VALUES (?, ?, NULL, ?, ?, ?)
+            """, (campus_id, building_id, level, lat, lon))
+            vertex_map[key] = cursor.lastrowid
+
         # ==========================================
-        # 7. EDGE Data
+        # 7. EDGE
+        # Each campus hub connects only to buildings that ACTUALLY belong
+        # to that campus (per the `buildings` list above) -- this is the
+        # exact bug that caused North/East Campus to wire into Engineering
+        # Tower (a Main Campus building) last time.
         # ==========================================
         print("Seeding edges...")
+
+        def add_edge(key_a, key_b, weight):
+            va, vb = vertex_map[key_a], vertex_map[key_b]
+            lo, hi = (va, vb) if va < vb else (vb, va)
+            cursor.execute(
+                "INSERT INTO edge (vertex_a, vertex_b, weight) VALUES (?, ?, ?)",
+                (lo, hi, weight),
+            )
+
         edges = [
-            (1, 6, 1.5),   # Main Campus -> Engineering Tower
-            (1, 7, 2.0),   # Main Campus -> Science Hall
-            (1, 8, 2.5),   # Main Campus -> Arts Building
-            (6, 11, 0.3),  # Engineering Tower -> Room 101
-            (6, 12, 0.4),  # Engineering Tower -> Room 102
-            (6, 13, 0.5),  # Engineering Tower -> Lecture Hall A
-            (6, 14, 0.6),  # Engineering Tower -> Computer Lab
-            (7, 16, 0.4),  # Science Hall -> Room 201
-            (8, 15, 0.3),  # Arts Building -> Studio 1
-            (2, 6, 3.0),   # North Campus -> Engineering Tower
-            (3, 9, 4.0),   # South Campus -> Business Hub
-            (4, 6, 5.0),   # East Campus -> Engineering Tower
-            (5, 8, 3.5),   # West Campus -> Arts Building
-            (9, 18, 0.4),  # Business Hub -> Boardroom A
-            (10, 19, 0.3), # Medical Clinic -> Treatment Room
-            (11, 12, 0.2), # Room 101 -> Room 102
-            (13, 14, 0.3), # Lecture Hall A -> Computer Lab
-            (15, 16, 0.2), # Studio 1 -> Room 201
+            ("main_campus_v", "engineering_tower_v", 1.5),
+            ("main_campus_v", "science_hall_v", 2.0),
+            ("main_campus_v", "arts_building_v", 2.5),
+            ("main_campus_v", "business_school_v", 2.2),
+            ("main_campus_v", "medical_center_v", 2.8),
+
+            ("north_campus_v", "engineering_annex_v", 0.8),
+            ("north_campus_v", "science_lab_v", 1.0),
+            ("north_campus_v", "arts_studio_v", 1.2),
+
+            ("south_campus_v", "business_hub_v", 0.9),
+            ("south_campus_v", "medical_clinic_v", 1.1),
+
+            ("east_campus_v", "research_center_v", 1.0),
+            ("east_campus_v", "innovation_lab_v", 1.3),
+
+            ("west_campus_v", "performing_arts_v", 0.9),
+            ("west_campus_v", "entrepreneurship_center_v", 1.1),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO edge (vertex_a, vertex_b, weight)
-            VALUES (?, ?, ?)
-        """, edges)
-        
+        for key_a, key_b, weight in edges:
+            add_edge(key_a, key_b, weight)
+
         # ==========================================
-        # 8. TIMETABLE Data
+        # 8. TIMETABLE
         # ==========================================
         print("Seeding timetables...")
-        
-        # Get semester dates (current semester)
         today = datetime.now().date()
         semester_start = today.replace(month=2, day=1) if today.month >= 2 else today.replace(month=7, day=1)
-        semester_end = semester_start + timedelta(days=120)  # ~4 months
-        
+        semester_end = semester_start + timedelta(days=120)
+
         timetables = [
-            # Room 101 (venue_id=1)
-            (1, 'MON', '08:00', '09:30', 'MATH101', semester_start, semester_end),
-            (1, 'WED', '08:00', '09:30', 'MATH101', semester_start, semester_end),
-            # Room 102 (venue_id=2)
-            (2, 'TUE', '10:00', '11:30', 'PHYS101', semester_start, semester_end),
-            (2, 'THU', '10:00', '11:30', 'PHYS101', semester_start, semester_end),
-            # Lecture Hall A (venue_id=3)
-            (3, 'MON', '14:00', '16:00', 'CHEM101', semester_start, semester_end),
-            (3, 'WED', '14:00', '16:00', 'CHEM101', semester_start, semester_end),
-            (3, 'FRI', '09:00', '11:00', 'CHEM101', semester_start, semester_end),
-            # Computer Lab (venue_id=4)
-            (4, 'TUE', '13:00', '14:30', 'CS101', semester_start, semester_end),
-            (4, 'THU', '13:00', '14:30', 'CS101', semester_start, semester_end),
-            # Seminar Room (venue_id=5)
-            (5, 'WED', '10:00', '11:30', 'ENG101', semester_start, semester_end),
-            (5, 'FRI', '10:00', '11:30', 'ENG101', semester_start, semester_end),
-            # Room 201 (venue_id=6)
-            (6, 'MON', '11:00', '12:30', 'BIOL101', semester_start, semester_end),
-            (6, 'WED', '11:00', '12:30', 'BIOL101', semester_start, semester_end),
-            # Studio 1 (venue_id=11)
-            (11, 'TUE', '14:00', '16:00', 'ART101', semester_start, semester_end),
-            (11, 'THU', '14:00', '16:00', 'ART101', semester_start, semester_end),
-            # Music Room (venue_id=14)
-            (14, 'MON', '10:00', '11:30', 'MUS101', semester_start, semester_end),
-            (14, 'WED', '10:00', '11:30', 'MUS101', semester_start, semester_end),
-            # Business Hub Boardroom (venue_id=18)
-            (18, 'FRI', '09:00', '10:30', 'BUS101', semester_start, semester_end),
-            # Clinic Room 1 (venue_id=21)
-            (21, 'TUE', '09:00', '10:30', 'MED101', semester_start, semester_end),
-            (21, 'THU', '09:00', '10:30', 'MED101', semester_start, semester_end),
-            # Anatomy Lab (venue_id=24)
-            (24, 'MON', '13:00', '15:00', 'MED201', semester_start, semester_end),
-            (24, 'WED', '13:00', '15:00', 'MED201', semester_start, semester_end),
+            ("room_101", 'MON', '08:00', '09:30', 'MATH101'),
+            ("room_101", 'WED', '08:00', '09:30', 'MATH101'),
+            ("room_102", 'TUE', '10:00', '11:30', 'PHYS101'),
+            ("room_102", 'THU', '10:00', '11:30', 'PHYS101'),
+            ("lecture_hall_a", 'MON', '14:00', '16:00', 'CHEM101'),
+            ("lecture_hall_a", 'WED', '14:00', '16:00', 'CHEM101'),
+            ("lecture_hall_a", 'FRI', '09:00', '11:00', 'CHEM101'),
+            ("computer_lab", 'TUE', '13:00', '14:30', 'CS101'),
+            ("computer_lab", 'THU', '13:00', '14:30', 'CS101'),
+            ("eng_seminar_room", 'WED', '10:00', '11:30', 'ENG101'),
+            ("eng_seminar_room", 'FRI', '10:00', '11:30', 'ENG101'),
+            ("room_201", 'MON', '11:00', '12:30', 'BIOL101'),
+            ("room_201", 'WED', '11:00', '12:30', 'BIOL101'),
+            ("studio_1", 'TUE', '14:00', '16:00', 'ART101'),
+            ("studio_1", 'THU', '14:00', '16:00', 'ART101'),
+            ("music_room", 'MON', '10:00', '11:30', 'MUS101'),
+            ("music_room", 'WED', '10:00', '11:30', 'MUS101'),
+            ("boardroom_a", 'FRI', '09:00', '10:30', 'BUS101'),
+            ("clinic_room_1", 'TUE', '09:00', '10:30', 'MED101'),
+            ("clinic_room_1", 'THU', '09:00', '10:30', 'MED101'),
+            ("anatomy_lab", 'MON', '13:00', '15:00', 'MED201'),
+            ("anatomy_lab", 'WED', '13:00', '15:00', 'MED201'),
         ]
-        cursor.executemany("""
-            INSERT OR IGNORE INTO timetable 
-            (venue_id, day_of_week, start_time, end_time, module_code, semester_start, semester_end)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, timetables)
-        
+        for venue_key, day, start, end, module in timetables:
+            cursor.execute("""
+                INSERT INTO timetable
+                (venue_id, day_of_week, start_time, end_time, module_code, semester_start, semester_end)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (venue_map[venue_key], day, start, end, module, semester_start, semester_end))
+
         # ==========================================
-        # 9. APP_USER Data
+        # 9. APP_USER
         # ==========================================
         print("Seeding app users...")
         users = [
@@ -318,89 +340,69 @@ def seed_data():
             ("Maria", "Garcia", "maria.garcia@university.edu"),
         ]
         cursor.executemany("""
-            INSERT OR IGNORE INTO app_user (fname, sname, email)
+            INSERT INTO app_user (fname, sname, email)
             VALUES (?, ?, ?)
         """, users)
-        
+
         # ==========================================
-        # 10. BOOKING Data
+        # 10. BOOKING
+        # (unchanged in approach -- this already pulled real IDs via SELECT
+        # rather than hardcoding them, which was correct)
         # ==========================================
         print("Seeding bookings...")
-        
-        # Get some existing users and venues for bookings
         cursor.execute("SELECT user_id FROM app_user LIMIT 5")
         user_ids = [row[0] for row in cursor.fetchall()]
-        
+
         cursor.execute("SELECT venue_id FROM venue LIMIT 10")
         venue_ids = [row[0] for row in cursor.fetchall()]
-        
+
         booking_data = []
         today = datetime.now().date()
-        
-        # Create bookings for next 7 days
         for i in range(7):
             booking_date = today + timedelta(days=i)
-            # Skip weekends
-            if booking_date.weekday() >= 5:  # Saturday=5, Sunday=6
+            if booking_date.weekday() >= 5:
                 continue
-                
-            for j in range(3):  # 3 bookings per day
+            for j in range(3):
                 user_id = user_ids[j % len(user_ids)]
                 venue_id = venue_ids[(j + i) % len(venue_ids)]
-                start_hour = 9 + (j * 3)  # 9:00, 12:00, 15:00
+                start_hour = 9 + (j * 3)
                 end_hour = start_hour + 1
-                start_time = f"{start_hour:02d}:00:00"
-                end_time = f"{end_hour:02d}:00:00"
-                booking_data.append((venue_id, user_id, start_time, end_time, booking_date))
-        
+                booking_data.append((
+                    venue_id, user_id,
+                    f"{start_hour:02d}:00:00", f"{end_hour:02d}:00:00",
+                    booking_date,
+                ))
+
         cursor.executemany("""
-            INSERT OR IGNORE INTO booking 
-            (venue_id, user_id, start_time, end_time, booking_date)
+            INSERT INTO booking (venue_id, user_id, start_time, end_time, booking_date)
             VALUES (?, ?, ?, ?, ?)
         """, booking_data)
-        
-        # Commit all changes
+
         conn.commit()
-        
-        # Print summary statistics
-        print("\n" + "="*50)
+
+        print("\n" + "=" * 50)
         print("SEED COMPLETE! Data Summary:")
-        print("="*50)
-        
+        print("=" * 50)
         tables = [
-            ('campus', 'Campuses'),
-            ('faculty', 'Faculties'),
-            ('building', 'Buildings'),
-            ('venue', 'Venues'),
-            ('equipment', 'Equipment items'),
-            ('vertex', 'Vertices'),
-            ('edge', 'Edges'),
-            ('timetable', 'Timetable entries'),
-            ('app_user', 'App users'),
-            ('booking', 'Bookings'),
+            ('campus', 'Campuses'), ('faculty', 'Faculties'), ('building', 'Buildings'),
+            ('venue', 'Venues'), ('equipment', 'Equipment items'), ('vertex', 'Vertices'),
+            ('edge', 'Edges'), ('timetable', 'Timetable entries'),
+            ('app_user', 'App users'), ('booking', 'Bookings'),
         ]
-        
         for table, label in tables:
             cursor.execute(f"SELECT COUNT(*) FROM {table}")
-            count = cursor.fetchone()[0]
-            print(f"Total {label:20s}: {count}")
-        
-        print("="*50)
+            print(f"Total {label:20s}: {cursor.fetchone()[0]}")
+        print("=" * 50)
         print("Database ready for testing!")
-        
+
         conn.close()
         return True
-        
+
     except Error as e:
         print(f"Database error: {e}")
         conn.rollback()
         conn.close()
         return False
-
-    conn.commit()
-    conn.close()
-    
-    print(f"Seed complete")
 
 if __name__ == "__main__":
     seed_data()
