@@ -106,6 +106,112 @@ h2{
     left: 85%;
 }
 
+.Popup_Houer{
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(46, 47, 34, 0.45);   
+    backdrop-filter: blur(6px);
+
+    z-index: 500;
+}
+
+.voegby_vorm{
+    width: 400px;
+    height: fit-content;
+    background-color: var(--paper);
+    border-radius: var(--default-border-radius);
+}
+
+.VoegBy{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+}
+
+.VoegBy label{
+    font-size: large;
+    font-weight: bold;
+    align-items: left;
+}
+
+.VoegBy button{
+    position: static;
+    padding: 15px;
+    margin-top: 10px;
+    font-size: medium;
+}
+
+.VoegBy h3{
+    color: var(--ink);
+    font-size: x-large;
+    margin-bottom: 10px;
+}
+
+.VoegBy input{
+    border: none;
+}
+
+.VoegBy input:focus{
+    transform: scale(1.05);
+}
+
+.Confirm_Houer{
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(46, 47, 34, 0.45);   
+    backdrop-filter: blur(6px);
+
+    z-index: 999;
+}
+
+.ConfirmAdd, .ConfirmDel{
+    font-size: medium;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    font-weight: bold;
+}
+
+.Confirm{
+    background-color: var(--paper);
+    border-radius: var(--default-border-radius);
+    width: 300px;
+    padding: 20px;
+}
+
+.JaNee{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.Confirm button{
+    position: static;
+    padding: 15px;
+    margin-top: 10px;
+    font-size: medium;
+}
+
 /* ==================== Gerigistreerde Lokale ontwerp ==================== */
 .Lokaal__titel, .Toerusting__title{
     display: flex;

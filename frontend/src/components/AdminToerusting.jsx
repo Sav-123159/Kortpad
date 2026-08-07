@@ -1,11 +1,21 @@
+import { useState } from "react";
 import "../css/Admin.css";
+import AdminVoegByPopUp from "../components/AdminVoegByPopUp.jsx";
+import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 
 export default function AdminToerusting(){
+    const [isPopupOop, setIsPopupOop] = useState(false);
     return(
         <div className="Info Toerusting__Inligting" data-for-tab="Toerusting">
             <div className="Toerusting__title">
                 <h2>Lokale Toerusting</h2>
-                <button>Voeg toerusting by.</button>
+
+                <button onClick={() => setIsPopupOop(true)}>Voeg toerusting by.</button>
+                <AdminVoegByPopUp 
+                    isPopupOop = {isPopupOop}
+                    setIsPopupOop={setIsPopupOop}
+                    tipe="VoegToerustingBy"
+                />
             </div>
             &ensp;Toerusting in elke lokaal  
             <div className="Lokale__kampus">
