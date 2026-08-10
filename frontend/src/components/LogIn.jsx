@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from 'react-dom/client';
+import PopupAnimation from "./PopupAnimation";
 import "../css/Style.css";
 import "../css/Gebruiker.css";
 
@@ -123,7 +124,7 @@ function LogIn({ show, onCancel, onClose }) {
 
     return (
         <div className="login-page">
-            <div className="login-container" ref={modalRef}>
+            <PopupAnimation as="div" className="login-container" ref={modalRef}>
                 <div className="form">
                     <h1>Welkom!</h1>
                     <h3>Teken Aan Of Registreer</h3>
@@ -155,7 +156,7 @@ function LogIn({ show, onCancel, onClose }) {
                     </svg>
                     <img src="../../public/LOGO_Cropped.jpeg" className="login-logo" />
                 </div>
-            </div>
+            </PopupAnimation>
         </div>
     );
 }

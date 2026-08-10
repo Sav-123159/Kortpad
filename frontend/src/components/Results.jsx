@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function Results({ getTime, time, campus}) {
+function Results({ getTime, time, campus, onLoaded}) {
     const [timetables, setTimetables] = useState([]);
     const [venues, setVenues] = useState([]);
     const [buildings, setBuildings] = useState([]);
@@ -46,6 +46,8 @@ function Results({ getTime, time, campus}) {
     const availableVenues = venues.filter(
         venue => !occupiedVenueIds.includes(venue.venue_id)
     );
+
+    onLoaded?.();
 
     return (
         <section className="Results">
