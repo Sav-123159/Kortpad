@@ -122,17 +122,23 @@ def update_user(user_id : int, user : UserBase):
         conn.close()
 
 # ==================== TIMETABLE ==================== 
-@app.get('/timetable/{id}')
-def get_timetable(id : int):
+@app.get('/timetable/{timetable_id}')
+def get_timetable(timetable_id : int):
+    if timetable_id <= 0:
+        raise HTTPException(status_code=400, detail='Timetable id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    data = cursor.execute('SELECT * FROM timetable WHERE timetable_id = ?', (id,)).fetchone()
-    timetable = Timetable(**dict(data)) if data else None
+        data = cursor.execute('SELECT * FROM timetable WHERE timetable_id = ?', (timetable_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Timetable does not exist')
+        
+        return Timetable(**dict(data))
 
-    conn.close()
-
-    return timetable
+    finally:
+        conn.close()
 
 @app.get('/timetable/by-venue/{venue_id}')
 def get_timetable(venue_id : int):
@@ -158,7 +164,7 @@ def get_timetables():
 
     return timetables
 
-@app.post('/timetable')
+@app.post('/timetable') # ****COMEBACK TO THIS FUNCTION FOR REFACTORING MAYBE
 def create_timetable(timetable : TimetableCreate):
     conn = get_db()
     try:
@@ -188,51 +194,77 @@ def create_timetable(timetable : TimetableCreate):
     finally:
         conn.close()
 
-@app.delete('/timetable/{id}')
-def delete_timetable(id : int):
+@app.delete('/timetable/{timetable_id}')
+def delete_timetable(timetable_id : int):
+    if timetable_id <= 0:
+        raise HTTPException(status_code=400, detail='Timetable id needs to be greater than 0')
+    
     conn = get_db()
     try:
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM timetable WHERE timetable_id = ?', (id,))
+        cursor.execute('DELETE FROM timetable WHERE timetable_id = ?', (timetable_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Timetable does not exist')
+        
         conn.commit()
         
-        return {'message': 'Timetable has been deleted'}
+        return {'message': f'Timetable {timetable_id} has been deleted'}
         
     except IntegrityError:
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
-@app.put('/timetable/{id}')
-def update_timetable(id : int, venue_id : int, day_of_week : str, start_time : str, end_time : str, module_code : str, semester_start : str, semester_end : str):
+@app.put('/timetable/{timetable_id}')
+def update_timetable(timetable_id : int, timetable : TimetableBase):
+    if timetable_id <= 0:
+        raise HTTPException(status_code=400, detail='Timetable id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute('UPDATE timetable SET venue_id = ?, day_of_week = ?, start_time = ?, end_time = ?, module_code = ?, semester_start = ?, semester_end = ? WHERE timetable_id = ?',
-    (venue_id, day_of_week, start_time, end_time, module_code, semester_start, semester_end, id)
-    )
-    conn.commit()
+        cursor.execute('UPDATE timetable SET venue_id = ?, day_of_week = ?, start_time = ?, end_time = ?, module_code = ?, semester_start = ?, semester_end = ? WHERE timetable_id = ?',
+        (
+            timetable.venue_id, 
+            timetable.day_of_week, 
+            timetable.start_time, 
+            timetable.end_time, 
+            timetable.module_code, 
+            timetable.semester_start, 
+            timetable.semester_end, 
+            timetable_id
+        )
+        )
+        conn.commit()
 
-    data = cursor.execute('SELECT * FROM timetable WHERE timetable_id = ?', (id,)).fetchone()
-    timetable = Timetable(**dict(data)) if data else None
-
-    conn.close()
-
-    return timetable
+        return {'message': f'Timetable {timetable_id} has been updated'}
+        
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
 
 # ==================== BOOKING ====================
-@app.get('/booking/{id}')
-def get_booking(id : int):
+@app.get('/booking/{booking_id}')
+def get_booking(booking_id : int):
+    if booking_id <= 0:
+        raise HTTPException(status_code=400, detail='Booking id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    data = cursor.execute('SELECT * FROM booking WHERE booking_id = ?', (id,)).fetchone()
-    booking = Booking(**dict(data)) if data else None
-
-    conn.close()
-
-    return booking
+        data = cursor.execute('SELECT * FROM booking WHERE booking_id = ?', (booking_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Booking does not exist')
+        
+        return Booking(**dict(data))
+    
+    finally:
+        conn.close()
 
 @app.get('/bookings')
 def get_bookings():
@@ -276,38 +308,61 @@ def create_booking(booking : BookingCreate):
     finally:
         conn.close()
 
-@app.delete('/booking/{id}')
-def delete_booking(id : int):
+@app.delete('/booking/{booking_id}')
+def delete_booking(booking_id : int):
+    if booking_id <= 0:
+        raise HTTPException(status_code=400, detail='Booking id needs to be greater than 0')
+    
     conn = get_db()
     try:
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM booking WHERE booking_id = ?', (id,))
+        cursor.execute('DELETE FROM booking WHERE booking_id = ?', (booking_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Booking does not exist')
+        
         conn.commit()
     
-        return {'message': 'Booking has been deleted'}
+        return {'message': f'Booking {booking_id} has been deleted'}
     
     except IntegrityError:
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
-@app.put('/booking/{id}')
-def update_booking(id : int, venue_id : int, user_id : int, start_time : str, end_time : str, booking_date : str, booking_created_at : str):
+@app.put('/booking/{booking_id}')
+def update_booking(booking_id : int, booking : BookingBase):
+    if booking_id <= 0:
+        raise HTTPException(status_code=400, detail='Booking id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute('UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ?, booking_created_at = ? WHERE booking_id = ?',
-    (venue_id, user_id, start_time, end_time, booking_date, booking_created_at, id)
-    )
-    conn.commit()
+        cursor.execute('UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ?, booking_created_at = ? WHERE booking_id = ?',
+        (
+            booking.venue_id, 
+            booking.user_id, 
+            booking.start_time, 
+            booking.end_time, 
+            booking.booking_date, 
+            booking.booking_created_at, 
+            booking_id
+        )
+        )
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Booking does not exist')
+        
+        conn.commit()
+        
+        return {'message': f'Booking {booking_id} has been updated'}
 
-    data = cursor.execute('SELECT * FROM booking WHERE booking_id = ?', (id,)).fetchone()
-    booking = Booking(**dict(data)) if data else None
-
-    conn.close()
-
-    return booking
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
 
 # ==================== CAMPUS ====================
 @app.get('/campus/{campus_id}')
@@ -407,17 +462,23 @@ def update_campus(campus_id : int, campus : CampusBase):
         conn.close()
 
 # ==================== BUILDING ====================
-@app.get('/building/{id}')
-def get_building(id : int):
+@app.get('/building/{building_id}')
+def get_building(building_id : int):
+    if building_id <= 0:
+        raise HTTPException(status_code=400, detail='Building id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    data = cursor.execute('SELECT * FROM building WHERE campus_id = ?', (id,)).fetchone()
-    building = Building(**dict(data)) if data else None
-
-    conn.close()
-
-    return building
+        data = cursor.execute('SELECT * FROM building WHERE campus_id = ?', (building_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Building does not exist')
+        
+        return Building(**dict(data))
+    
+    finally:
+        conn.close()
 
 @app.get('/buildings')
 def get_buildings():
@@ -449,51 +510,72 @@ def create_building(building : BuildingCreate):
     finally:
         conn.close()
 
-@app.delete('/building/{id}')
-def delete_building(id : int):
+@app.delete('/building/{building_id}')
+def delete_building(building_id : int):
+    if building_id <= 0:
+        raise HTTPException(status_code=400, detail='Building id needs to be greater than 0')
+    
     conn = get_db()
     try:
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM building WHERE building_id = ?', (id,))
+        cursor.execute('DELETE FROM building WHERE building_id = ?', (building_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Building does not exist')
+        
         conn.commit()
         
-        return {'message': 'Building has been deleted'}
+        return {'message': f'Building {building_id} has been deleted'}
     
     except IntegrityError:
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
-@app.put('/building/{id}')
-def update_building(id : int, campus_id : int, building_name : str, faculty_id : int):
+@app.put('/building/{building_id}')
+def update_building(building_id : int, building : BuildingBase):
+    if building_id <= 0:
+        raise HTTPException(status_code=400, detail='Building id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute('UPDATE building SET campus_id = ?, building_name = ?, faculty_id = ? WHERE building_id = ?',
-    (campus_id, building_name, faculty_id, id)
-    )
-    conn.commit()
+        cursor.execute('UPDATE building SET campus_id = ?, building_name = ?, faculty_id = ? WHERE building_id = ?',
+        (building.campus_id, building.building_name, building.faculty_id, building_id)
+        )
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Building does not exist')
+        
+        conn.commit()
 
-    data = cursor.execute('SELECT * FROM building WHERE building_id = ?', (id,)).fetchone()
-    building = Building(**dict(data)) if data else None
-
-    conn.close()
-
-    return building
+        return {'message': f'Building {building_id} has been updated'}
+    
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
 
 # ==================== VENUE ====================
-@app.get('/venue/{id}')
-def get_venue(id : int):
+@app.get('/venue/{venue_id}')
+def get_venue(venue_id : int):
+    if venue_id <= 0:
+        raise HTTPException(status_code=400, detail='Venue id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    data = cursor.execute('SELECT * FROM venue WHERE venue_id = ?', (id,)).fetchone()
-    venue = Venue(**dict(data)) if data else None
+        data = cursor.execute('SELECT * FROM venue WHERE venue_id = ?', (venue_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Venue does not exist')
+        
+        return Venue(**dict(data))
 
-    conn.close()
-
-    return venue
+    finally:
+        conn.close()
 
 @app.get('/venue/by-campus/{campus_id}')
 def get_venue(campus_id : int):
@@ -542,35 +624,48 @@ def create_venue(venue : VenueCreate):
     finally:
         conn.close()
 
-@app.delete('/venue/{id}')
-def delete_venue(id : int):
+@app.delete('/venue/{venue_id}')
+def delete_venue(venue_id : int):
+    if venue_id <= 0:
+        raise HTTPException(status_code=400, detail='Venue id needs to be greater than 0')
+    
     conn = get_db()
     try:
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM venue WHERE venue_id = ?', (id,))
+        cursor.execute('DELETE FROM venue WHERE venue_id = ?', (venue_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Venue does not exist')
+        
         conn.commit()
         
-        return {'message': 'Venue has been deleted'}
+        return {'message': f'Venue {venue_id} has been deleted'}
 
     except IntegrityError:
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
-@app.put('/venue/{id}')
-def update_venue(id : int, building_id : int, venue_name : str, capacity : int):
+@app.put('/venue/{venue_id}')
+def update_venue(venue_id : int, venue : VenueBase):
+    if venue_id <= 0:
+        raise HTTPException(status_code=400, detail='Venue id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute('UPDATE venue SET building_id = ?, venue_name = ?, capacity = ? WHERE venue_id = ?',
-    (building_id, venue_name, capacity, id)
-    )
-    conn.commit()
-
-    data = cursor.execute('SELECT * FROM venue WHERE venue_id = ?', (id,)).fetchone()
-    venue = Venue(**dict(data)) if data else None
-
-    conn.close()
-
-    return venue
+        cursor.execute('UPDATE venue SET building_id = ?, venue_name = ?, capacity = ? WHERE venue_id = ?',
+        (building_id, venue_name, capacity, venue_id)
+        )
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Venue does not exist')
+        
+        conn.commit()
+    
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
