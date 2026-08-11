@@ -310,17 +310,23 @@ def update_booking(id : int, venue_id : int, user_id : int, start_time : str, en
     return booking
 
 # ==================== CAMPUS ====================
-@app.get('/campus/{id}')
-def get_campus(id : int):
+@app.get('/campus/{campus_id}')
+def get_campus(campus_id : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    data = cursor.execute('SELECT * FROM campus WHERE campus_id = ?', (id,)).fetchone()
-    campus = Campus(**dict(data)) if data else None
+        data = cursor.execute('SELECT * FROM campus WHERE campus_id = ?', (campus_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Campus does not exist')
 
-    conn.close()
-
-    return campus
+        return Campus(**dict(data))
+    
+    finally:
+        conn.close()
 
 @app.get('/campuses')
 def get_campuses():
@@ -348,42 +354,57 @@ def create_campus(campus : CampusCreate):
         return Campus(campus_id=cursor.lastrowid, **campus.model_dump())
     
     except IntegrityError:
-        raise HTTPException(status_code=400, detail='Something went wrong')
+        raise HTTPException(status_code=400, detail='Campus needs a campus name')
     finally:
         conn.close()
 
-@app.delete('/campus/{id}')
-def delete_campus(id : int):
+@app.delete('/campus/{campus_id}')
+def delete_campus(campus_id : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
     conn = get_db()
     try:
         cursor = conn.cursor()
         
-        cursor.execute('DELETE FROM campus WHERE campus_id = ?', (id,))
+        cursor.execute('DELETE FROM campus WHERE campus_id = ?', (campus_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Campus does not exist')
+        
         conn.commit()
         
-        return {'message': 'Campus has been deleted'}
-
+        return {'message': f'Campus {campus_id} has been deleted'}
+    
     except IntegrityError:
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
-@app.put('/campus/{id}')
-def update_campus(id : int, campus_name : str):
+@app.put('/campus/{campus_id}')
+def update_campus(campus_id : int, campus : CampusBase):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
     conn = get_db()
-    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
 
-    cursor.execute('UPDATE campus SET campus_name = ? WHERE campus_id = ?',
-    (campus_name, id)
-    )
-    conn.commit()
+        cursor.execute('UPDATE campus SET campus_name = ? WHERE campus_id = ?',
+        (campus.campus_name, campus_id)
+        )
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Campus does not exist')
+        
+        conn.commit()
 
-    data = cursor.execute('SELECT * FROM campus WHERE campus_id = ?', (id,)).fetchone()
-    campus = Campus(**dict(data)) if data else None
-
-    conn.close()
-
-    return campus
+        return {'message': f'Campus {campus_id} has been updated'}
+    
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
 
 # ==================== BUILDING ====================
 @app.get('/building/{id}')
