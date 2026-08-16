@@ -462,6 +462,19 @@ def update_campus(campus_id : int, campus : CampusBase):
         conn.close()
 
 # ==================== BUILDING ====================
+@app.get('/buildings/by-campus/{campus_id}')
+def get_buildings(campus_id : int):
+    conn = get_db()
+    
+    cursor = conn.cursor()
+    
+    data = cursor.execute('SELECT * FROM building WHERE campus_id = ?', (campus_id,)).fetchall()
+    buildings = [Building(**dict(d)) for d in data] 
+    
+    conn.close()
+    
+    return buildings
+
 @app.get('/building/{building_id}')
 def get_building(building_id : int):
     if building_id <= 0:
@@ -557,6 +570,21 @@ def update_building(building_id : int, building : BuildingBase):
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
+
+    return building
+
+@app.get('/buildings/by-campus/{campus_id}')
+def get_buildings(campus_id : int):
+    conn = get_db()
+    
+    cursor = conn.cursor()
+    
+    data = cursor.execute('SELECT * FROM building WHERE campus_id = ?', (campus_id,)).fetchall()
+    buildings = [Building(**dict(d)) for d in data]
+    
+    conn.close()
+    
+    return buildings
 
 # ==================== VENUE ====================
 @app.get('/venue/{venue_id}')
@@ -655,9 +683,9 @@ def update_venue(venue_id : int, venue : VenueBase):
     conn = get_db()
     try:
         cursor = conn.cursor()
-
+        
         cursor.execute('UPDATE venue SET building_id = ?, venue_name = ?, capacity = ? WHERE venue_id = ?',
-        (building_id, venue_name, capacity, venue_id)
+        (venue.building_id, venue.venue_name, venue.capacity, venue_id)
         )
         
         if cursor.rowcount == 0:
@@ -669,3 +697,36 @@ def update_venue(venue_id : int, venue : VenueBase):
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
+
+@app.get('/venues/by-building/{building_id}')
+def get_venues_by_building(building_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute(
+        'SELECT * FROM venue WHERE building_id = ?',
+        (building_id,)
+    ).fetchall()
+
+    venues = [Venue(**dict(d)) for d in data]
+
+    conn.close()
+
+    return venues
+
+# ==================== EQUIPMENT ====================
+@app.get('/equipment/by-venue_id/{venue_id}')
+def get_equipment_by_venue(venue_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute(
+        'SELECT * FROM equipment WHERE venue_id = ?',
+        (venue_id,)
+    ).fetchall()
+
+    equipment = [dict(d) for d in data]
+
+    conn.close()
+
+    return equipment
