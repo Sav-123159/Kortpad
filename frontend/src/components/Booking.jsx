@@ -2,13 +2,23 @@ import React, { useState, useEffect, useRef } from "react";
 import PopupAnimation from "./PopupAnimation";
 
 function Booking({ show, onConfirm, onCancel, onClose }) {
+
+    //----------------------- CONTSTANTS -----------------------
+
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
     const [timetables, setTimetables] = useState([]);
+    const [bookings, setBookings] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
     const [selectedVenue, setSelectedVenue] = useState("");
     const [date, setDate] = useState("");
     const [selectedSlots, setSelectedSlots] = useState([]);
+    const [defaultValues, setDefaultValues] = useState({
+        campus: "",
+        venue: "",
+        date: "",
+        slots: []
+    });
 
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -20,6 +30,9 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             ? days[new Date(date).getDay()]
             : "";
 
+
+    //----------------------- API FETCHES -----------------------
+
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
             .then((res) => res.json())
@@ -28,6 +41,8 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
                 if (data.length > 0) {
                     setSelectedCampus(data[0].campus_id);
+                    // Hou vorige waardes van defaultValues en oorskryf net die campus
+                    setDefaultValues((prev) => ({ ...prev, campus: data[0].campus_id }));
                 }
             })
             .catch((error) => console.error(error));
@@ -39,43 +54,70 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             return;
         }
 
+        setSelectedVenue("");
+        setTimetables([]);
+
         fetch(`http://127.0.0.1:8000/venue/by-campus/${selectedCampus}`)
             .then((res) => res.json())
-            .then((data) => setVenues(data))
+            .then((data) => {
+                setVenues(data);
+
+                if (data.length > 0) {
+                    setSelectedVenue(data[0].venue_id);
+                    // Hou vorige waardes van defaultValues en oorskryf net die venue
+                    setDefaultValues((prev) => ({ ...prev, venue: data[0].venue_id }));
+                }
+
+            })
             .catch((error) => console.error(error));
     }, [selectedCampus]);
 
     useEffect(() => {
-        setTimetables([
-            {
-                day_of_week: "MON",
-                start_time: "09:00",
-                end_time: "11:00"
-            },
-            {
-                day_of_week: "TUE",
-                start_time: "14:00",
-                end_time: "16:00"
-            },
-            {
-                day_of_week: "WED",
-                start_time: "10:00",
-                end_time: "12:00"
-            },
-            {
-                day_of_week: "THU",
-                start_time: "08:00",
-                end_time: "09:00"
-            },
-            {
-                day_of_week: "FRI",
-                start_time: "13:00",
-                end_time: "15:00"
-            }
-        ]);
+        if (!selectedVenue) {
+            setTimetables([]);
+            setBookings([]);
+            return;
+        }
+
+        fetch(`http://127.0.0.1:8000/timetable/by-venue/${selectedVenue}`)
+            .then((res) => res.json())
+            .then((data) => setTimetables(data))
+            .catch((error) => console.error(error));
+
+        loadBookings(selectedVenue);
+
     }, [selectedVenue]);
 
+    // Load bookings for the selected venue
+    async function loadBookings(venueId) {
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/booking/by-venue/${venueId}`
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Booking failed");
+            }
+
+            const data = await response.json();
+            setBookings(data);
+
+        } catch (error) {
+            console.error("Failed to load bookings:", error);
+        }
+    }
+
+    //----------------------- OPEN, CLOSE AND RESET MODAL -----------------------
+
     const modalRef = useRef(null);
+
+    function resetForm() {
+        setSelectedCampus(defaultValues.campus);
+        setSelectedVenue(defaultValues.venue);
+        setDate(defaultValues.date);
+        setSelectedSlots(defaultValues.slots);
+    }
 
     useEffect(() => {
         const closeModalonClickOut = (e) => {
@@ -85,12 +127,14 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                 !modalRef.current.contains(e.target) &&
                 onClose
             ) {
+                resetForm();
                 onClose();
             }
         };
 
         const closeModalOnEscKeyDown = (e) => {
             if (show && e.code === "Escape" && onClose) {
+                resetForm();
                 onClose();
             }
         };
@@ -104,6 +148,18 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         };
     }, [show, onClose]);
 
+    function clearSelection() {
+        setSelectedSlots([]);
+    }
+
+    function onCancelClicked() {
+        resetForm();
+        if (onClose) onClose();
+        if (onCancel) onCancel();
+    }
+
+    //----------------------- TABLE CELL LOGIC -----------------------
+
     function handleCellClick(day, time, occupied) {
         if (occupied || !activeDay || day !== activeDay) return;
 
@@ -111,15 +167,27 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
         // Deselect
         if (selectedSlots.includes(slot)) {
-            const index = selectedSlots.indexOf(slot);
-            //Prevent middleslot from being deselected
-            if (index !== 0 && index !== selectedSlots.length - 1) {
+            // Time index of the slot being removed
+            const timeIndex = times.indexOf(time);
+
+            // Time indexes of all currently selected slots
+            const selectedTimeIndexes = selectedSlots.map((s) =>
+                times.indexOf(s.split("-")[1])
+            );
+
+            // Earliest and latest time in the current selection
+            const lowest = Math.min(...selectedTimeIndexes);
+            const highest = Math.max(...selectedTimeIndexes);
+
+            // Only allow removing a boundary slot (earliest or latest time)
+            // Removing a slot in the middle breaks the row, clear everything
+            if (timeIndex !== lowest && timeIndex !== highest) {
                 clearSelection();
             } else {
                 setSelectedSlots(selectedSlots.filter((s) => s !== slot));
             }
+            return;
         }
-
         // First select
         if (selectedSlots.length === 0) {
             setSelectedSlots([slot]);
@@ -147,31 +215,88 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         }
     }
 
-    function clearSelection() {
-        setSelectedSlots([]);
-    }
+    //----------------------- SUBMIT LOGIC -----------------------
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
 
-        if (onConfirm) {
-            onConfirm({
-                campus: selectedCampus,
-                venue: selectedVenue,
-                date,
-                slots: selectedSlots
-            });
+        const selectedTimes = selectedSlots
+            .map((slot) => slot.split("-")[1])
+            // Sort the times to ensure they are in order
+            // Because the user can select times in any order, we need to sort them to find the start and end times correctly
+            .sort();
+
+        const startTime = selectedTimes[0];
+
+        const endTime =
+            // Get the time after the last selected time
+            times[times.indexOf(selectedTimes.at(-1)) + 1];
+
+        const bookingData = {
+            venue_id: Number(selectedVenue),
+            user_id: 1,
+            start_time: `${startTime}:00`,
+            end_time: `${endTime}:00`,
+            booking_date: date
+        };
+
+        try {
+            const response = await fetch(
+                "http://127.0.0.1:8000/booking",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(bookingData)
+                }
+            );
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || "Booking failed");
+            }
+
+            const result = await response.json();
+
+            console.log("Booking created:", result);
+            alert("Bespreking suksesvol!");
+
+            // Refresh the bookings after a successful booking
+            await loadBookings(selectedVenue);
+            resetForm();
+
+            if (onConfirm) {
+                onConfirm({
+                    campus: selectedCampus,
+                    venue: selectedVenue,
+                    date,
+                    slots: selectedSlots,
+                });
+            }
+
+        } catch (error) {
+            console.error("Booking failed:", error);
+            alert(error.message);
         }
 
-        if (onClose) {
-            onClose();
+    }
+
+    //----------------------- VALIDATION -----------------------
+
+    function checkSelectedDate(e) {
+        if (e.target.value >= new Date().toISOString().split("T")[0]) {
+            setDate(e.target.value);
+            setSelectedSlots([]);
+        }
+        else {
+            alert("Kies asseblief 'n geldige datum.");
+            setDate("");
+            setSelectedSlots([]);
         }
     }
 
-    function onCancelClicked() {
-        if (onClose) onClose();
-        if (onCancel) onCancel();
-    }
+    //----------------------- RENDER -----------------------
 
     if (!show) {
         return null;
@@ -179,182 +304,184 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     return (
         <section className="booking-page">
-                <PopupAnimation as="section" className="booking-modal" ref={modalRef}>
+            <PopupAnimation as="section" className="booking-modal" ref={modalRef}>
 
-                    <form className="booking-sidebar" onSubmit={handleSubmit}>
+                <form className="booking-sidebar" onSubmit={handleSubmit} onReset={onCancelClicked}>
 
-                        <h3>Maak 'n Bespreking</h3>
+                    <h3>Maak 'n Bespreking</h3>
 
-                        <label htmlFor="campus">Kampus:</label>
-                        <select
-                            id="campus"
-                            value={selectedCampus}
-                            onChange={(e) => setSelectedCampus(e.target.value)}
-                        >
-                            {campuses.map((campus) => (
-                                <option
-                                    key={campus.campus_id}
-                                    value={campus.campus_id}
-                                >
-                                    {campus.campus_name}
-                                </option>
-                            ))}
-                        </select>
-
-                        <label htmlFor="venue">Lokaal:</label>
-                        <select
-                            id="venue"
-                            value={selectedVenue}
-                            onChange={(e) => setSelectedVenue(e.target.value)}
-                        >
-                            {venues.map((venue) => (
-                                <option
-                                    key={venue.venue_id}
-                                    value={venue.venue_id}
-                                >
-                                    {venue.venue_name}
-                                </option>
-                            ))}
-                        </select>
-
-                        <label htmlFor="date">Datum:</label>
-                        <input
-                            id="date"
-                            type="date"
-                            value={date}
-                            onChange={(e) => {
-                                setDate(e.target.value);
-                                setSelectedSlots([]);
-                            }}
-                        />
-
-                        {selectedSlots.length > 0 && (
-                            <div className="booking-selection">
-                                <strong>Gekose Tye ({activeDay}):</strong>
-                                <div className="booking-selection-times">
-                                    {selectedSlots
-                                        .map((slot) => slot.split("-")[1])
-                                        .sort()
-                                        .join(", ")}
-                                </div>
-
-                                <button
-                                    type="button"
-                                    className="booking-clear"
-                                    onClick={clearSelection}
-                                >
-                                    Vee keuse skoon
-                                </button>
-                            </div>
-                        )}
-
-                        <div className="booking-actions">
-                            <button
-                                type="submit"
-                                className="booking-confirm"
-                                disabled={selectedSlots.length === 0}
+                    <label htmlFor="campus">Kampus:</label>
+                    <select
+                        id="campus"
+                        value={selectedCampus}
+                        onChange={(e) => setSelectedCampus(e.target.value)}
+                    >
+                        {campuses.map((campus) => (
+                            <option
+                                key={campus.campus_id}
+                                value={campus.campus_id}
                             >
-                                Bevestig Bespreking
-                            </button>
+                                {campus.campus_name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <label htmlFor="venue">Lokaal:</label>
+                    <select
+                        id="venue"
+                        value={selectedVenue}
+                        onChange={(e) => setSelectedVenue(e.target.value)}
+                    >
+                        {venues.map((venue) => (
+                            <option
+                                key={venue.venue_id}
+                                value={venue.venue_id}
+                            >
+                                {venue.venue_name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <label htmlFor="date">Datum:</label>
+                    <input
+                        id="date"
+                        type="date"
+                        value={date}
+                        onChange={checkSelectedDate}
+                    />
+
+                    {selectedSlots.length > 0 && (
+                        <div className="booking-selection">
+                            <strong>Gekose Tye ({activeDay}):</strong>
+                            <div className="booking-selection-times">
+                                {selectedSlots
+                                    .map((slot) => slot.split("-")[1])
+                                    .sort()
+                                    .join(", ")}
+                            </div>
 
                             <button
                                 type="button"
-                                className="booking-cancel"
-                                onClick={onCancelClicked}
+                                className="booking-clear"
+                                onClick={clearSelection}
                             >
-                                Kanselleer
+                                Vee keuse skoon
                             </button>
                         </div>
+                    )}
 
-                    </form>
+                    <div className="booking-actions">
+                        <button
+                            type="submit"
+                            className="booking-confirm"
+                            disabled={selectedSlots.length === 0}
+                        >
+                            Bevestig Bespreking
+                        </button>
 
-                    <section className="booking-grid">
+                        <button
+                            type="reset"
+                            className="booking-cancel"
+                        >
+                            Kanselleer
+                        </button>
+                    </div>
 
-                        <div className="booking-grid-header">
-                            <h4>Skedule Rooster</h4>
+                </form>
 
-                            <p>
-                                {activeDay
-                                    ? `Klik op selle om tye op ${activeDay} te kies.`
-                                    : "Kies eers 'n datum om tydgleuwe te aktiveer."}
-                            </p>
-                        </div>
+                <section className="booking-grid">
 
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Tyd</th>
+                    <div className="booking-grid-header">
+                        <h4>Skedule Rooster</h4>
 
-                                    {days.map((day) => (
-                                        <th
-                                            key={day}
-                                            className={
-                                                activeDay && day !== activeDay
-                                                    ? "disabled-header"
-                                                    : ""
-                                            }
-                                        >
-                                            {day}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
+                        <p>
+                            {activeDay
+                                ? `Klik op selle om tye op ${activeDay} te kies.`
+                                : "Kies eers 'n datum om tydgleuwe te aktiveer."}
+                        </p>
+                    </div>
 
-                            <tbody>
-                                {times.map((time) => (
-                                    <tr key={time}>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tyd</th>
 
-                                        <td className="time-label">{time}</td>
-
-                                        {days.map((day) => {
-                                            const slot = `${day}-${time}`;
-
-                                            const occupied = timetables.some(
-                                                (timetable) =>
-                                                    timetable.day_of_week === day &&
-                                                    timetable.start_time <= time &&
-                                                    timetable.end_time > time
-                                            );
-
-                                            const selected = selectedSlots.includes(slot);
-
-                                            const disabled =
-                                                !activeDay || day !== activeDay;
-
-                                            return (
-                                                <td
-                                                    key={slot}
-                                                    className={
-                                                        occupied
-                                                            ? "occupied"
-                                                            : selected
-                                                                ? "selected"
-                                                                : disabled
-                                                                    ? "disabled"
-                                                                    : "available"
-                                                    }
-                                                    onClick={() =>
-                                                        handleCellClick(
-                                                            day,
-                                                            time,
-                                                            occupied
-                                                        )
-                                                    }
-                                                >
-                                                    {occupied
-                                                        ? "Beset"
-                                                        : selected
-                                                            ? "Gekies"
-                                                            : "Beskikbaar"}
-                                                </td>
-                                            );
-                                        })}
-                                    </tr>
+                                {days.map((day) => (
+                                    <th
+                                        key={day}
+                                        className={
+                                            activeDay && day !== activeDay
+                                                ? "disabled-header"
+                                                : ""
+                                        }
+                                    >
+                                        {day}
+                                    </th>
                                 ))}
-                            </tbody>
-                        </table>
+                            </tr>
+                        </thead>
 
-                    </section>
+                        <tbody>
+                            {times.map((time) => (
+                                <tr key={time}>
+
+                                    <td className="time-label">{time}</td>
+
+                                    {days.map((day) => {
+                                        const slot = `${day}-${time}`;
+
+                                        const occupied = (timetables.some(
+                                            (timetable) =>
+                                                timetable.day_of_week === day &&
+                                                timetable.start_time <= time &&
+                                                timetable.end_time > time
+                                        )) || (day == activeDay && date !== "" &&
+                                            bookings.some(
+                                                (booking) =>
+                                                    booking.booking_date === date &&
+                                                    booking.start_time <= time &&
+                                                    booking.end_time > time
+                                            ));
+
+                                        const selected = selectedSlots.includes(slot);
+
+                                        const disabled =
+                                            !activeDay || day !== activeDay;
+
+                                        return (
+                                            <td
+                                                key={slot}
+                                                className={
+                                                    occupied
+                                                        ? "occupied"
+                                                        : selected
+                                                            ? "selected"
+                                                            : disabled
+                                                                ? "disabled"
+                                                                : "available"
+                                                }
+                                                onClick={() =>
+                                                    handleCellClick(
+                                                        day,
+                                                        time,
+                                                        occupied
+                                                    )
+                                                }
+                                            >
+                                                {occupied
+                                                    ? "Beset"
+                                                    : selected
+                                                        ? "Gekies"
+                                                        : "Beskikbaar"}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                </section>
             </PopupAnimation>
         </section>
     );

@@ -266,6 +266,18 @@ def get_booking(booking_id : int):
     finally:
         conn.close()
 
+@app.get('/booking/by-venue/{venue_id}')
+def get_booking(venue_id : int):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute('SELECT * FROM booking WHERE venue_id = ?', (venue_id,)).fetchall()
+    bookings = [Booking(**dict(d)) for d in data]
+
+    conn.close()
+
+    return bookings
+
 @app.get('/bookings')
 def get_bookings():
     conn = get_db()
