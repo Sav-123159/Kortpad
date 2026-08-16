@@ -8,7 +8,7 @@ function Results({ getTime, time, campus, onLoaded}) {
     useEffect(() => {
 
         fetch(`http://127.0.0.1:8000/venue/by-campus/${campus}`)
-            .then(res => res.json())
+            .then(res => res.json()) 
             .then(data => setVenues(data))
             .catch((error) => console.error("Failed to fetch venues:", error));
 

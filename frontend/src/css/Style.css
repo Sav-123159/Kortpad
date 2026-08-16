@@ -234,8 +234,7 @@ h3 {
 
 .login-container {
     display: flex;
-    flex-direction: row;
-    /* Side by side */
+    flex-direction: row;      
     align-items: center;
     justify-content: space-between;
     gap: 60px;

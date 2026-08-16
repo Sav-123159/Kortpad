@@ -81,7 +81,7 @@ button{
     background-color: var(--paper);
     color: var(--ink);
 
-    height: 80.5vh;
+    height: 85vh;
     width: 80%;
     padding: 10px;
 }
@@ -91,7 +91,8 @@ h2{
     font-family: var(--button-font);
 }
 
-.Lokale__Inligting h3{
+.Lokale__Inligting h3, 
+.Toerusting__Inligting h3{
     font-family: var(--button-font);
     font-size: medium;
 
@@ -101,7 +102,7 @@ h2{
 }
 
 /* ============================ Lokaal en Toerusting gedeeld ============================== */
-.Lokale__Inligting button, .Toerusting__title button{
+.Lokaal__titel button, .Toerusting__title button{
     position: absolute;
     left: 85%;
 }
@@ -216,11 +217,31 @@ h2{
 .Lokaal__titel, .Toerusting__title{
     display: flex;
     flex-direction: row;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
-.Lokale__Inligting{
+.Lokale__Inligting, .Toerusting__Inligting{
     position: relative;
+    min-height: 450px;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    width: 100%;
+    height: 60%;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.7;
+    transition: opacity 0.5s ease;
+}
+
+.loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .Lokale__kampus{
@@ -229,7 +250,7 @@ h2{
 
     padding: 10px;
     border-radius: var(--default-border-radius);
-    gap: 10px;
+    
     margin-bottom: 15px;
     margin-top: 15px;
     margin-left: 5%;
@@ -245,29 +266,92 @@ h2{
 
     font-family: var(--button-font);
     font-size: medium;
+    margin-right: 10px;
 }
 
-/* ----- Lys van al die lokale gerigistreerd se ontwerp */
-.Lokale__lys{
+.Lokale__kampus h3{
+    margin-left: 10px;
+}
+
+.Lokale__lys, 
+.Lokale__equip{
     background-color: var(--pine);
     color: var(--paper);
+    font-size: medium;
 
-    padding: 15px 25px;
-    margin-left: 10%;
-    margin-right: 10%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    padding: 12px 20px;
+    margin-left: 15%;
+    margin-right: 15%;
     margin-bottom: 7px;
     border-radius: var(--default-border-radius);  
 }
 
-.Lokale__lys button{
+.Lokale__lys button, 
+.Lokale__equip button{
+    position: relative;
     background-color: var(--pine);
-    left: 80%;
     font-size: large;
     border: none;
+
+    margin-left: auto;
 }
 
-.Lokale__lys button:hover{
+.Lokale__lys button:hover,
+.Lokale__equip button:hover, 
+.Cancel_Edit:hover{
     background-color: var(--pine-dark);
+}
+
+.Lokale__equip button.Edit_Aktief{
+    background-color: var(--pine-dark);
+}
+
+.Cancel_Edit {
+  background-color: var(--pine-dark);
+  color: var(--paper);
+  font-size: large;
+  border: none;
+  margin-left: 5px;
+  border-radius: var(--default-border-radius);
+}
+
+.Lokale__equip label {
+   width: 33%;
+}
+
+.Lokale__equip input {
+    width: 60px;
+    padding: 5px;
+
+    border-radius: var(--default-border-radius);
+    border: var(--default-border);
+
+    margin-bottom: 0 auto;
+
+    text-align: center;
+    font-size: medium;
+}
+
+.Lokale__lys input{
+    border-radius: var(--default-border-radius);
+    background-color: var(--paper);
+
+    border: none;
+    width: 150px;
+    padding: 5px;
+    margin-right: 10px;
+
+    text-align: center;
+    font-size: small;
+    color: var(--ink);
+}
+
+.Lokale__equip div button{
+    margin-left: 20px;
 }
 
 /* ==================== Eksamen en Semester ontwerp ==================== */
@@ -315,7 +399,7 @@ h2{
     background-color: var(--pine);
     border-radius: var(--default-border-radius);
     margin-top: 10px;
-    padding: 10px;
+    padding: 8px;
 
     display: flex;
     justify-content: center;
@@ -333,8 +417,8 @@ h2{
 .Besprekings__Inligting div{
     background-color: var(--pine);
     border-radius: var(--default-border-radius);
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 8px;
+    padding: 8px;
 
     display: flex;
     justify-content: center;
@@ -352,7 +436,7 @@ h2{
 /* Form uitleg */
 .Besprekings__Inligting form {
     display: flex;
-    margin-top: 40px;
+    margin-top: 20px;
 }
 
 .Besprekings__Inligting fieldset {
@@ -363,7 +447,7 @@ h2{
     height: 100%;
     width: auto;
     min-width: 300px;
-    padding: 30px;
+    padding: 20px;
     margin: auto;
 
     background-color: var(--pine);
@@ -373,7 +457,7 @@ h2{
 
 .Besprekings__Inligting fieldset label{
     display: inline-block;
-    width: 50%;
+    width: 40%;
 
     font-size: large;
     color: var(--paper);
@@ -396,7 +480,7 @@ h2{
 }
 
 .Besprekings__Inligting form button{
-    padding: 20px;
+    padding: 10px;
     width: 200px;
     border: none;             
     outline: none;
