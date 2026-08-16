@@ -1,53 +1,77 @@
 import { useState, useEffect } from "react";
 
-function Results({ getTime, time, campus, onLoaded}) {
+function Results({ getTime, time, campus, onLoaded }) {
     const [timetables, setTimetables] = useState([]);
     const [venues, setVenues] = useState([]);
     const [buildings, setBuildings] = useState([]);
 
     useEffect(() => {
+        if (!campus) {
+            setVenues([]);
+            setTimetables([]);
+            return;
+        }
 
         fetch(`http://127.0.0.1:8000/venue/by-campus/${campus}`)
-            .then(res => res.json()) 
-            .then(data => setVenues(data))
+            .then((res) => res.json())
+            .then((data) => setVenues(data))
             .catch((error) => console.error("Failed to fetch venues:", error));
-
-        venues.map((venue) =>
-            (fetch(`http://127.0.0.1:8000/timetable/by-venue/${venue.venue_id}`)
-                .then(res => res.json())
-                .then(data => setTimetables(data))
-                .catch((error) => console.error("Failed to fetch timetables:", error)))
-            );
-
-        fetch("http://127.0.0.1:8000/buildings")
-            .then(res => res.json())
-            .then(data => setBuildings(data))
-            .catch((error) => console.error("Failed to fetch buildings:", error));
-
     }, [campus]);
+
+    useEffect(() => {
+        if (venues.length === 0) {
+            setTimetables([]);
+            return;
+        }
+
+        // Fetch the timetable for every venue in the selected campus
+        // Each fetch returns a Promise because the response arrives later
+        Promise.all(
+            venues.map((venue) =>
+                fetch(`http://127.0.0.1:8000/timetable/by-venue/${venue.venue_id}`)
+                    .then((res) => res.json())
+            )
+        )
+            // Each venue returns an array of timetables
+            // flat() combines all those arrays into one array
+            .then((data) => setTimetables(data.flat()))
+            .catch((error) => console.error("Failed to fetch timetables:", error));
+    }, [venues]);
+
+    useEffect(() => {
+        fetch("http://127.0.0.1:8000/buildings")
+            .then((res) => res.json())
+            .then((data) => setBuildings(data))
+            .catch((error) => console.error("Failed to fetch buildings:", error));
+    }, []);
+
+    useEffect(() => {
+        // Tell LeftPanel that the data needed for the results has loaded
+        if (buildings.length > 0) {
+            onLoaded?.();
+        }
+    }, [venues, buildings, timetables]);
 
     const now = new Date();
 
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
     const currentDay = days[now.getDay()];
-    const currentTime = now.toTimeString().slice(0, 8);
+    const currentTime = `${String(now.getHours()).padStart(2, "0")}:00`;
 
     const targetTime = (getTime && time) ? time : currentTime;
 
     const occupiedVenueIds = timetables
         .filter(timetable =>
-            timetable.day_of_week === currentDay &&
-            timetable.start_time <= targetTime &&
-            timetable.end_time > targetTime
+                timetable.day_of_week === currentDay &&
+                timetable.start_time <= targetTime &&
+                timetable.end_time > targetTime
         )
-        .map(timetable => timetable.venue_id);
+        .map((timetable) => timetable.venue_id);
 
 
     const availableVenues = venues.filter(
         venue => !occupiedVenueIds.includes(venue.venue_id)
     );
-
-    onLoaded?.();
 
     return (
         <section className="Results">
