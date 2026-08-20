@@ -9,16 +9,18 @@ export default function AdminRoosters() {
     const [selectedVenue, setSelectedVenue] = useState("");
     const [selectedSemester, setSelectedSemester] = useState("Semester1");
     const [selectedSlots, setSelectedSlots] = useState([]);
+    const [deselectedSlots, setDeselectedSlots] = useState([]);
     const [slotModules, setSlotModules] = useState({});
 
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", ];
+    const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00",];
 
     const semesters = [
         { id: "Semester1", start: "01-01", end: "06-01" },
         { id: "Semester2", start: "07-01", end: "12-01" },
     ];
 
+    //Hard Code for now
     const modules = [
         { code: "COS110", name: "Programming 1" },
         { code: "COS122", name: "Imperative Programming" },
@@ -70,20 +72,33 @@ export default function AdminRoosters() {
     const clearSelection = () => {
         setSelectedSlots([]);
         setSlotModules({});
+        setDeselectedSlots([]);
     };
 
     function handleCellClick(day, time, occupied) {
-        if (occupied) return;
-
         const slot = `${day}-${time}`;
 
         if (selectedSlots.includes(slot)) {
             setSelectedSlots(selectedSlots.filter((s) => s !== slot));
+            //Removes associated module
             setSlotModules((prev) => {
                 const updated = { ...prev };
                 delete updated[slot];
                 return updated;
             });
+            return;
+        }
+
+        if (occupied) {
+            const entryId = occupied.timetable_id;
+            const isDeselected = deselectedSlots.includes(entryId);
+
+
+            if (!isDeselected) {
+                setDeselectedSlots([...deselectedSlots, entryId]);
+            } else {
+                setSelectedSlots([...selectedSlots, slot]);
+            }
             return;
         }
 
@@ -111,7 +126,7 @@ export default function AdminRoosters() {
 
         //Groups of consecutive time slots with the same module code
         const groups = [];
-        
+
         //Use sorted list of slots
         sortedSelectedSlots.forEach((slot) => {
             const [day, time] = slot.split("-");
@@ -121,9 +136,9 @@ export default function AdminRoosters() {
             // Calculate end time (time index + 1)
             const nextTime =
                 times[timeIndex + 1] || `${parseInt(time.split(":")[0], 10) + 1}:00`;
-                //Fallback for last time slot (16:00), need to compute a end-time (17:00)
+            //Fallback for last time slot (16:00), need to compute a end-time (17:00)
 
-            
+
             const lastGroup = groups[groups.length - 1];
 
             // Merge if contiguous on same day AND matching non-empty module code
@@ -153,14 +168,15 @@ export default function AdminRoosters() {
         return groups;
     };
 
-
     //----------------------- SUBMIT HANDLER -----------------------
-    const handleSubmit = () => {
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
         const entries = selectedSlots.map((slot) => {
             const [day, time] = slot.split("-");
-            const timeIdx = times.indexOf(time);
+            const timeIndex = times.indexOf(time);
             const nextTime =
-                times[timeIdx + 1] || `${parseInt(time.split(":")[0], 10) + 1}:00`;
+                times[timeIndex + 1] || `${parseInt(time.split(":")[0], 10) + 1}:00`;
 
             return {
                 venue_id: selectedVenue,
@@ -171,6 +187,10 @@ export default function AdminRoosters() {
                 module_code: slotModules[slot] || "",
             };
         });
+
+        const deletions = deselectedSlots.map((slot) => {
+
+        })
 
         clearSelection();
     };
@@ -239,31 +259,38 @@ export default function AdminRoosters() {
                                     <td className="time-label">{time}</td>
                                     {days.map((day) => {
                                         const slot = `${day}-${time}`;
-                                        const occupied = timetables.some(
+                                        const occupied = timetables.find(
                                             (t) =>
                                                 t.day_of_week === day &&
                                                 t.start_time <= time &&
                                                 t.end_time > time
                                         );
                                         const selected = selectedSlots.includes(slot);
+                                        const deselected = occupied && deselectedSlots.includes(occupied.timetable_id)
+
+                                        let Class = "available";
+                                        let Text = "Beskikbaar";
+
+                                        if (selected) {
+                                            Class = "selected";
+                                            Text = "Gekies";
+                                        } else if (occupied) {
+                                            if (deselected) {
+                                                Class = "available";
+                                                Text = "Beskikbaar";
+                                            } else {
+                                                Class = "occupied";
+                                                Text = "Beset";
+                                            }
+                                        }
 
                                         return (
                                             <td
                                                 key={slot}
-                                                className={
-                                                    occupied
-                                                        ? "occupied"
-                                                        : selected
-                                                            ? "selected"
-                                                            : "available"
-                                                }
+                                                className={Class}
                                                 onClick={() => handleCellClick(day, time, occupied)}
                                             >
-                                                {occupied
-                                                    ? "Beset"
-                                                    : selected
-                                                        ? "Gekies"
-                                                        : "Beskikbaar"}
+                                                {Text}
                                             </td>
                                         );
                                     })}

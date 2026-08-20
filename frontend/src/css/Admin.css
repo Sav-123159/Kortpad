@@ -399,7 +399,7 @@ h2{
 .occupied {
     background: var(--ink);
     color: white;
-    cursor: not-allowed;
+    cursor: pointer;
 }
 
 table {
