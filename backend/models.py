@@ -24,7 +24,7 @@ class Campus(CampusBase):
 class BuildingBase(BaseModel):
     campus_id : int
     building_name : str
-    faculty_id : int
+    faculty_id : int | None = None
     
 class BuildingCreate(BuildingBase):
     pass
@@ -82,3 +82,7 @@ class EquipmentCreate(EquipmentBase):
 
 class Equipment(EquipmentBase):
     equipment_id : int
+    
+class Route(BaseModel):
+    path_coordinates : list[tuple[float, float]]
+    distance : float

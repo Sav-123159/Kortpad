@@ -3,6 +3,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from models import *
 from database import init_db, get_db
+from graph import GraphCache
+from dijkstra import dijkstra
 from datetime import date, time
 
 app = FastAPI()
@@ -20,6 +22,8 @@ app.add_middleware(
 )
 
 init_db()
+
+_map_cache = GraphCache()
 
 @app.get('/')
 def root():
@@ -509,7 +513,7 @@ def get_building(building_id : int):
 def get_buildings():
     conn = get_db()
     cursor = conn.cursor()
-
+    
     data = cursor.execute('SELECT * FROM building').fetchall()
     buildings = [Building(**dict(d)) for d in data]
 
@@ -619,6 +623,8 @@ def get_venue(venue_id : int):
 
 @app.get('/venue/by-campus/{campus_id}')
 def get_venue(campus_id : int):
+    _map_cache.get_graph(campus_id)
+    
     conn = get_db()
     cursor = conn.cursor()
 
@@ -742,3 +748,42 @@ def get_equipment_by_venue(venue_id: int):
     conn.close()
 
     return equipment
+
+# ==================== MAP ====================
+@app.get('/route/{campus_id}-{start_venue}-{destination_venue}')
+def get_route(campus_id : int, start_venue : int, destination_venue : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT ven.venue_id, v.vertex_id
+        FROM venue ven
+        JOIN vertex v ON v.venue_id = ven.venue_id AND v.level = 'building'
+        WHERE ven.venue_id IN (?, ?)
+    ''', (start_venue, destination_venue))
+
+    rows = {row['venue_id']: row['vertex_id'] for row in cursor.fetchall()}
+    conn.close()
+
+    if start_venue not in rows or destination_venue not in rows:
+        raise HTTPException(status_code=404, detail='One or both venues could not be resolved to a location')
+
+    start_from = rows[start_venue]
+    destination = rows[destination_venue]
+    
+    try:
+        adjacency, vertices = _map_cache.get_graph(campus_id)
+        path_data, distance_data = dijkstra(adjacency, vertices, start_from, destination)
+        
+        coordinates = [
+            [vertices[vertex_id]['latitude'], vertices[vertex_id]['longitude']]
+            for vertex_id in path_data
+        ]
+        
+        return Route(path_coordinates=coordinates, distance=distance_data)
+    
+    except Exception:
+        raise HTTPException(status_code=400, detail='Route could not be determined')

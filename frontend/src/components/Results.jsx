@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
 
-function Results({ getTime, time, campus, onLoaded }) {
+function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded}) {
     const [timetables, setTimetables] = useState([]);
     const [venues, setVenues] = useState([]);
     const [buildings, setBuildings] = useState([]);
 
     useEffect(() => {
-        if (!campus) {
-            setVenues([]);
-            setTimetables([]);
-            return;
-        }
-
-        fetch(`http://127.0.0.1:8000/venue/by-campus/${campus}`)
-            .then((res) => res.json())
-            .then((data) => setVenues(data))
+        fetch(`http://127.0.0.1:8000/venue/by-campus/${selectedCampus}`)
+            .then(res => res.json())
+            .then(data => setVenues(data))
             .catch((error) => console.error("Failed to fetch venues:", error));
-    }, [campus]);
+    }, [selectedCampus]);
 
     useEffect(() => {
         if (venues.length === 0) {
@@ -43,14 +37,7 @@ function Results({ getTime, time, campus, onLoaded }) {
             .then((res) => res.json())
             .then((data) => setBuildings(data))
             .catch((error) => console.error("Failed to fetch buildings:", error));
-    }, []);
-
-    useEffect(() => {
-        // Tell LeftPanel that the data needed for the results has loaded
-        if (buildings.length > 0) {
-            onLoaded?.();
-        }
-    }, [venues, buildings, timetables]);
+    }, [selectedCampus]);
 
     const now = new Date();
 
@@ -58,7 +45,7 @@ function Results({ getTime, time, campus, onLoaded }) {
     const currentDay = days[now.getDay()];
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:00`;
 
-    const targetTime = (getTime && time) ? time : currentTime;
+    const targetTime = (selectedTime != null) ? selectedTime : currentTime;
 
     const occupiedVenueIds = timetables
         .filter(timetable =>
@@ -73,6 +60,10 @@ function Results({ getTime, time, campus, onLoaded }) {
         venue => !occupiedVenueIds.includes(venue.venue_id)
     );
 
+    const handleClick = (venue) => { setEndVenue(venue.venue_id); }
+
+    onLoaded?.();
+
     return (
         <section className="Results">
             {availableVenues.map((venue) => {
@@ -82,7 +73,11 @@ function Results({ getTime, time, campus, onLoaded }) {
                 );
 
                 return (
-                    <div className="res-houer" key={venue.venue_id}>
+                    <div 
+                        className="res-houer"
+                        key={venue.venue_id}
+                        onClick={() => handleClick(venue)}
+                    >
                         <div className="lokaal">
                             <b>Lokaal Naam:</b>
                             <br />
@@ -93,12 +88,6 @@ function Results({ getTime, time, campus, onLoaded }) {
                             <b>Gebou Naam:</b>
                             <br />
                             {building ? building.building_name : "Onbekend"}
-                        </div>
-
-                        <div className="afstand">
-                            <b>Afstand:</b>
-                            <br />
-                            Onbekend
                         </div>
 
                         <div className="kapasiteit">
