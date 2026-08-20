@@ -12,10 +12,7 @@ export default function AdminRoosters() {
     const [slotModules, setSlotModules] = useState({});
 
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    const times = [
-        "08:00", "09:00", "10:00", "11:00", "12:00",
-        "13:00", "14:00", "15:00", "16:00", "17:00"
-    ];
+    const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", ];
 
     const semesters = [
         { id: "Semester1", start: "01-01", end: "06-01" },
@@ -99,6 +96,64 @@ export default function AdminRoosters() {
         }));
     };
 
+    //----------------------- GROUPING LOGIC -----------------------
+    const getGroupedEntries = () => {
+        if (selectedSlots.length === 0) return [];
+
+        // Sort slots by day order and time order
+        const sorted = [...selectedSlots].sort((a, b) => {
+            const [dayA, timeA] = a.split("-");
+            const [dayB, timeB] = b.split("-");
+            const dayDiff = days.indexOf(dayA) - days.indexOf(dayB);
+            if (dayDiff !== 0) return dayDiff; //Not on the same day, don't need to compare hours
+            return times.indexOf(timeA) - times.indexOf(timeB); //They are on the same day, compare hours
+        });
+
+        //Groups of consecutive time slots with the same module code
+        const groups = [];
+        
+        //Use sorted list of slots
+        sorted.forEach((slot) => {
+            const [day, time] = slot.split("-");
+            const timeIndex = times.indexOf(time);
+            const moduleCode = slotModules[slot] || "";
+
+            // Calculate end time (time index + 1)
+            const nextTime =
+                times[timeIndex + 1] || `${parseInt(time.split(":")[0], 10) + 1}:00`;
+                //Fallback for last time slot (16:00), need to compute a end-time (17:00)
+
+            
+            const lastGroup = groups[groups.length - 1];
+
+            // Merge if contiguous on same day AND matching non-empty module code
+            if (
+                lastGroup &&                                //not empty (-1)
+                lastGroup.day === day &&                    //is the next consecutive slot on the same day as the previous group
+                lastGroup.moduleCode === moduleCode &&      //is the next consecutive slot in the same module as the previous group
+                moduleCode !== "" &&                        //is the module code empty (can't group)
+                lastGroup.endIndex === timeIndex            //is the next index of the last group the same as the current time index
+            ) {
+                lastGroup.endTime = nextTime;
+                lastGroup.endIndex = timeIndex + 1;
+                lastGroup.slots.push(slot); //Add to end of array in the slots object
+            } else {
+                groups.push({
+                    day,
+                    startTime: time,
+                    endTime: nextTime,
+                    startIndex: timeIndex,
+                    endIndex: timeIndex + 1,
+                    moduleCode,
+                    slots: [slot],  //single array
+                });
+            }
+        });
+
+        return groups;
+    };
+
+
     //----------------------- SUBMIT HANDLER -----------------------
     const handleSubmit = () => {
         const entries = selectedSlots.map((slot) => {
@@ -119,6 +174,8 @@ export default function AdminRoosters() {
 
         clearSelection();
     };
+
+    const groupedEntries = getGroupedEntries();
 
     return (
         <div className="Roosters__Inligting" data-for-tab="Roosters">
@@ -253,18 +310,15 @@ export default function AdminRoosters() {
                             </div>
                         )}
 
-                        {selectedSlots.length > 0 && (
+                        {groupedEntries.length > 0 && (
                             <div>
                                 <h4>Opsomming:</h4>
-                                {selectedSlots.map((slot) => {
-                                    const [day, time] = slot.split("-");
-                                    return (
-                                        <div key={slot} className="chosen-display">
-                                            <strong>{day}</strong>: {time} [{" "}
-                                            {slotModules[slot] || "Geen module"} ]
-                                        </div>
-                                    );
-                                })}
+                                {groupedEntries.map((group, idx) => (
+                                    <div key={idx} className="chosen-display">
+                                        <strong>{group.day}</strong>: {group.startTime} - {group.endTime} [{" "}
+                                        {group.moduleCode || "Geen module"} ]
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

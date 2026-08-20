@@ -22,7 +22,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-    const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+    const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
 
     //Choose date first, pull d.o.w. out
     const activeDay =
