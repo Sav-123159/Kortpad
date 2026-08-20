@@ -96,24 +96,24 @@ export default function AdminRoosters() {
         }));
     };
 
+    // Sort slots by day order and time order
+    const sortedSelectedSlots = [...selectedSlots].sort((a, b) => {
+        const [dayA, timeA] = a.split("-");
+        const [dayB, timeB] = b.split("-");
+        const dayDiff = days.indexOf(dayA) - days.indexOf(dayB);
+        if (dayDiff !== 0) return dayDiff; //Not on the same day, don't need to compare hours
+        return times.indexOf(timeA) - times.indexOf(timeB); //They are on the same day, compare hours
+    });
+
     //----------------------- GROUPING LOGIC -----------------------
     const getGroupedEntries = () => {
         if (selectedSlots.length === 0) return [];
-
-        // Sort slots by day order and time order
-        const sorted = [...selectedSlots].sort((a, b) => {
-            const [dayA, timeA] = a.split("-");
-            const [dayB, timeB] = b.split("-");
-            const dayDiff = days.indexOf(dayA) - days.indexOf(dayB);
-            if (dayDiff !== 0) return dayDiff; //Not on the same day, don't need to compare hours
-            return times.indexOf(timeA) - times.indexOf(timeB); //They are on the same day, compare hours
-        });
 
         //Groups of consecutive time slots with the same module code
         const groups = [];
         
         //Use sorted list of slots
-        sorted.forEach((slot) => {
+        sortedSelectedSlots.forEach((slot) => {
             const [day, time] = slot.split("-");
             const timeIndex = times.indexOf(time);
             const moduleCode = slotModules[slot] || "";
@@ -280,7 +280,7 @@ export default function AdminRoosters() {
                             <p>Geen slots gekies nie.</p>
                         ) : (
                             <div>
-                                {selectedSlots.map((slot) => {
+                                {sortedSelectedSlots.map((slot) => {
                                     const [day, time] = slot.split("-");
                                     return (
                                         <div

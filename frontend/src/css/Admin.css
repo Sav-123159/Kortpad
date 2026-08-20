@@ -359,6 +359,11 @@ h2{
     margin-right: 25%;
 }
 
+.Roosters__Inligting{
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
 .timetable-grid{
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -371,6 +376,7 @@ h2{
     flex-direction: column;
     gap: 12px;
     grid-area: Timetable;
+    overflow: auto;
 }
 
 .available {
@@ -440,6 +446,8 @@ td {
     border-radius: var(--default-border-radius);
     text-align: center;
     grid-area: SidePanel;
+    overflow-y: scroll;
+    max-height: 58vh;
 }
 
 .module-selection{
