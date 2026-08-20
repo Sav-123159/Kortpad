@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Campus Graph Node Editor</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --paper: #f6f4ef;
+    --panel: #ffffff;
+    --line: #dcd7cc;
+    --campus: #2f5d8a;
+    --building: #b5602f;
+    --edge: #c0392b;
+    --accent: #2f5d8a;
+    --muted: #6b7280;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 16px;
+    padding: 16px;
+    min-height: 100vh;
+  }
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+  }
+  h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+  .stage {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .toolbar .grow { flex: 1; }
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    padding: 7px 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn.primary:hover { background: #274e75; }
+  .btn.danger { color: var(--edge); }
+  .btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+  .canvas-wrap {
+    position: relative;
+    overflow: auto;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    background:
+      linear-gradient(45deg, #eee 25%, transparent 25%),
+      linear-gradient(-45deg, #eee 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #eee 75%),
+      linear-gradient(-45deg, transparent 75%, #eee 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas { display: block; cursor: crosshair; }
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .empty-state input { margin-top: 12px; }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+  .field-row { display: flex; gap: 8px; }
+  .field { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+  label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  input, select {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 13px;
+    background: var(--paper);
+    color: var(--ink);
+    width: 100%;
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin: 0; }
+  legend { font-size: 12px; font-weight: 600; padding: 0 4px; color: var(--ink); }
+  .list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+  .row-item {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .row-item .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .row-item .txt { flex: 1; font-family: var(--mono); }
+  .row-item button {
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px 4px;
+  }
+  .row-item button:hover { color: var(--edge); }
+  .row-item input[type="number"] { width: 60px; padding: 3px 5px; font-size: 11px; }
+  textarea {
+    width: 100%;
+    min-height: 160px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: #fbfaf7;
+    resize: vertical;
+  }
+  .badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: #eee;
+    color: var(--muted);
+  }
+  .zoom-controls { display: flex; gap: 4px; align-items: center; }
+  .footer-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="stage">
+    <div>
+      <h1>Campus graph node editor</h1>
+      <p class="sub">Load your map, click to place vertices, click two vertices to draw an edge. Coordinates are computed precisely from where you click &mdash; no trial and error.</p>
+    </div>
+
+    <div class="toolbar">
+      <input type="file" id="imgInput" accept="image/*" />
+      <div class="grow"></div>
+      <div class="zoom-controls">
+        <button class="btn" id="zoomOut">&minus;</button>
+        <span class="hint" id="zoomLabel">100%</span>
+        <button class="btn" id="zoomIn">+</button>
+      </div>
+      <button class="btn active" id="modeVertexBtn">Add vertex</button>
+      <button class="btn" id="modeEdgeBtn">Add edge</button>
+      <button class="btn danger" id="undoBtn">Undo last</button>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="empty-state" id="emptyState">
+        Load your campus map image to begin placing nodes.<br>
+        <input type="file" id="imgInputInline" accept="image/*" />
+      </div>
+      <canvas id="mapCanvas" style="display:none;"></canvas>
+    </div>
+
+    <p class="hint" id="modeHint">Mode: <strong>Add vertex</strong> &mdash; click anywhere on the map to place a node using the defaults on the right.</p>
+  </div>
+
+  <div class="panel">
+    <fieldset>
+      <legend>Coordinate system</legend>
+      <div class="field-row">
+        <div class="field">
+          <label>Longitude max (width)</label>
+          <input type="number" id="lonMax" value="2000">
+        </div>
+        <div class="field">
+          <label>Latitude max (height)</label>
+          <input type="number" id="latMax" value="1500">
+        </div>
+      </div>
+      <p class="hint">Must match your Leaflet bounds exactly. Latitude is flipped automatically (image Y grows down, map Y grows up).</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>New vertex defaults</legend>
+      <div class="field-row">
+        <div class="field">
+          <label>Level</label>
+          <select id="defLevel">
+            <option value="campus">campus</option>
+            <option value="building">building</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Campus ID</label>
+          <input type="number" id="defCampusId" value="1">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Building ID</label>
+          <input type="number" id="defBuildingId" placeholder="required if 'building'">
+        </div>
+        <div class="field">
+          <label>Venue ID</label>
+          <input type="number" id="defVenueId" placeholder="optional">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Vertices <span class="badge" id="vertexCount">0</span></legend>
+      <div class="list" id="vertexList"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Edges <span class="badge" id="edgeCount">0</span></legend>
+      <div class="list" id="edgeList"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Export</legend>
+      <button class="btn primary" id="exportBtn">Generate SQL</button>
+      <textarea id="exportOut" placeholder="Click 'Generate SQL' once you've placed your nodes and edges." readonly></textarea>
+      <button class="btn" id="copyBtn">Copy to clipboard</button>
+      <p class="footer-note">Edges are matched by exact coordinates at insert time, not guessed row numbers &mdash; safe even if AUTOINCREMENT ids don't match your notes.</p>
+    </fieldset>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const state = {
+    vertices: [],   // { level, campusId, buildingId, venueId, natX, natY, lon, lat }
+    edges: [],      // { aIdx, bIdx, weight }
+    mode: 'vertex',
+    edgeFirst: null,
+    img: null,
+    zoom: 1,
+  };
+
+  const canvas = document.getElementById('mapCanvas');
+  const ctx = canvas.getContext('2d');
+  const emptyState = document.getElementById('emptyState');
+  const modeHint = document.getElementById('modeHint');
+
+  function loadImage(file) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = function () {
+      state.img = img;
+      state.zoom = Math.min(1, 900 / img.naturalWidth);
+      emptyState.style.display = 'none';
+      canvas.style.display = 'block';
+      render();
+    };
+    img.src = url;
+  }
+
+  document.getElementById('imgInput').addEventListener('change', e => {
+    if (e.target.files[0]) loadImage(e.target.files[0]);
+  });
+  document.getElementById('imgInputInline').addEventListener('change', e => {
+    if (e.target.files[0]) loadImage(e.target.files[0]);
+  });
+
+  document.getElementById('zoomIn').onclick = () => { state.zoom = Math.min(3, state.zoom * 1.2); render(); };
+  document.getElementById('zoomOut').onclick = () => { state.zoom = Math.max(0.1, state.zoom / 1.2); render(); };
+
+  function setMode(mode) {
+    state.mode = mode;
+    state.edgeFirst = null;
+    document.getElementById('modeVertexBtn').classList.toggle('active', mode === 'vertex');
+    document.getElementById('modeEdgeBtn').classList.toggle('active', mode === 'edge');
+    modeHint.innerHTML = mode === 'vertex'
+      ? "Mode: <strong>Add vertex</strong> &mdash; click anywhere on the map to place a node using the defaults on the right."
+      : "Mode: <strong>Add edge</strong> &mdash; click one vertex, then a second, to connect them.";
+    render();
+  }
+  document.getElementById('modeVertexBtn').onclick = () => setMode('vertex');
+  document.getElementById('modeEdgeBtn').onclick = () => setMode('edge');
+
+  document.getElementById('undoBtn').onclick = () => {
+    if (state.mode === 'edge' && state.edges.length) {
+      state.edges.pop();
+    } else if (state.vertices.length) {
+      const idx = state.vertices.length - 1;
+      state.vertices.pop();
+      state.edges = state.edges.filter(e => e.aIdx !== idx && e.bIdx !== idx);
+    }
+    render();
+  };
+
+  function pixelToCampus(natX, natY) {
+    const lonMax = parseFloat(document.getElementById('lonMax').value) || 2000;
+    const latMax = parseFloat(document.getElementById('latMax').value) || 1500;
+    const lon = (natX / state.img.naturalWidth) * lonMax;
+    const lat = latMax - (natY / state.img.naturalHeight) * latMax; // flip Y
+    return { lon, lat };
+  }
+
+  function findNearestVertex(natX, natY, thresholdNat) {
+    let best = -1, bestDist = Infinity;
+    state.vertices.forEach((v, i) => {
+      const d = Math.hypot(v.natX - natX, v.natY - natY);
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
+    return bestDist <= thresholdNat ? best : -1;
+  }
+
+  canvas.addEventListener('click', e => {
+    if (!state.img) return;
+    const rect = canvas.getBoundingClientRect();
+    const dispX = e.clientX - rect.left;
+    const dispY = e.clientY - rect.top;
+    const natX = dispX / state.zoom;
+    const natY = dispY / state.zoom;
+
+    if (state.mode === 'vertex') {
+      const { lon, lat } = pixelToCampus(natX, natY);
+      const level = document.getElementById('defLevel').value;
+      const campusId = document.getElementById('defCampusId').value || null;
+      const buildingId = document.getElementById('defBuildingId').value || null;
+      const venueId = document.getElementById('defVenueId').value || null;
+      state.vertices.push({
+        level, campusId, buildingId, venueId,
+        natX, natY, lon, lat
+      });
+      renderLists();
+      render();
+    } else {
+      const threshold = 14 / state.zoom;
+      const idx = findNearestVertex(natX, natY, threshold);
+      if (idx === -1) return;
+      if (state.edgeFirst === null) {
+        state.edgeFirst = idx;
+      } else if (state.edgeFirst !== idx) {
+        const a = state.vertices[state.edgeFirst];
+        const b = state.vertices[idx];
+        const dist = Math.hypot(a.lon - b.lon, a.lat - b.lat);
+        state.edges.push({ aIdx: state.edgeFirst, bIdx: idx, weight: Math.round(dist * 10) / 10 });
+        state.edgeFirst = null;
+        renderLists();
+      }
+      render();
+    }
+  });
+
+  function render() {
+    if (!state.img) return;
+    canvas.width = state.img.naturalWidth * state.zoom;
+    canvas.height = state.img.naturalHeight * state.zoom;
+    document.getElementById('zoomLabel').textContent = Math.round(state.zoom * 100) + '%';
+    ctx.setTransform(state.zoom, 0, 0, state.zoom, 0, 0);
+    ctx.drawImage(state.img, 0, 0);
+
+    // edges
+    ctx.lineWidth = 2 / state.zoom;
+    ctx.strokeStyle = '#c0392b';
+    state.edges.forEach(e => {
+      const a = state.vertices[e.aIdx], b = state.vertices[e.bIdx];
+      if (!a || !b) return;
+      ctx.beginPath();
+      ctx.moveTo(a.natX, a.natY);
+      ctx.lineTo(b.natX, b.natY);
+      ctx.stroke();
+    });
+
+    // vertices
+    state.vertices.forEach((v, i) => {
+      ctx.beginPath();
+      ctx.arc(v.natX, v.natY, 8 / state.zoom, 0, Math.PI * 2);
+      ctx.fillStyle = v.level === 'building' ? '#b5602f' : '#2f5d8a';
+      if (state.edgeFirst === i) ctx.fillStyle = '#e0a800';
+      ctx.fill();
+      ctx.lineWidth = 2 / state.zoom;
+      ctx.strokeStyle = 'white';
+      ctx.stroke();
+      ctx.fillStyle = 'white';
+      ctx.font = (10 / state.zoom) + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(i + 1, v.natX, v.natY + 3.5 / state.zoom);
+    });
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  function renderLists() {
+    document.getElementById('vertexCount').textContent = state.vertices.length;
+    document.getElementById('edgeCount').textContent = state.edges.length;
+
+    const vList = document.getElementById('vertexList');
+    vList.innerHTML = '';
+    state.vertices.forEach((v, i) => {
+      const div = document.createElement('div');
+      div.className = 'row-item';
+      div.innerHTML = `
+        <span class="dot" style="background:${v.level === 'building' ? '#b5602f' : '#2f5d8a'}"></span>
+        <span class="txt">#${i + 1} ${v.level} lon:${v.lon.toFixed(1)} lat:${v.lat.toFixed(1)}</span>
+        <button data-i="${i}" title="Delete">&times;</button>
+      `;
+      div.querySelector('button').onclick = () => {
+        state.vertices.splice(i, 1);
+        state.edges = state.edges
+          .filter(e => e.aIdx !== i && e.bIdx !== i)
+          .map(e => ({
+            aIdx: e.aIdx > i ? e.aIdx - 1 : e.aIdx,
+            bIdx: e.bIdx > i ? e.bIdx - 1 : e.bIdx,
+            weight: e.weight
+          }));
+        renderLists();
+        render();
+      };
+      vList.appendChild(div);
+    });
+
+    const eList = document.getElementById('edgeList');
+    eList.innerHTML = '';
+    state.edges.forEach((e, i) => {
+      const div = document.createElement('div');
+      div.className = 'row-item';
+      div.innerHTML = `
+        <span class="txt">#${e.aIdx + 1} &harr; #${e.bIdx + 1}</span>
+        <input type="number" step="0.1" value="${e.weight}" data-i="${i}">
+        <button data-i="${i}" title="Delete">&times;</button>
+      `;
+      div.querySelector('input').oninput = (ev) => {
+        state.edges[i].weight = parseFloat(ev.target.value) || 0;
+      };
+      div.querySelector('button').onclick = () => {
+        state.edges.splice(i, 1);
+        renderLists();
+        render();
+      };
+      eList.appendChild(div);
+    });
+  }
+
+  document.getElementById('exportBtn').onclick = () => {
+    if (!state.vertices.length) {
+      document.getElementById('exportOut').value = '-- Place at least one vertex first.';
+      return;
+    }
+    let sql = '-- ============================================\n';
+    sql += '-- Generated by Campus Graph Node Editor\n';
+    sql += '-- ============================================\n\n';
+    sql += '-- VERTICES\n';
+    sql += 'INSERT INTO vertex (level, campus_id, building_id, venue_id, latitude, longitude) VALUES\n';
+    sql += state.vertices.map((v, i) => {
+      const campusId = v.level === 'campus' ? (v.campusId || 'NULL') : (v.campusId || 'NULL');
+      const buildingId = v.buildingId || 'NULL';
+      const venueId = v.venueId || 'NULL';
+      const comment = ` -- #${i + 1}`;
+      return `    ('${v.level}', ${campusId}, ${buildingId}, ${venueId}, ${v.lat.toFixed(2)}, ${v.lon.toFixed(2)})${comment}`;
+    }).join(',\n') + ';\n\n';
+
+    if (state.edges.length) {
+      sql += '-- EDGES (matched by exact coordinates, safe regardless of actual autoincrement ids)\n';
+      state.edges.forEach(e => {
+        const a = state.vertices[e.aIdx], b = state.vertices[e.bIdx];
+        sql += `INSERT INTO edge (vertex_a, vertex_b, weight)\n`;
+        sql += `SELECT MIN(x.vertex_id, y.vertex_id), MAX(x.vertex_id, y.vertex_id), ${e.weight}\n`;
+        sql += `FROM vertex x, vertex y\n`;
+        sql += `WHERE x.latitude = ${a.lat.toFixed(2)} AND x.longitude = ${a.lon.toFixed(2)}\n`;
+        sql += `  AND y.latitude = ${b.lat.toFixed(2)} AND y.longitude = ${b.lon.toFixed(2)};\n\n`;
+      });
+    }
+
+    document.getElementById('exportOut').value = sql;
+  };
+
+  document.getElementById('copyBtn').onclick = () => {
+    const out = document.getElementById('exportOut');
+    out.select();
+    document.execCommand('copy');
+  };
+
+  setMode('vertex');
+})();
+</script>
+</body>
+</html>

@@ -170,7 +170,6 @@ button.form-button:hover {
 
 .MapPaneel {
     flex: 1;
-    padding: 20px;
     background: var(--paper);
 }
 

@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 
-function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
+function SearchForm({ onSearch, onTimeChange, selectedCampus, setSelectedCampus, setStartVenue }) {
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
-    const [selectedCampus, setSelectedCampus] = useState("");
 
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
@@ -12,14 +11,13 @@ function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
                 setCampuses(data);
                 if (data.length > 0) {
                     setSelectedCampus(data[0].campus_id);
-                    onCampusChange?.(data[0].campus_id);
                 }
             })
             .catch((error) => console.error("Failed to fetch campuses:", error));
-    }, []); // [] Needed. Without them on load React indefinitely calls the API
+    }, []);
 
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         onSearch({
@@ -27,10 +25,8 @@ function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
             lokaal: formData.get("lokaal"),
             tyd: formData.get("tyd"),
         });
-    };
-
-    function handleChange(e) {
-        setSelectedCampus(e.target.value);
+        
+        setStartVenue(formData.get("lokaal"));
     };
 
     useEffect(() => {
@@ -51,8 +47,7 @@ function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
                 <label htmlFor="kampus">Kampus:</label>
                 <select id="kampus" name="kampusNaam"
                     onChange={(e) => {
-                        handleChange(e);
-                        onCampusChange?.(e.target.value);
+                        setSelectedCampus(e.target.value);
                     }} required>
                     {campuses.map((campus) => (
                         <option key={campus.campus_id} value={campus.campus_id}>
@@ -64,7 +59,7 @@ function SearchForm({ onSearch, onTimeChange, onCampusChange }) {
                 <label htmlFor="lokaal">Huidige Lokaal:</label>
                 <select id="lokaal" name="lokaal" required>
                     {venues.map((venue) => (
-                        <option key={venue.venue_id} value={venue.venue_name}>
+                        <option key={venue.venue_id} value={venue.venue_id}>
                             {venue.venue_name}
                         </option>
                     ))}

@@ -41,7 +41,7 @@ def create_tables():
             building_id INTEGER PRIMARY KEY AUTOINCREMENT,
             campus_id INTEGER NOT NULL,
             building_name VARCHAR(100) NOT NULL,
-            faculty_id INTEGER NOT NULL,
+            faculty_id INTEGER,
             FOREIGN KEY (campus_id) REFERENCES campus(campus_id),
             FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id)
         );
@@ -181,8 +181,8 @@ def create_views():
             'CLASS' AS entry_type,
             t.day_of_week,
             NULL AS specific_date,
-            t.term_start,
-            t.term_end,
+            t.semester_start,
+            t.semester_end,
             t.start_time,
             t.end_time,
             t.module_code AS description
@@ -197,8 +197,8 @@ def create_views():
             'BOOKING' AS entry_type,
             NULL AS day_of_week,
             b.booking_date AS specific_date,
-            NULL AS term_start,
-            NULL AS term_end,
+            NULL AS semester_start,
+            NULL AS semester_end,
             b.start_time,
             b.end_time,
             'Boeking deur ' || u.fname || ' ' || u.sname AS description
@@ -213,3 +213,4 @@ def create_views():
 def init_db():
     create_tables()
     create_views()
+

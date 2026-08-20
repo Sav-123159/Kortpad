@@ -1,6 +1,4 @@
 from database import get_db
-from dijkstra import dijkstra
-import heapq
 
 class GraphCache:
     def __init__(self):

@@ -1,33 +1,29 @@
-import { useState } from "react";
-import Header from "./Header";
+import { useEffect, useState } from "react";
 import LeftPanel from "./LeftPanel";
 import KortpadMap from "./KortpadMap";
-import { lokale } from "../data/mockData";
 import '../css/Gebruiker.css';
 import '../css/Style.css';
 
 function StudentContainer() {
-    const [results, setResults] = useState(
-        lokale.filter((l) => l.beskikbaar)
-    );
-
-    const handleSoek = (soekData) => {
-        console.log(soekData);
-
-        setResults(
-            lokale.filter((l) => l.beskikbaar)
-        );
-    };
+    const [selectedCampus, setSelectedCampus] = useState(1);
+    const [startVenue, setStartVenue] = useState("");
+    const [endVenue, setEndVenue] = useState("");  
 
     return (
         <div className="app">
             <div className="Container">
                 <LeftPanel
-                    results={results}
-                    onSearch={handleSoek}
+                    selectedCampus={selectedCampus}
+                    setSelectedCampus={setSelectedCampus}
+                    setStartVenue={setStartVenue}
+                    setEndVenue={setEndVenue}
                 />
                 <div className="MapPaneel">
-                    <KortpadMap lokale={results}/>
+                    <KortpadMap 
+                        selectedCampus={selectedCampus}
+                        startVenue={startVenue}
+                        endVenue={endVenue}
+                    />
                 </div>
             </div>
             
