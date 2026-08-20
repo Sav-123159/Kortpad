@@ -193,27 +193,7 @@ h3 {
     color: var(--ink);
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--paper-deep);
-    color: var(--ink);
-}
-
-th,
-td {
-    width: 40px;
-    height: 40px;
-    text-align: center;
-    border: var(--default-border);
-}
-
 h1 {
-    margin: 0px;
-    color: var(--ink);
-}
-
-h3 {
     margin: 0px;
     color: var(--ink);
 }

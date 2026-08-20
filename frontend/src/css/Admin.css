@@ -359,16 +359,56 @@ h2{
     margin-right: 25%;
 }
 
-/* Die sal seker net savvi se een wees, net op die admin blad */
-.rooster{
+.timetable-grid{
     display: grid;
-    grid-template-columns: 1fr 2fr 2fr 2fr 2fr 2fr;
-    grid-template-rows: repeat(11, 1fr);
-    
+    grid-template-columns: 2fr 1fr;
+    grid-template-areas: "Timetable SidePanel";
+    gap: 10px;
+}
+
+.timetable-panel{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    grid-area: Timetable;
+}
+
+.available {
+    background: white;
+    cursor: pointer;
+}
+
+.available:hover {
+    background: var(--pine);
+    color: white;
+}
+
+.selected {
+    background: var(--pine-dark);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.occupied {
+    background: var(--ink);
+    color: white;
+    cursor: not-allowed;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
     background-color: var(--paper-deep);
-    padding: 8px;
-    border-radius: var(--default-border-radius);
+    color: var(--ink);
+}
+
+th,
+td {
+    width: 40px;
+    height: 40px;
     text-align: center;
+    border: var(--default-border);
 }
 
 .bespreek{
@@ -392,6 +432,45 @@ h2{
     padding: 5px;
     background-color: var(--paper-deep);
     border: solid 1px var(--ink);
+}
+
+.side-panel{
+    background-color: var(--paper-deep);
+    padding: 8px;
+    border-radius: var(--default-border-radius);
+    text-align: center;
+    grid-area: SidePanel;
+}
+
+.module-selection{
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+}
+
+.module-selection form{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.select-Module{
+    background-color: var(--paper);
+    font-size: small;
+    width: auto;
+}
+
+.sidePanelButtons{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.chosen-display{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 5px;
 }
 
 /* ======================= Besprekings ======================== */
