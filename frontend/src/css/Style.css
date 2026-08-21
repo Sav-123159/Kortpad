@@ -75,10 +75,10 @@ button:hover {
     background-color: var(--pine-dark);
     width: 100%;
     padding: 10px 0;
-
     display: flex;
+    flex-direction: row;      
     align-items: center;
-    position: relative;
+    justify-content: space-between;
 }
 
 /* Logo */
@@ -101,10 +101,31 @@ button:hover {
 .Nav {
     background-color: var(--paper);
     border-radius: var(--default-border-radius);
-
-    position: absolute;
-    left: 45%;
+    margin-right: 2vw;
     padding: 3px;
+}
+
+.greeting{
+    background-color: var(--paper);
+    color: var(--ink);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+
+    font-size: large;
+    font-family: var(--button-font);
+    border: none;
+
+    margin: 3px;
+    padding: 7px;
+
+    transform-origin: bottom center;
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.greeting:hover {
+    background-color: var(--paper-deep);
+    box-shadow:  0 6px 10px rgba(0, 0, 0, 0.25);
+    animation: Wave 0.65s ease;
 }
 
 .Nav_Knoppie {
@@ -212,7 +233,13 @@ h1 {
     color: var(--ink);
 }
 
-.login-page {
+h3 {
+    margin: 0px;
+    color: var(--ink);
+}
+
+.login-page,
+.logout-page {
     position: fixed;
     inset: 0;
 
@@ -244,6 +271,19 @@ h1 {
     box-sizing: border-box;
 }
 
+.logout-container {
+    display: flex;
+    flex-direction: row;      
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+    padding: 15px;
+    background: var(--paper);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+    box-sizing: border-box;
+}
+
 /* Left side (login form) */
 .form {
     flex: 1;
@@ -254,7 +294,7 @@ h1 {
 
 form.login {
     max-height: 300px;
-    overflow-y: scroll;
+    overflow-y: auto;
     scrollbar-width: 0px;
 }
 
@@ -434,4 +474,14 @@ img.login-logo {
     100% {
         stroke-dashoffset: -340;
     }
+}
+
+@keyframes Wave {
+    0%   { transform: rotate(0deg)   translateY(0)    scale(1); }
+    15%  { transform: rotate(-9deg)  translateY(-8px)  scale(1.03); }
+    30%  { transform: rotate(8deg)   translateY(-10px) scale(1.04); }
+    45%  { transform: rotate(-7deg)  translateY(-7px)  scale(1.02); }
+    60%  { transform: rotate(5deg)   translateY(-4px)  scale(1.01); }
+    75%  { transform: rotate(-2deg)  translateY(-1px)  scale(1); }
+    100% { transform: rotate(0deg)   translateY(0)     scale(1); }
 }

@@ -5,9 +5,7 @@ import { useAuth } from "./AuthContext";
 import "../css/Style.css";
 import "../css/Gebruiker.css";
 
-//bug: wagwoord en herhaal wagwoord werk nie. maak nie saak wat jy in bevestig wagwoord sit nie, dit gee nie 'n error nie
-
-const Api_Url = import.meta.env.VITE_API_URL; //stel url na vite se url waarde (localhost:5173)
+const Api_Url = import.meta.env.VITE_API_URL; //set URL to vite value (localhost:5173)
 
 function LoginModal({ onLogin, error }) {
 
@@ -17,7 +15,6 @@ function LoginModal({ onLogin, error }) {
     function HandleSubmit(e){
         //stop full page submit
         e.preventDefault();
-        //gee waardes vir handleLogin
         onLogin(email, password);
     }
 
@@ -42,8 +39,7 @@ function LoginModal({ onLogin, error }) {
                 required
             />
 
-            {/*wys backend error message. Savannah, asb help met css maybe maak dit rooi en italic? unless jy dink dit lyk reg idk ydy. as dit bad lyk dan los dit maybe*/}
-            {error && <p className="lgoin-error">{error}</p>}
+            {error && <p className="login-error">{error}</p>}
 
             <button type="submit">Teken In</button>
         </form>
@@ -61,17 +57,21 @@ function RegisterModal({ onRegister, error }) {
     function HandleSubmit(e){
         //stop full page submit
         e.preventDefault();
-
-        if(password !== confirmPassword){
-            setLocalError("Password does not match")
-        }
         setLocalError("");
 
-        //gee waardes vir handleLogin
+        if(password !== confirmPassword){
+            setLocalError("Wagwoord stem nie ooreen nie.");
+            setPassword("");
+            setConfirmPassword("");
+            return;
+        }
+        //Overwrite local error above
+        //setLocalError("");
+
         onRegister({ fname, sname, email }, password);
     }
 
-    //render registreer form
+    //render register form
     return (
         <form className="login" onSubmit={HandleSubmit}>
             <label htmlFor="name">Naam:</label>
@@ -119,7 +119,6 @@ function RegisterModal({ onRegister, error }) {
                 required
             />
 
-            {/*word gestuur voordat dit 'n server error veroorsaak. @Savannah css pls, vir register-error, css dalk rooi en italics, weer eens as dit bad lyk kan jy dit los. Doen watever jou hart begeer*/}
             {(localError || error) && <p className="register-error">{localError || error}</p>}
 
             <button type="submit">Registreer</button>
@@ -129,11 +128,9 @@ function RegisterModal({ onRegister, error }) {
 
 function LogIn({ show, onCancel, onClose }) {
     const modalRef = useRef(null);
-    //let codeToDisplay = null;
-    //let buttonPhrase = null; afgeskyf en verander
     const [isRegistered, setIsRegistered] = useState(true);
     const [error, setError] = useState("");
-    const { login } = useAuth(); //vat login function van AuthContext
+    const { login } = useAuth(); //fetch login function from AuthContext
 
     useEffect(() => {
         const closeModalOnClickOut = (e) => {
@@ -164,13 +161,13 @@ function LogIn({ show, onCancel, onClose }) {
 
     const showRegister = () => {
         setIsRegistered(!isRegistered);
-        setError(""); //clear die errors waneer jy forms switch
+        setError(""); //Clear errors when forms are changed
     };
 
-    //call post /user/login, dan stoor returned user
-    //die is di AutContext signal dat iemand in gelog is is
+    //call post /user/login, then store returned user
+    //AuthContext signal that user is logged in
 
-    async function HandleLogin(email, password){ //async want ons wag vir CRUD respons
+    async function HandleLogin(email, password){
         setError("");
 
         try{
@@ -180,20 +177,18 @@ function LogIn({ show, onCancel, onClose }) {
                 body: JSON.stringify({ email, password }),
             });
 
-            if(!res.ok){ //as
-                //res.json lees die FastAPI error 
+            if(!res.ok){
                 const data = await res.json().catch(() => ({}));
-                setError(data.detail || "Iets het verkeerd gegaan unc :(");
+                setError(data.detail || "Login Failed");
                 return;
             }
 
-            const user = await res.json(); //UserCheck object van backend
+            const user = await res.json();
             login(user);
             onClose?.();
         }
         catch{
-            //network failure
-            setError("Server is af koning :)")
+            setError("Kon nie in teken nie.")
         }
     }
 
@@ -206,39 +201,26 @@ function LogIn({ show, onCancel, onClose }) {
                 body: JSON.stringify({ user: userInfo, auth: { password }  }),
             });
 
-            if(!res.ok){ //as die POST message nie 'n kode tussen 200-299 stuur nie is res.ok = false
+            if(!res.ok){
                 const data = await res.json().catch(() => ({}));
-                //as email alklaar bestaan
-                setError(data.detail || "Iets het verkeerd gegaan luhmayo :/"); //data.detail is die HTTPException message
+                setError(data.detail || "Email bestaan reeds.");
+                setEmail("");
                 return;
             }
 
-            //as jy registreer dan log dadelik in
             await HandleLogin(userInfo.email, password);
         }
         catch{
-            setError("Server het ge-oopsie :P")
+            setError("Kon nie rekening skep nie.")
         }
     }
 
-
-    /*if (isRegistered) {
-        codeToDisplay = <LoginModal />
-        buttonPhrase = "Skep Rekening";
-    } else {
-        codeToDisplay = <RegisterModal />
-        buttonPhrase = "Teken In";
-    }*/
-
-    if (!show) return null;
-
-    //cooler weergawe van die code hierbo
     const codeToDisplay = isRegistered
         ? <LoginModal onLogin={HandleLogin} error={error}/>
         :<RegisterModal onRegister={HandleRegister} error={error}/>
     const buttonPhrase = isRegistered ? "Skep Rekening" : "Teken In";
 
-
+    if (!show) return null;
 
     return (
         <div className="login-page">
