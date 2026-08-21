@@ -125,7 +125,8 @@ def create_tables():
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
             fname VARCHAR(50) NOT NULL,
             sname VARCHAR(50) NOT NULL,
-            email VARCHAR(100) NOT NULL UNIQUE
+            email VARCHAR(100) NOT NULL UNIQUE,
+            is_admin BOOLEAN NOT NULL CHECK (is_admin IN (0, 1)) DEFAULT 0
         );               
     ''')
     
