@@ -9,14 +9,17 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 // Laai die globale CSS-lêers in
 
-
+//AuthContext
+import { AuthProvider } from './components/AuthContext.jsx';
 
 
 // Render die App-komponent in die root-element van die html
 ReactDOM.createRoot(document.getElementById('root')).render(
   // Gebruik StrictMode vir streng kontrole van die React-komponente
   <React.StrictMode>
-    {/* Render die App-komponent */}
-    <App />
+    {/*AuthProvider oor die hele app, vir elke komponent om toegang te he tot useAuth() (login status, user data, .....)*/}
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </React.StrictMode>
 );

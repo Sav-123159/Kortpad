@@ -6,6 +6,7 @@ from database import init_db, get_db
 from graph import GraphCache
 from dijkstra import dijkstra
 from datetime import date, time
+import bcrypt
 
 app = FastAPI()
 
@@ -28,6 +29,16 @@ _map_cache = GraphCache()
 @app.get('/')
 def root():
     return {'message': 'API'}
+
+# ==================== AUTH ====================
+def encrypt_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+def verify_password(password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
 
 # ==================== USER ====================
 @app.get('/user/{user_id}')
@@ -57,23 +68,73 @@ def get_users():
     users = [User(**dict(d)) for d in data]
 
     conn.close()
-
     return users
 
 @app.post('/user')
-def create_user(user : UserCreate):
+def create_user(user : UserCreate, auth : Auth):
     conn = get_db()
     try:
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO app_user (fname, sname, email) VALUES (?, ?, ?)',
+        
+        #User
+        cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, 0)',
         (user.fname, user.sname, user.email))
+
+        user_id = cursor.lastrowid
+
+        #Auth
+        hashed_password = encrypt_password(auth.password)
+        cursor.execute('INSERT INTO auth (user_id, password, email) VALUES (?, ?, ?)',
+        (user_id, hashed_password, user.email))
         
         conn.commit()
-
-        return User(user_id=cursor.lastrowid, **user.model_dump())
+        return User(user_id=user_id, **user.model_dump())
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Email already exists')
+    finally:
+        conn.close()
+
+@app.post('/user/admin') #vir admins wat users create, kan hulle initialise met admin rights
+def create_user(user : AdminUserCreate, auth : Auth): #gebruik Auth vir password field om die password te protect
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        
+        #User
+        cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, ?)',
+        (user.fname, user.sname, user.email, user.is_admin))
+
+        user_id = cursor.lastrowid
+
+        #Auth
+        hashed_password = encrypt_password(auth.password)
+        cursor.execute('INSERT INTO auth (user_id, password, email) VALUES (?, ?, ?)',
+        (user_id, hashed_password, user.email))
+        
+        conn.commit()
+        return User(user_id=user_id, **user.model_dump()) 
+    
+    except IntegrityError:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Email already exists')
+    finally:
+        conn.close()
+
+@app.post('/user/login') #omdat email unique is
+def login(login : Login): #omdat HandleLogin 'n user object verwag moet ek 'n nuwe mode skep
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT password FROM auth WHERE email = ?', (login.email,))
+        row = cursor.fetchone()
+
+        if row is None or not verify_password(login.password, row[0]):
+            raise HTTPException(status_code=401, detail='Wrong password') 
+
+        data = cursor.execute('SELECT * FROM app_user WHERE email = ?', (login.email,)).fetchone()
+        return UserCheck(**dict(data)) #stuur frontend toe, vir local storage ook, so gebruik UserCheck
     finally:
         conn.close()
 
@@ -96,12 +157,13 @@ def delete_user(user_id : int):
         return {'message': f'User {user_id} has been deleted'}
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
 @app.put('/user/{user_id}')
-def update_user(user_id : int, user : UserBase):
+def update_user(user_id : int, user : UserBase, is_admin : bool): #moet die is_admin by die put function ook kom?
     if user_id <= 0:
         raise HTTPException(status_code=400, detail='User id needs to be greater than 0')
     
@@ -109,8 +171,8 @@ def update_user(user_id : int, user : UserBase):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('UPDATE app_user SET fname = ?, sname = ?, email = ? WHERE user_id = ?',
-        (user.fname, user.sname, user.email, user_id)
+        cursor.execute('UPDATE app_user SET fname = ?, sname = ?, email = ?, is_admin = ? WHERE user_id = ?',
+        (user.fname, user.sname, user.email, is_admin, user_id)
         )
         
         if cursor.rowcount == 0:
@@ -121,6 +183,7 @@ def update_user(user_id : int, user : UserBase):
         return {'message': f'User {user_id} has been updated'}
 
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -194,6 +257,7 @@ def create_timetable(timetable : TimetableCreate):
         return Timetable(timetable_id=cursor.lastrowid, **timetable.model_dump())
 
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -217,6 +281,7 @@ def delete_timetable(timetable_id : int):
         return {'message': f'Timetable {timetable_id} has been deleted'}
         
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -242,11 +307,16 @@ def update_timetable(timetable_id : int, timetable : TimetableBase):
             timetable_id
         )
         )
+
+        if cursor.rowcount == 0: #extra check in gesit
+            raise HTTPException(status_code=404, detail='Timetable does not exist') 
+        
         conn.commit()
 
         return {'message': f'Timetable {timetable_id} has been updated'}
         
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -320,6 +390,7 @@ def create_booking(booking : BookingCreate):
         return Booking(booking_id=row[0], booking_created_at=row[1], **booking.model_dump())
 
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -343,6 +414,7 @@ def delete_booking(booking_id : int):
         return {'message': f'Booking {booking_id} has been deleted'}
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -376,6 +448,7 @@ def update_booking(booking_id : int, booking : BookingBase):
         return {'message': f'Booking {booking_id} has been updated'}
 
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -425,6 +498,7 @@ def create_campus(campus : CampusCreate):
         return Campus(campus_id=cursor.lastrowid, **campus.model_dump())
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Campus needs a campus name')
     finally:
         conn.close()
@@ -448,6 +522,7 @@ def delete_campus(campus_id : int):
         return {'message': f'Campus {campus_id} has been deleted'}
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -473,12 +548,13 @@ def update_campus(campus_id : int, campus : CampusBase):
         return {'message': f'Campus {campus_id} has been updated'}
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
 
 # ==================== BUILDING ====================
-@app.get('/buildings/by-campus/{campus_id}')
+@app.get('/buildings/by-campus/{campus_id}') #daar was 2 get('/buildings/by-campus/{campus_id}')'s, altwee was presies dieselfde, een is delete
 def get_buildings(campus_id : int):
     conn = get_db()
     
@@ -500,7 +576,7 @@ def get_building(building_id : int):
     try:
         cursor = conn.cursor()
 
-        data = cursor.execute('SELECT * FROM building WHERE campus_id = ?', (building_id,)).fetchone()
+        data = cursor.execute('SELECT * FROM building WHERE building_id = ?', (building_id,)).fetchone() #campus_id na building_id to verander
         if not data:
             raise HTTPException(status_code=404, detail='Building does not exist')
         
@@ -535,6 +611,7 @@ def create_building(building : BuildingCreate):
         return Building(building_id=cursor.lastrowid, **building.model_dump())
 
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -558,6 +635,7 @@ def delete_building(building_id : int):
         return {'message': f'Building {building_id} has been deleted'}
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -583,24 +661,10 @@ def update_building(building_id : int, building : BuildingBase):
         return {'message': f'Building {building_id} has been updated'}
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
-
-    return building
-
-@app.get('/buildings/by-campus/{campus_id}')
-def get_buildings(campus_id : int):
-    conn = get_db()
-    
-    cursor = conn.cursor()
-    
-    data = cursor.execute('SELECT * FROM building WHERE campus_id = ?', (campus_id,)).fetchall()
-    buildings = [Building(**dict(d)) for d in data]
-    
-    conn.close()
-    
-    return buildings
 
 # ==================== VENUE ====================
 @app.get('/venue/{venue_id}')
@@ -666,6 +730,7 @@ def create_venue(venue : VenueCreate):
         return Venue(venue_id=cursor.lastrowid, **venue.model_dump())
         
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -689,6 +754,7 @@ def delete_venue(venue_id : int):
         return {'message': f'Venue {venue_id} has been deleted'}
 
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
@@ -712,6 +778,7 @@ def update_venue(venue_id : int, venue : VenueBase):
         conn.commit()
     
     except IntegrityError:
+        conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()

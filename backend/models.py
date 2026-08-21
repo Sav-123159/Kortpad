@@ -1,13 +1,26 @@
 from pydantic import BaseModel
 from datetime import time, date, datetime
 
+class Auth(BaseModel):
+    password : str
+
+class Login(BaseModel):
+    email : str
+    password : str
+
 class UserBase(BaseModel):
     fname : str
     sname : str
     email : str
 
+class UserCheck(UserBase): #net vir frontend checks sodat die userbase nie insecure is nie (anders kan jy maklik registreer as admin), vir net gets en puts
+    is_admin : bool
+
 class UserCreate(UserBase):
     pass
+
+class AdminUserCreate(UserBase):
+    is_admin : bool
 
 class User(UserBase):
     user_id : int
