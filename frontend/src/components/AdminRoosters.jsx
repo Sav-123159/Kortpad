@@ -1,5 +1,5 @@
 import "../css/Admin.css";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function AdminRoosters() {
     const [campuses, setCampuses] = useState([]);
@@ -16,8 +16,8 @@ export default function AdminRoosters() {
     const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00",];
 
     const semesters = [
-        { id: "Semester1", start: "01-01", end: "06-01" },
-        { id: "Semester2", start: "07-01", end: "12-01" },
+        { id: "Semester1", start: "-01-01", end: "-06-01" },
+        { id: "Semester2", start: "-07-01", end: "-12-01" },
     ];
 
     //Hard Code for now
@@ -27,6 +27,8 @@ export default function AdminRoosters() {
         { code: "WTW114", name: "Calculus" },
         { code: "INF154", name: "Informatika" }
     ];
+
+    const year = new Date().getFullYear();
 
     //----------------------- API FETCHES -----------------------
     useEffect(() => {
@@ -64,9 +66,24 @@ export default function AdminRoosters() {
 
         fetch(`http://127.0.0.1:8000/timetable/by-venue/${selectedVenue}`)
             .then((res) => res.json())
-            .then((data) => setTimetables(data))
+            .then((data) => setTimetables(data.map(normalizeTimetableEntry)))
             .catch((error) => console.error(error));
     }, [selectedVenue]);
+
+
+    //18:00:00 > 18:00
+    //Slice seconds
+    function normalizeTimetableEntry(entry) {
+        return {
+            ...entry,
+            start_time: entry.start_time?.slice(0, 5),
+            end_time: entry.end_time?.slice(0, 5),
+        };
+    }
+
+    function semesterTimeTables(timeTables) {
+        filter
+    }
 
     //----------------------- TABLE CELL LOGIC -----------------------
     const clearSelection = () => {
@@ -168,8 +185,10 @@ export default function AdminRoosters() {
         return groups;
     };
 
+    const chosenSemester = semesters.find((s) => s.id === selectedSemester);
+
     //----------------------- SUBMIT HANDLER -----------------------
-    const handleSubmit = (e) => {
+    async function handleSubmit(e) {
         e.preventDefault();
 
         const entries = selectedSlots.map((slot) => {
@@ -179,23 +198,79 @@ export default function AdminRoosters() {
                 times[timeIndex + 1] || `${parseInt(time.split(":")[0], 10) + 1}:00`;
 
             return {
-                venue_id: selectedVenue,
-                semester_id: selectedSemester,
+                //"15" -> 15
+                //base 10, prevents base 8 or 16 reading in older javascript engines
+                venue_id: parseInt(selectedVenue, 10),
+                semester_start: `${year}${chosenSemester.start}`,
+                semester_end: `${year}${chosenSemester.end}`,
                 day_of_week: day,
-                start_time: time,
-                end_time: nextTime,
+                start_time: `${time}`,
+                end_time: `${nextTime}`,
                 module_code: slotModules[slot] || "",
             };
         });
 
-        const deletions = deselectedSlots.map((slot) => {
+        try {
+            await Promise.all(
+                entries.map(async (entry) => {
+                    const response = await fetch("http://127.0.0.1:8000/timetable", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(entry),
+                    });
 
-        })
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || "Failed to create entry");
+                    }
+
+                    return response.json();
+                })
+            );
+
+            await Promise.all(
+                deselectedSlots.map(async (timetableId) => {
+                    const response = await fetch(`http://127.0.0.1:8000/timetable/${timetableId}`, {
+                        method: "DELETE",
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || "Failed to delete entry");
+                    }
+                })
+            );
+
+
+
+            alert("Rooster suksesvol opgedateer!");
+
+            const timetableResponse = await fetch(
+                `http://127.0.0.1:8000/timetable/by-venue/${selectedVenue}`
+            );
+            const data = await timetableResponse.json();
+            setTimetables(data.map(normalizeTimetableEntry));
+
+            clearSelection();
+        } catch (error) {
+            console.error("Failed to submit timetable:", error);
+            alert("Kon nie rooster opdateer nie. Probeer weer.");
+        }
+
+
 
         clearSelection();
     };
 
     const groupedEntries = getGroupedEntries();
+
+    const SemesterStart = `${year}${chosenSemester.start}`;
+    const SemesterEnd = `${year}${chosenSemester.end}`;
+    const filteredTimetables = timetables.filter(
+        (t) =>
+            t.semester_start === SemesterStart &&
+            t.semester_end === SemesterEnd
+    );
 
     return (
         <div className="Roosters__Inligting" data-for-tab="Roosters">
@@ -259,7 +334,7 @@ export default function AdminRoosters() {
                                     <td className="time-label">{time}</td>
                                     {days.map((day) => {
                                         const slot = `${day}-${time}`;
-                                        const occupied = timetables.find(
+                                        const occupied = filteredTimetables.find(
                                             (t) =>
                                                 t.day_of_week === day &&
                                                 t.start_time <= time &&
@@ -353,14 +428,14 @@ export default function AdminRoosters() {
                     <div className="sidePanelButtons">
                         <button
                             onClick={handleSubmit}
-                            disabled={selectedSlots.length === 0}
+                            disabled={selectedSlots.length === 0 && deselectedSlots.length === 0}
                             className="confirm-Timetable"
                         >
                             Bevestig
                         </button>
                         <button
                             onClick={clearSelection}
-                            disabled={selectedSlots.length === 0}
+                            disabled={selectedSlots.length === 0 && deselectedSlots.length === 0}
                             className="cancel-timetable"
                         >
                             Kanselleer
