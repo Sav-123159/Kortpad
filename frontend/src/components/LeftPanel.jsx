@@ -7,12 +7,18 @@ import SearchForm from "./SearchForm";
 import Results from "./Results";
 import Booking from "./Booking";
 
-export default function LeftPanel({ selectedCampus, setSelectedCampus, setStartVenue, setEndVenue }) {
+export default function LeftPanel({ 
+    hasSearched,
+    setHasSearched,
+    selectedCampus, 
+    setSelectedCampus, 
+    setStartVenue, 
+    setEndVenue, 
+    collapsed, 
+    setCollapsed 
+}) {
     const [selectedTime, setSelectedTime] = useState("");
-    // Stores the time that was used for the last search, prevents reload before search by not using selectedTime
-    const [searchedTime, setSearchedTime] = useState("");
 
-    const [hasSearched, setHasSearched] = useState(false);
     const [show, setShow] = useState(false);
 
     // Increment on every search so Results remounts, so Scroll activates
@@ -66,7 +72,18 @@ export default function LeftPanel({ selectedCampus, setSelectedCampus, setStartV
     }
 
     return (
-        <section className="LeftPanel" ref={panelRef}>
+        <motion.section 
+            className="LeftPanel" 
+            ref={panelRef}
+            animate={{
+                width: collapsed ? 0 : 360,
+                padding: collapsed ? 0 : 20,
+            }}
+            transition={{
+                duration: 0.4,
+                ease: "easeInOut",
+            }}    
+        >
             <button onClick={showModal}>
                 Bespreek Lokaal
             </button>
@@ -84,34 +101,50 @@ export default function LeftPanel({ selectedCampus, setSelectedCampus, setStartV
                 setStartVenue={setStartVenue}
             />
 
-            <div id="results" ref={resultsRef}>
-                <h2>Resultate</h2>
-            </div>
-
             {hasSearched && (
-                <motion.div
-                    initial={{
-                        opacity: 0,
-                        y: 30,
-                    }}
-                    animate={{
-                        opacity: 1,
-                        y: 0,
-                    }}
-                    transition={{
-                        duration: 0.5,
-                        ease: "easeOut",
-                    }}
-                >
-                    <Results
-                        lokale={results}
-                        selectedTime={selectedTime}
-                        selectedCampus={selectedCampus}
-                        setEndVenue={setEndVenue}
-                        onLoaded={smoothScrollToResults}
-                    />
-                </motion.div>
+                <>
+                    <motion.div 
+                        id="results" 
+                        ref={resultsRef}
+                        initial={{
+                            opacity: 0,
+                            y: 30,
+                        }}
+                        animate={{
+                            opacity: 1,
+                            y: 0,
+                        }}
+                        transition={{
+                            duration: 0.5,
+                            ease: "easeOut",
+                        }}
+                    >
+                        <h2>Resultate</h2>
+                    </motion.div>
+                    <motion.div
+                        initial={{
+                            opacity: 0,
+                            y: 30,
+                        }}
+                        animate={{
+                            opacity: 1,
+                            y: 0,
+                        }}
+                        transition={{
+                            duration: 0.5,
+                            ease: "easeOut",
+                        }}
+                    >
+                        <Results
+                            selectedTime={selectedTime}
+                            selectedCampus={selectedCampus}
+                            setEndVenue={setEndVenue}
+                            onLoaded={smoothScrollToResults}
+                            setCollapsed={setCollapsed}
+                        />
+                    </motion.div>
+                </>
             )}
-        </section>
+        </motion.section>
     );
 }

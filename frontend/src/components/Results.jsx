@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded}) {
+function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setCollapsed}) {
     const [timetables, setTimetables] = useState([]);
     const [venues, setVenues] = useState([]);
     const [buildings, setBuildings] = useState([]);
@@ -60,7 +60,10 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded}) {
         venue => !occupiedVenueIds.includes(venue.venue_id)
     );
 
-    const handleClick = (venue) => { setEndVenue(venue.venue_id); }
+    const handleClick = (venue) => { 
+        setEndVenue(venue.venue_id);
+        setCollapsed(true);
+    }
 
     onLoaded?.();
 

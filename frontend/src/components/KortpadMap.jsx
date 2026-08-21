@@ -4,12 +4,39 @@ import {
     ImageOverlay,
     Polyline,
     Marker,
-    Popup
+    Popup,
+    useMap
 } from 'react-leaflet';
 import { CRS } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-function KortpadMap({ selectedCampus, startVenue, endVenue }) {
+function MapSizeHandler({ collapsed }) {
+    const map = useMap();
+
+    useEffect(() => {
+        let animationFrame;
+
+        const updateMap = () => {
+            map.invalidateSize({ animate: false });
+            animationFrame = requestAnimationFrame(updateMap);
+        };
+
+        animationFrame = requestAnimationFrame(updateMap);
+
+        const timeout = setTimeout(() => {
+            cancelAnimationFrame(animationFrame);
+        }, 450);
+
+        return () => {
+            cancelAnimationFrame(animationFrame);
+            clearTimeout(timeout);
+        };
+    }, [collapsed, map]);
+
+    return null;
+}
+
+function KortpadMap({ selectedCampus, startVenue, endVenue, collapsed }) {
     const [route, setRoute] = useState(null);
 
     // useEffect(() => {
@@ -23,6 +50,7 @@ function KortpadMap({ selectedCampus, startVenue, endVenue }) {
 
     useEffect(() => {
         if (!selectedCampus || !startVenue || !endVenue) {
+            setRoute(null);
             return;
         }
 
@@ -41,6 +69,8 @@ function KortpadMap({ selectedCampus, startVenue, endVenue }) {
             maxBoundsViscosity={1.0}
             style={{ height: "100vh", width: "100%" }}
         >
+            <MapSizeHandler collapsed={collapsed} />
+
             <ImageOverlay
                 url={imageUrl}
                 bounds={bounds}

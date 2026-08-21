@@ -60,6 +60,7 @@ button {
     border-radius: var(--default-border-radius);
     color: white;
     background-color: var(--pine-dark);
+    cursor: pointer;
 }
 
 button:hover {
@@ -159,18 +160,32 @@ button.form-button:hover {
     width: 360px;
     padding: 20px;
 
+    box-sizing: border-box;
+
     display: flex;
     flex-direction: column;
+
     align-items: center;
     gap: 20px;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
+
     background: var(--paper-deep);
 }
 
 .MapPaneel {
     flex: 1;
+    position: relative;
     background: var(--paper);
+}
+
+.endJourneyBtn {
+    position: absolute;
+
+    top: 20px;
+    right: 20px;
+
+    z-index: 1000;
 }
 
 table {
