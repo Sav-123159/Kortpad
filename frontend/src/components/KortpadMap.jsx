@@ -35,6 +35,7 @@ function KortpadMap({ selectedCampus, startVenue, endVenue }) {
     return (
         <MapContainer
             crs={CRS.Simple}
+            zoomControl={false}
             bounds={bounds}
             maxBounds={bounds}
             maxBoundsViscosity={1.0}
