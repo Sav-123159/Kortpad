@@ -4,9 +4,9 @@ import LogOut from "./LogOut";
 import { useAuth } from "./AuthContext";
 
 export default function Header({ aktieweContainer, setAktieweContainer }) {
-    const [show, setShow] = useState(false); //wys login modal
-    const [showLogOut, setShowLogOut] = useState(false); //wys logout modal
-    const { user, isLoggedIn, logout } = useAuth(); //AuthContext metode vir die user data 
+    const [show, setShow] = useState(false); 
+    const [showLogOut, setShowLogOut] = useState(false);
+    const { user, isLoggedIn, logout } = useAuth();
 
     const showModal = () => {
         setShow(true);
@@ -17,10 +17,10 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
     };
 
     const handleAuthButtonClick = () => {
-        if (isLoggedIn){
+        if (isLoggedIn) {
             setShowLogOut(true);
-        } 
-        else{
+        }
+        else {
             showModal();
         }
     };
@@ -50,33 +50,34 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
                 <img src="/Kortpad_LOGO.jpeg" alt="Kortpad logo" />
             </div>
 
-            {/*user se naam wys regs van  logo (maybe moet email of naam en van wys idk lmk) kode, Savannah asb help met css hier dit lyk bietjie garbage*/}
-            {isLoggedIn && (<p className="Nav_Gebruiker">{user.fname}</p>)}
+            {isLoggedIn && (
+                <div className="greeting">
+                    <p>Hello {user.fname}!</p>
+                </div>
+            )}
 
             <div className="Nav">
-                {/*studente button word net gerender as isAdmin true is, ander wat is die punt (glo my dit lyk nie reg nie)*/}
                 {isAdmin && (
                     <button
                         className={aktieweContainer === "StudentContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
                         onClick={() => setAktieweContainer("StudentContainer")}
                     >Student</button>)}
 
-                {/*admin button, selfde as student*/}
                 {isAdmin && (
                     <button
                         className={aktieweContainer === "AdminContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
                         onClick={() => setAktieweContainer("AdminContainer")}
                     >Admin</button>)}
 
-                {/*wys either log in of log out*/}
                 <button className="Nav_Knoppie" onClick={handleAuthButtonClick}>{isLoggedIn ? "Log Out" : "Log In"}</button>
 
-                <LogIn show={show} onClose={hideModal}/>
+                <LogIn show={show} onClose={hideModal} />
 
                 <LogOut
                     show={showLogOut}
                     onConfirm={confirmLogout}
-                    onCancel={cancelLogout}/>
+                    onCancel={cancelLogout} 
+                    onClose={cancelLogout}/>
             </div>
         </header>
     );

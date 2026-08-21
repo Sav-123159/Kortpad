@@ -1,17 +1,17 @@
 import {createContext, useContext, useState, useEffect } from "react";
 
-//die context is leesbaar van enige bladsy, kyk of jy ingelog is
+//Context is accessible from any page, checks if user is logged in
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }){
 
-    //kyk localstorage vir vorige user
+    //Look in local storage for possible previous user
     const [user, setUser] = useState(() => {
         const stored = localStorage.getItem("user");
         return stored ? JSON.parse(stored) : null; 
     });
 
-    //as user verander, verander localstorage
+    //if user has changed, update local storage
     useEffect(() => {
         
         if(user){
@@ -22,7 +22,7 @@ export function AuthProvider({ children }){
         }
     }, [user]);
 
-    //suksevole login
+    //Successful login
     function login(userData){
         setUser(userData);
     }
@@ -30,8 +30,8 @@ export function AuthProvider({ children }){
     function logout(){
         setUser(null);
     }
-    
-    //kinders van AuthProvider kry useAuth en kry die 4 waardes / alles wat nested is in AuthContext (die hele program, omdat dit by main.jsx so gestell is)
+
+    //Children of AuthProvider get useAuth and the 4 values
     return(<AuthContext.Provider value={{ user, login, logout, isLoggedIn: !!user }}>{children}</AuthContext.Provider>);
 }
 
