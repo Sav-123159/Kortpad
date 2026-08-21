@@ -7,19 +7,12 @@ import SearchForm from "./SearchForm";
 import Results from "./Results";
 import Booking from "./Booking";
 
-export default function LeftPanel({ results, onSearch }) {
-    // Current Time in Form
+export default function LeftPanel({ selectedCampus, setSelectedCampus, setStartVenue, setEndVenue }) {
     const [selectedTime, setSelectedTime] = useState("");
     // Stores the time that was used for the last search, prevents reload before search by not using selectedTime
     const [searchedTime, setSearchedTime] = useState("");
 
     const [hasSearched, setHasSearched] = useState(false);
-
-    // Current Campus in Form
-    const [selectedCampus, setSelectedCampus] = useState("");
-    // Stores the campus that was used for the last search, prevents reload before search by not using selectedCampus
-    const [searchedCampus, setSearchedCampus] = useState("");
-
     const [show, setShow] = useState(false);
 
     // Increment on every search so Results remounts, so Scroll activates
@@ -39,16 +32,9 @@ export default function LeftPanel({ results, onSearch }) {
         setShow(false);
     };
 
-    const handleSubmit = (values) => {
+    const onSearch = () => {
         shouldScrollToResults.current = true;
-
-        setSearchedCampus(selectedCampus);
-        setSearchedTime(selectedTime);
-
-        // Force Results to remount so its data-loaded effect and scroll runs on every search
-        setSearchId((id) => id + 1);
         setHasSearched(true);
-        onSearch(values);
     };
 
 
@@ -91,9 +77,11 @@ export default function LeftPanel({ results, onSearch }) {
             />
 
             <SearchForm
-                onSearch={handleSubmit}
+                onSearch={onSearch}
                 onTimeChange={setSelectedTime}
-                onCampusChange={setSelectedCampus}
+                selectedCampus={selectedCampus}
+                setSelectedCampus={setSelectedCampus}
+                setStartVenue={setStartVenue}
             />
 
             <div id="results" ref={resultsRef}>
@@ -116,10 +104,10 @@ export default function LeftPanel({ results, onSearch }) {
                     }}
                 >
                     <Results
-                        key={searchId}
-                        getTime={!!searchedTime}
-                        time={searchedTime}
-                        campus={searchedCampus}
+                        lokale={results}
+                        selectedTime={selectedTime}
+                        selectedCampus={selectedCampus}
+                        setEndVenue={setEndVenue}
                         onLoaded={smoothScrollToResults}
                     />
                 </motion.div>

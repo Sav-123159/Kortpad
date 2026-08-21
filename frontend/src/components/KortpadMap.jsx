@@ -1,50 +1,76 @@
-
-// Laai die nodige modules in
-// react-leaflet vir die kaart-rendering
-import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
-// leaflet vir die kaart-logika
+import { useState, useEffect } from "react";
+import { 
+    MapContainer,
+    ImageOverlay,
+    Polyline,
+    Marker,
+    Popup
+} from 'react-leaflet';
+import { CRS } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// KortpadMap-komponent vat 'n prop lokale, pad, en middelpunt, en render 'n kaart met die beskikbare lokale as pins, en die kortste pad as 'n lyn
-function KortpadMap({ lokale = [], pad = [], middelpunt = [-25.8460365, 28.1781282] }) {
-    // Render die kaart met die beskikbare lokale as pins, en die kortste pad as 'n lyn
+function KortpadMap({ selectedCampus, startVenue, endVenue }) {
+    const [route, setRoute] = useState(null);
 
+    // useEffect(() => {
+    //     // Change map to the selected campus' map
+    // }, [selectedCampus]);
+    const imageUrl = '/maps/Leriba Kaart (2026).jpg';
     const bounds = [
-    [-25.8453419, 28.1779], // Southwest coordinates
-    [-25.8470878, 28.1787890] // Northeast coordinates
+        [0,0],
+        [1500, 2000]
     ];
 
+    useEffect(() => {
+        if (!selectedCampus || !startVenue || !endVenue) {
+            return;
+        }
+
+        fetch(`http://127.0.0.1:8000/route/${selectedCampus}-${startVenue}-${endVenue}`)
+            .then(res => res.json())
+            .then(data => setRoute(data))
+            .catch((error) => console.error("Failed to calculate route:", error));
+    }, [startVenue, endVenue]);
+
     return (
-        // MapContainer is die hoof-komponent van react-leaflet wat die kaart render
-        // center is die middelpunt van die kaart, zoom is die zoom-vlak, style is die styl van die kaart
         <MapContainer
-            center={middelpunt}
-            zoom={100}
-            className="leaflet-container"
-            maxBounds={bounds}
-            scrollWheelZoom={false}
-            doubleClickZoom={false}
-            touchZoom={false}
+            crs={CRS.Simple}
             zoomControl={false}
+            bounds={bounds}
+            maxBounds={bounds}
+            maxBoundsViscosity={1.0}
+            style={{ height: "100vh", width: "100%" }}
         >
-            {/* TileLayer is die laag wat die kaart-afbeeldings wys */}
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; OpenStreetMap bydraers'
+            <ImageOverlay
+                url={imageUrl}
+                bounds={bounds}
             />
-            {/* Marker is die pin wat die lokaal wys */}
-            {lokale.map((lokaal) => (
-                <Marker key={lokaal.id} position={[lokaal.lat, lokaal.lng]}>
-                    <Popup>
-                        <b>{lokaal.naam}</b>
-                        <br />
-                        {lokaal.beskikbaar ? 'Beskikbaar' : 'Besig'}
-                    </Popup>
-                </Marker>
-            ))}
-            {/* Polyline is die lyn wat die kortste pad wys */}
-            {pad.length > 0 && (
-                <Polyline positions={pad} pathOptions={{ color: '#8a5a34', weight: 4 }} />
+
+            {route?.path_coordinates?.length > 0 && (
+                <>
+                    <Polyline 
+                        positions={route.path_coordinates}
+                        pathOptions={{
+                            lineJoin: 'round',
+                            lineCap: 'round',
+                            weight: 6,
+                            color: '#42643f'
+                        }}
+                    />
+                    <Marker position={route.path_coordinates[0]}>
+                        <Popup>Start</Popup>
+                    </Marker>
+
+                    <Marker
+                        position={
+                            route.path_coordinates[
+                                route.path_coordinates.length - 1
+                            ]
+                        }
+                    >
+                        <Popup>Destination</Popup>
+                    </Marker>
+                </>
             )}
         </MapContainer>
     );
