@@ -115,7 +115,7 @@ def create_tables():
             semester_start DATE NOT NULL,
             semester_end DATE NOT NULL,
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id),
-            FOREIGN KEY (module_id) REFERENCES module_code(module_id),
+            FOREIGN KEY (module_id) REFERENCES module(module_id),
             CHECK (end_time > start_time)
         )        
     ''')

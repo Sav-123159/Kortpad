@@ -12,7 +12,7 @@ class UserBase(BaseModel):
     fname : str
     sname : str
     email : str
-    is_admin : bool
+    is_admin : bool | None = False
 
 class UserCreate(UserBase):
     pass
