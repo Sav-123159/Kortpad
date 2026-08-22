@@ -112,10 +112,10 @@ Volledige interaktiewe API-dokumentasie is beskikbaar by `http://localhost:8000/
 
 ## Span
 
-- [Naam] — [rol/bydrae]
-- [Naam] — [rol/bydrae]
-- [Naam] — [rol/bydrae]
-- [Naam] — [rol/bydrae]
+- Martin Pretorius — 2024020161
+- Erika Cronjé — [studente nommer]
+- Savannah [Van] — [studente nommer]
+- Vaughan van Emmenis — [studente nommer]
 
 ## Lisensie
 
