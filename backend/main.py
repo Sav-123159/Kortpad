@@ -829,6 +829,64 @@ def get_equipment_by_venue(venue_id: int):
 
     return equipment
 
+@app.post('/equipment')
+def create_equipment(equipment: EquipmentCreate):
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO equipment (venue_id, equip_name, equip_qty) VALUES (?, ?, ?)',
+            (equipment.venue_id, equipment.equip_name, equipment.equip_qty)
+        )
+        conn.commit()
+        return dict(equip_id=cursor.lastrowid, **equipment.model_dump())
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong while adding equipment')
+    finally:
+        conn.close()
+
+@app.delete('/equipment/{equip_id}')
+def delete_equipment(equip_id: int):
+    if equip_id <= 0:
+        raise HTTPException(status_code=400, detail='Equipment id must be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM equipment WHERE equip_id = ?', (equip_id,))
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Equipment does not exist')
+        
+        conn.commit()
+        return {'message': f'Equipment {equip_id} has been deleted'}
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong while deleting equipment')
+    finally:
+        conn.close()
+
+@app.put('/equipment/{equip_id}')
+def update_equipment(equip_id: int, equipment: EquipmentBase):
+    if equip_id <= 0:
+        raise HTTPException(status_code=400, detail='Equipment id must be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'UPDATE equipment SET venue_id = ?, equip_name = ?, equip_qty = ? WHERE equip_id = ?',
+            (equipment.venue_id, equipment.equip_name, equipment.equip_qty, equip_id)
+        )
+        
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail='Equipment does not exist')
+        
+        conn.commit()
+        return {'message': f'Equipment {equip_id} has been updated'}
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail='Something went wrong while updating equipment')
+    finally:
+        conn.close()
 # ==================== MAP ====================
 @app.get('/route/{campus_id}-{start_venue}-{destination_venue}')
 def get_route(campus_id : int, start_venue : int, destination_venue : int):

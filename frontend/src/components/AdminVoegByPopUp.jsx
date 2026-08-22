@@ -2,7 +2,34 @@ import { useState, useEffect } from "react";
 import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp";
 
-function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding}){
+function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding, setVenues}){
+        const [capacity, setCapacity] = useState("");
+        const hanteerAdd = async () => {
+    try {
+        const res = await fetch("http://127.0.0.1:8000/venue", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"}, 
+        body: JSON.stringify({
+            building_id: parseInt(selectedBuilding),
+            venue_name: lokaalNaam,
+            capacity: parseInt(capacity),
+        }),
+        });
+        const data = await res.json();
+        console.log("Venue added:", data);
+
+        // Herlaai die volledige lys venues ná insert
+        const res2 = await fetch(`http://127.0.0.1:8000/venues/by-building/${selectedBuilding}`);
+        const allVenues = await res2.json();
+        setVenues(allVenues);
+
+        setIsPopupOop(false);
+    } catch (err) {
+        console.error("Error adding venue:", err);
+    }
+};
+
+    
     const [isConfirmOop, setIsConfirmOop] = useState(false);
     const [lokaalNaam, setLokaalNaam] = useState("");
     return(
@@ -51,7 +78,7 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
                     onChange={(e) => setLokaalNaam(e.target.value)}/> <br />
 
                 <label htmlFor="capacity">Kapasiteit: </label>
-                <input type="number" id="capacity" name="capacity" min={0} /> <br />
+                <input type="number" id="capacity" name="capacity" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)}/> <br />
                 
                 <button type="button" onClick={() => setIsConfirmOop(true)}>Voeg By.</button> 
                 <AdminConfirmPopUp 
@@ -60,6 +87,7 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
                     setIsConfirmOop = {setIsConfirmOop}
                     lokaalNaam={lokaalNaam}
                     tipe = "ConfirmAdd"
+                    onConfirm={hanteerAdd}
                 />
 
             </fieldset>
@@ -67,12 +95,38 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
     )
 }
 
-function AddToerusting({setIsPopupOop, lokaalNaam}){
+function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
     const [isConfirmOop, setIsConfirmOop] = useState(false);
     const [equipNaam, setEquipNaam] = useState("");
-    return(
+    const [equipQty, setEquipQty] = useState(1);
+
+    const hanteerAdd = async () => {
+        try {
+            const res = await fetch("http://127.0.0.1:8000/equipment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    venue_id: venueId,
+                    equip_name: equipNaam,
+                    equip_qty: parseInt(equipQty),
+                }),
+            });
+            const data = await res.json();
+            console.log("Equipment added:", data);
+
+            const res2 = await fetch(`http://127.0.0.1:8000/equipment/by-venue_id/${venueId}`);
+            const allEquip = await res2.json();
+            setEquipment(allEquip);
+
+            setIsPopupOop(false);
+        } catch (err) {
+            console.error("Error adding equipment:", err);
+        }
+    };
+
+    return (
         <fieldset className="VoegBy">
-            <h3>Voeg toerusting vir {lokaalNaam} by: </h3>  <br />
+            <h3>Voeg toerusting vir {lokaalNaam} by: </h3> <br />
 
             <label htmlFor="equip_name">Toerusting Naam: </label>
             <input
@@ -84,23 +138,31 @@ function AddToerusting({setIsPopupOop, lokaalNaam}){
             /> <br />
 
             <label htmlFor="equip_qty">Hoeveelheid: </label>
-            <input type="number" id="equip_qty" name="equip_qty" min={1} /> <br />
-            
-            <button type="button" onClick={() => setIsConfirmOop(true)}>Voeg By.</button> 
-            <AdminConfirmPopUp 
+            <input
+                type="number"
+                id="equip_qty"
+                name="equip_qty"
+                min={1}
+                value={equipQty}
+                onChange={(e) => setEquipQty(e.target.value)}
+            /> <br />
+
+            <button type="button" onClick={() => setIsConfirmOop(true)}>Voeg By.</button>
+            <AdminConfirmPopUp
                 setIsPopupOop={setIsPopupOop}
-                isConfirmOop = {isConfirmOop}
-                setIsConfirmOop = {setIsConfirmOop}
-                tipe = "ConfirmAdd"
+                isConfirmOop={isConfirmOop}
+                setIsConfirmOop={setIsConfirmOop}
                 equipNaam={equipNaam}
                 lokaalNaam={lokaalNaam}
-            /> 
-
+                tipe="ConfirmAdd"
+                onConfirm={hanteerAdd}
+            />
         </fieldset>
-    )
+    );
 }
 
-export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaalNaam}) {
+
+export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaalNaam, setVenues, setEquipment, venueId }) {
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
     useEffect(() => {
@@ -141,9 +203,16 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
                         buildings={buildings}
                         selectedBuilding={selectedBuilding}
                         setSelectedBuilding={setSelectedBuilding}
+                        setVenues={setVenues}
                     />
                 )}
-                {tipe === "VoegToerustingBy" && <AddToerusting setIsPopupOop={setIsPopupOop} lokaalNaam={lokaalNaam}/>}
+                {tipe === "VoegToerustingBy" && 
+                    <AddToerusting 
+                        setIsPopupOop={setIsPopupOop} 
+                        lokaalNaam={lokaalNaam}
+                        venueId={venueId}
+                        setEquipment={setEquipment}
+                    />}
             </form>
         </div>
     )

@@ -68,6 +68,21 @@ export default function AdminToerusting(){
         setSelectedEquip(null);
     };
 
+    const hanteerDeleteEquip = async () => {
+        try {
+            await fetch(`http://127.0.0.1:8000/equipment/${selectedEquip}`, {
+                method: "DELETE",
+            });
+            setEquipment(equipment.filter(item => item.equip_id !== selectedEquip));
+            setIsDeleteOop(false);
+            setSelectedEquip(null);
+        } catch (err) {
+            console.error("Error deleting equipment:", err);
+        }
+    };
+
+
+
     const [editingEquip, setEditingEquip] = useState(null);
     const [tempValue, setTempValue] = useState({});
 
@@ -86,6 +101,8 @@ export default function AdminToerusting(){
                     setIsPopupOop={setIsPopupOop}
                     tipe="VoegToerustingBy"
                     lokaalNaam={selectedVenueName}
+                    setEquipment={setEquipment}
+                    venueId={selectedVenue}
                 />
             </div>
             &ensp;Toerusting in elke lokaal  
@@ -188,19 +205,35 @@ export default function AdminToerusting(){
 
                             <button
                                 className={editingEquip === item.equip_id ? "Edit_Aktief" : ""}
-                                onClick={() => {
+                                onClick={async () => {
                                     if (editingEquip !== item.equip_id) {
                                         setEditingEquip(item.equip_id);
                                         setTempValue({ ...tempValue, [item.equip_id]: item.equip_qty });
                                     } else {
-                                        setEquipment(
-                                            equipment.map((equip) =>
-                                                equip.equip_id === item.equip_id 
-                                                ? { ...equip, equip_qty: tempValue[item.equip_id]}
-                                                : equip
-                                            )
-                                        );
-                                        setEditingEquip(null);
+                                        try{
+                                            await fetch(`http://127.0.0.1:8000/equipment/${item.equip_id}`, {
+                                                method: "PUT",
+                                                headers: { "Content-Type": "application/json" },
+                                                body: JSON.stringify({
+                                                    venue_id: item.venue_id,
+                                                    equip_name: item.equip_name,
+                                                    equip_qty: tempValue[item.equip_id]
+                                                }),
+                                            });
+
+                                            setEquipment(
+                                                equipment.map((equip) =>
+                                                    equip.equip_id === item.equip_id 
+                                                    ? { ...equip, equip_qty: tempValue[item.equip_id]}
+                                                    : equip
+                                                )
+                                            );
+                                            setEditingEquip(null);
+                                            
+                                        }catch (err){
+                                            console.error("Error updating venue: ", err);
+                                        }
+                                        
                                     }
                                 }}
 
@@ -233,7 +266,7 @@ export default function AdminToerusting(){
                     isConfirmOop={isDeleteOop}
                     setIsConfirmOop={setIsDeleteOop}
                     tipe="ConfirmDel"
-                    onConfirm={deleteEquip}
+                    onConfirm={hanteerDeleteEquip}
                     itemName={selectedEquipName}
                 />
             </div>              
