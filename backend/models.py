@@ -85,7 +85,7 @@ class Booking(BookingBase):
 
 class EquipmentBase(BaseModel):
     venue_id : int
-    equipment_name : str
+    equip_name : str
     equip_qty : int
     
 class EquipmentCreate(EquipmentBase):

@@ -1,6 +1,6 @@
 import "../css/Admin.css";
 
-function ConfirmAdd({setIsConfirmOop, setIsPopupOop, lokaalNaam, equipNaam}){
+function ConfirmAdd({setIsConfirmOop, setIsPopupOop, lokaalNaam, equipNaam, onConfirm}){
     return(
         <div className="ConfirmAdd">
             <div>
@@ -10,7 +10,7 @@ function ConfirmAdd({setIsConfirmOop, setIsPopupOop, lokaalNaam, equipNaam}){
                 }
             </div>
             <div className="JaNee">
-                <button onClick={() => {setIsConfirmOop(false); setIsPopupOop(false);}}>Ja</button>
+                <button onClick={() => {onConfirm(); setIsConfirmOop(false); setIsPopupOop(false);}}>Ja</button>
                 <button onClick={() => setIsConfirmOop(false)}>Nee</button>
             </div>
         </div>  
@@ -51,6 +51,7 @@ function CapacityError({setIsConfirmOop, venueCapacity, requestedCapacity}) {
     )
 }
 
+
 export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam}){
     if (!isConfirmOop) {
         return null;
@@ -60,8 +61,8 @@ export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsCon
         <>
             <div className="Confirm_Houer" onClick={() => setIsConfirmOop(false)}>
                 <div className="Confirm" onClick={(e)=> e.stopPropagation()}>
-                    {tipe === "ConfirmAdd" && <ConfirmAdd setIsConfirmOop={setIsConfirmOop} setIsPopupOop={setIsPopupOop} lokaalNaam={lokaalNaam} equipNaam={equipNaam}/>}
-                    {tipe === "ConfirmDel" && <ConfirmDel setIsConfirmOop={setIsConfirmOop} onConfirm={onConfirm} itemName={itemName}/>}
+                    {tipe === "ConfirmAdd" && <ConfirmAdd setIsConfirmOop={setIsConfirmOop} setIsPopupOop={setIsPopupOop} lokaalNaam={lokaalNaam} equipNaam={equipNaam} onConfirm={onConfirm}/>}
+                    {tipe === "ConfirmDel" && <ConfirmDel setIsConfirmOop={setIsConfirmOop} onConfirm={onConfirm} itemName={itemName} />}
                     {tipe === "CapacityError" && <CapacityError setIsConfirmOop={setIsConfirmOop} venueCapacity={venueCapacity} requestedCapacity={requestedCapacity}/>}
                 </div>
             </div>
