@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import LogIn from "./LogIn";
-import LogOut from "./LogOut";
+import GeneralPopupModal from "./GeneralPopupModal";
 import { useAuth } from "./AuthContext";
 
 export default function Header({ aktieweContainer, setAktieweContainer }) {
-    const [show, setShow] = useState(false); 
-    const [showLogOut, setShowLogOut] = useState(false);
-    const { user, isLoggedIn, logout } = useAuth();
+    const [show, setShow] = useState(false); //wys login modal
+    const [showLogOut, setShowLogOut] = useState(false); //wys logout modal
+    const { user, isLoggedIn, logout } = useAuth(); //AuthContext metode vir die user data 
+    const [popupPrompt, setPopupPrompt] = useState();
+    const greetingRef = useRef(null);
 
     const showModal = () => {
         setShow(true);
@@ -17,7 +19,8 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
     };
 
     const handleAuthButtonClick = () => {
-        if (isLoggedIn) {
+        if (isLoggedIn){
+            setPopupPrompt("Is jy seker jy wil uit teken?")
             setShowLogOut(true);
         }
         else {
@@ -35,14 +38,34 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
         setShowLogOut(false);
     };
 
+ useEffect(() => {
+        const greetingBtn = greetingRef.current;
+        if (!greetingBtn) return; // not logged in yet, nothing to attach to
+
+        let isCoolingDown = false;
+
+        const handleMouseEnter = () => {
+            if (isCoolingDown) return;
+            isCoolingDown = true;
+            greetingBtn.classList.add('is-waving');
+
+            setTimeout(() => {
+                greetingBtn.classList.remove('is-waving');
+                isCoolingDown = false;
+            }, 650);
+        };
+
+        greetingBtn.addEventListener('mouseenter', handleMouseEnter);
+
+        return () => {
+            greetingBtn.removeEventListener('mouseenter', handleMouseEnter);
+        };
+    }, [isLoggedIn]);
+
     //Student en Admin buttons wys net as die user ingelog is en is admin
     //user?, vir die geval dat daar nie 'n user is nie (user is null)
     //!! vir null of undefined user wat dan nogsteeds 'n waarde terug gee
     const isAdmin = isLoggedIn && !!user?.is_admin;
-
-
-    console.log("user object:", user);
-    console.log("is_admin value:", user?.is_admin, typeof user?.is_admin);
 
     return (
         <header className="HeadNav">
@@ -51,7 +74,7 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
             </div>
 
             {isLoggedIn && (
-                <div className="greeting">
+                <div className="greeting" ref={greetingRef}>
                     <p>Hello {user.fname}!</p>
                 </div>
             )}
@@ -73,11 +96,11 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
 
                 <LogIn show={show} onClose={hideModal} />
 
-                <LogOut
+                <GeneralPopupModal
                     show={showLogOut}
                     onConfirm={confirmLogout}
-                    onCancel={cancelLogout} 
-                    onClose={cancelLogout}/>
+                    onCancel={cancelLogout}
+                    prompt={popupPrompt}/>
             </div>
         </header>
     );

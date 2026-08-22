@@ -321,6 +321,19 @@ def update_timetable(timetable_id : int, timetable : TimetableBase):
     finally:
         conn.close()
 
+# ==================== MODULE ====================
+@app.get('/modules')
+def get_modules():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute('SELECT * FROM module').fetchall()
+    modules = [dict(d) for d in data]
+
+    conn.close()
+
+    return modules
+
 # ==================== BOOKING ====================
 @app.get('/booking/{booking_id}')
 def get_booking(booking_id : int):

@@ -1,9 +1,25 @@
 import { useState, useEffect } from "react";
+import GeneralPopupModal from "./GeneralPopupModal";
 
 function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setCollapsed}) {
     const [timetables, setTimetables] = useState([]);
     const [venues, setVenues] = useState([]);
     const [buildings, setBuildings] = useState([]);
+    const [popupPrompt, setPopupPrompt] = useState();
+    const [show, setShow] = useState(false);
+
+    const showModal = () => {
+        setShow(true);
+    };
+
+    const confirmResult = () => {
+        setShow(false);
+        setCollapsed(true);
+    };
+
+    const cancelResult = () => {
+        setShow(false);
+    };
 
     useEffect(() => {
         fetch(`http://127.0.0.1:8000/venue/by-campus/${selectedCampus}`)
@@ -62,7 +78,8 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
 
     const handleClick = (venue) => { 
         setEndVenue(venue.venue_id);
-        setCollapsed(true);
+        setPopupPrompt(`Is jy seker jy wil ${venue.venue_name} kies?`);
+        showModal();
     }
 
     onLoaded?.();
@@ -101,6 +118,12 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
                     </div>
                 );
             })}
+            <GeneralPopupModal
+                show={show}
+                onConfirm={confirmResult}
+                onCancel={cancelResult}
+                prompt={popupPrompt}
+            />
         </section>
     );
 }

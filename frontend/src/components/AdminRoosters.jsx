@@ -1,5 +1,6 @@
 import "../css/Admin.css";
 import React, { useState, useEffect } from "react";
+import GeneralPopupModal from "./GeneralPopupModal";
 
 export default function AdminRoosters() {
     const [campuses, setCampuses] = useState([]);
@@ -11,6 +12,28 @@ export default function AdminRoosters() {
     const [selectedSlots, setSelectedSlots] = useState([]);
     const [deselectedSlots, setDeselectedSlots] = useState([]);
     const [slotModules, setSlotModules] = useState({});
+    const [popupPrompt, setPopupPrompt] = useState();
+    const [show, setShow] = useState(false);
+    const [modules, setModules] = useState([]);
+
+    const [pendingEntryId, setPendingEntryId] = useState(null); // occupied slot waiting on confirmation
+
+    const showModal = () => {
+        setShow(true);
+    };
+
+    const confirmDeselect = () => {
+        if (pendingEntryId !== null) {
+            setDeselectedSlots([...deselectedSlots, pendingEntryId]);
+        }
+        setShow(false);
+        setPendingEntryId(null);
+    };
+
+    const cancelDeselect = () => {
+        setShow(false);
+        setPendingEntryId(null);
+    };
 
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
     const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00",];
@@ -18,14 +41,6 @@ export default function AdminRoosters() {
     const semesters = [
         { id: "Semester1", start: "-01-01", end: "-06-01" },
         { id: "Semester2", start: "-07-01", end: "-12-01" },
-    ];
-
-    //Hard Code for now
-    const modules = [
-        { code: "COS110", name: "Programming 1" },
-        { code: "COS122", name: "Imperative Programming" },
-        { code: "WTW114", name: "Calculus" },
-        { code: "INF154", name: "Informatika" }
     ];
 
     const year = new Date().getFullYear();
@@ -48,6 +63,7 @@ export default function AdminRoosters() {
         }
         setSelectedVenue("");
         setTimetables([]);
+        clearSelection();
 
         fetch(`http://127.0.0.1:8000/venue/by-campus/${selectedCampus}`)
             .then((res) => res.json())
@@ -63,13 +79,19 @@ export default function AdminRoosters() {
             setTimetables([]);
             return;
         }
-
+        clearSelection();
         fetch(`http://127.0.0.1:8000/timetable/by-venue/${selectedVenue}`)
             .then((res) => res.json())
             .then((data) => setTimetables(data.map(normalizeTimetableEntry)))
             .catch((error) => console.error(error));
     }, [selectedVenue]);
 
+    useEffect(() => {
+        fetch("http://127.0.0.1:8000/modules")
+            .then((res) => res.json())
+            .then((data) => setModules(data))
+            .catch((error) => console.error("Failed to fetch modules:", error));
+    }, []);
 
     //18:00:00 > 18:00
     //Slice seconds
@@ -79,10 +101,6 @@ export default function AdminRoosters() {
             start_time: entry.start_time?.slice(0, 5),
             end_time: entry.end_time?.slice(0, 5),
         };
-    }
-
-    function semesterTimeTables(timeTables) {
-        filter
     }
 
     //----------------------- TABLE CELL LOGIC -----------------------
@@ -97,7 +115,6 @@ export default function AdminRoosters() {
 
         if (selectedSlots.includes(slot)) {
             setSelectedSlots(selectedSlots.filter((s) => s !== slot));
-            //Removes associated module
             setSlotModules((prev) => {
                 const updated = { ...prev };
                 delete updated[slot];
@@ -110,9 +127,14 @@ export default function AdminRoosters() {
             const entryId = occupied.timetable_id;
             const isDeselected = deselectedSlots.includes(entryId);
 
-
             if (!isDeselected) {
-                setDeselectedSlots([...deselectedSlots, entryId]);
+                setPendingEntryId(entryId);
+
+                const startTime = occupied.start_time;
+                const endTime = occupied.end_time;
+
+                setPopupPrompt(`Is jy seker jy wil die ${day} (${startTime} - ${endTime}) klas verwyder?`);
+                showModal();
             } else {
                 setSelectedSlots([...selectedSlots, slot]);
             }
@@ -191,24 +213,15 @@ export default function AdminRoosters() {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        const entries = selectedSlots.map((slot) => {
-            const [day, time] = slot.split("-");
-            const timeIndex = times.indexOf(time);
-            const nextTime =
-                times[timeIndex + 1] || `${parseInt(time.split(":")[0], 10) + 1}:00`;
-
-            return {
-                //"15" -> 15
-                //base 10, prevents base 8 or 16 reading in older javascript engines
-                venue_id: parseInt(selectedVenue, 10),
-                semester_start: `${year}${chosenSemester.start}`,
-                semester_end: `${year}${chosenSemester.end}`,
-                day_of_week: day,
-                start_time: `${time}`,
-                end_time: `${nextTime}`,
-                module_code: slotModules[slot] || "",
-            };
-        });
+        const entries = groupedEntries.map((group) => ({
+            venue_id: parseInt(selectedVenue, 10),
+            semester_start: `${year}${chosenSemester.start}`,
+            semester_end: `${year}${chosenSemester.end}`,
+            day_of_week: group.day,
+            start_time: group.startTime,
+            end_time: group.endTime,
+            module_code: group.moduleCode,
+        }));
 
         try {
             await Promise.all(
@@ -241,8 +254,6 @@ export default function AdminRoosters() {
                 })
             );
 
-
-
             alert("Rooster suksesvol opgedateer!");
 
             const timetableResponse = await fetch(
@@ -256,10 +267,6 @@ export default function AdminRoosters() {
             console.error("Failed to submit timetable:", error);
             alert("Kon nie rooster opdateer nie. Probeer weer.");
         }
-
-
-
-        clearSelection();
     };
 
     const groupedEntries = getGroupedEntries();
@@ -307,7 +314,7 @@ export default function AdminRoosters() {
                 <select
                     id="semester"
                     value={selectedSemester}
-                    onChange={(e) => setSelectedSemester(e.target.value)}
+                    onChange={(e) => { setSelectedSemester(e.target.value); clearSelection() }}
                 >
                     {semesters.map((sem) => (
                         <option key={sem.id} value={sem.id}>
@@ -400,8 +407,8 @@ export default function AdminRoosters() {
                                                 >
                                                     <option value="">Kies Module</option>
                                                     {modules.map((module) => (
-                                                        <option key={module.code} value={module.code}>
-                                                            {module.code} - {module.name}
+                                                        <option key={module.module_id} value={module.module_name}>
+                                                            {module.module_name}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -444,6 +451,12 @@ export default function AdminRoosters() {
                 </div>
 
             </div>
+            <GeneralPopupModal
+                show={show}
+                onConfirm={confirmDeselect}
+                onCancel={cancelDeselect}
+                prompt={popupPrompt}
+            />
         </div>
     );
 }
