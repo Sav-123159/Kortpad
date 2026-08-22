@@ -125,7 +125,10 @@ button:hover {
 .greeting:hover {
     background-color: var(--paper-deep);
     box-shadow:  0 6px 10px rgba(0, 0, 0, 0.25);
-    animation: Wave 0.65s ease;
+}
+
+.greeting.is-waving {
+    animation: Wave 0.65s ease forwards;
 }
 
 .Nav_Knoppie {
@@ -239,7 +242,7 @@ h3 {
 }
 
 .login-page,
-.logout-page {
+.popup-page {
     position: fixed;
     inset: 0;
 
@@ -271,7 +274,7 @@ h3 {
     box-sizing: border-box;
 }
 
-.logout-container {
+.popup-container {
     display: flex;
     flex-direction: row;      
     align-items: center;
