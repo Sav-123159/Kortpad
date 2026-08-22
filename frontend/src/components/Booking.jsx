@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import PopupAnimation from "./PopupAnimation";
+import LogIn from "./LogIn";
+import { useAuth } from "./AuthContext";
 
 function Booking({ show, onConfirm, onCancel, onClose }) {
+    
+    const { user, isLoggedIn } = useAuth();
 
     //----------------------- CONTSTANTS -----------------------
 
@@ -19,6 +23,16 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         date: "",
         slots: []
     });
+
+    const [showLogIn, setShowLogin] = useState(false);
+
+    const showLoginModal = () => {
+        setShowLogin(true);
+    };
+
+    const hideLoginModal = () => {
+        setShowLogin(false);
+    };
 
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -123,6 +137,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         const closeModalonClickOut = (e) => {
             if (
                 show &&
+                !showLogIn && 
                 modalRef.current &&
                 !modalRef.current.contains(e.target) &&
                 onClose
@@ -146,7 +161,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             document.body.removeEventListener("mousedown", closeModalonClickOut);
             document.removeEventListener("keydown", closeModalOnEscKeyDown);
         };
-    }, [show, onClose]);
+    }, [show, onClose, showLogIn]);
 
     function clearSelection() {
         setSelectedSlots([]);
@@ -234,10 +249,10 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
         const bookingData = {
             venue_id: Number(selectedVenue),
-            user_id: 1,
             start_time: `${startTime}:00`,
             end_time: `${endTime}:00`,
-            booking_date: date
+            booking_date: date,
+            user_id: user.user_id
         };
 
         try {
@@ -258,8 +273,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             }
 
             const result = await response.json();
-
-            console.log("Booking created:", result);
+            
             alert("Bespreking suksesvol!");
 
             // Refresh the bookings after a successful booking
@@ -371,10 +385,16 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                     )}
 
                     <div className="booking-actions">
+                        {isLoggedIn === false && (
+                            <div className="Sign-In-Prompt">
+                                <a onClick={showLoginModal}><strong><i>Teken In om 'n bespreking te maak.</i></strong></a>
+                            </div>
+                        )}
+
                         <button
                             type="submit"
                             className="booking-confirm"
-                            disabled={selectedSlots.length === 0}
+                            disabled={selectedSlots.length === 0 || isLoggedIn === false}
                         >
                             Bevestig Bespreking
                         </button>
@@ -483,6 +503,8 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
                 </section>
             </PopupAnimation>
+
+            <LogIn show={showLogIn} onClose={hideLoginModal}/>
         </section>
     );
 }

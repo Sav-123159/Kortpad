@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useAuth } from "./AuthContext";
 
 import { animate } from "motion";
 import { motion } from "motion/react";
@@ -18,16 +19,11 @@ export default function LeftPanel({
     setCollapsed 
 }) {
     const [selectedTime, setSelectedTime] = useState("");
-
     const [show, setShow] = useState(false);
-
-    // Increment on every search so Results remounts, so Scroll activates
-    const [searchId, setSearchId] = useState(0);
 
     const panelRef = useRef(null);
     const resultsRef = useRef(null);
 
-    // Used to prevent scrolling when Results changes for another reason
     const shouldScrollToResults = useRef(false);
 
     const showModal = () => {
@@ -84,6 +80,7 @@ export default function LeftPanel({
                 ease: "easeInOut",
             }}    
         >
+
             <button onClick={showModal}>
                 Bespreek Lokaal
             </button>

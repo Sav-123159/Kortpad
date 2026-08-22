@@ -191,3 +191,14 @@
     background: #b9c9ba !important;
     color: #4b5563 !important;
 }
+
+.Sign-In-Prompt{
+    display: flex;
+    justify-content: center;
+}
+
+.Sign-In-Prompt a{
+    font-size: medium;
+    cursor: pointer;
+}
+
