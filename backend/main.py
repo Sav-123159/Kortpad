@@ -134,7 +134,7 @@ def login(login : Login): #omdat HandleLogin 'n user object verwag moet ek 'n nu
             raise HTTPException(status_code=401, detail='Wrong password') 
 
         data = cursor.execute('SELECT * FROM app_user WHERE email = ?', (login.email,)).fetchone()
-        return UserCheck(**dict(data)) #stuur frontend toe, vir local storage ook, so gebruik UserCheck
+        return User(**dict(data)) #stuur frontend toe, vir local storage ook, so gebruik UserCheck
     finally:
         conn.close()
 
