@@ -42,11 +42,15 @@ export default function AdminBesprekings(){
 
     const selectedVenueData = venues.find(venue => venue.venue_id === Number(selectedVenue));
     const [capacity, setCapacity] = useState("");
+
+    const [naam, setNaam] = useState("");
+    const [datumTyd, setDatumTyd] = useState("");
+
     return(
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
             <h2>Besprekings</h2>
             &ensp;Besprekings kan hier gemaak word om ander besprekings te oorskryf.
-            <form>
+            <form onSubmit={(e) => {e.preventDefault(); setIsConfirmOop(true);}}>
                 <fieldset>
                     <label htmlFor="kampus">Kampus: </label>
                     <select name="kampus" id="kampus"    
@@ -100,15 +104,25 @@ export default function AdminBesprekings(){
                         ))}
                     </select>
 
-                    <label htmlFor="name">Naam van bespreking</label>
-                    <input type="text" id="name" name="name"/> <br/>
+                    <label htmlFor="naam">Naam van bespreking: </label>
+                    <input type="text" id="naam" name="naam"
+                        value={naam}
+                        onChange={(e) => setNaam(e.target.value)}
+                    /> 
+                    <br/>
 
-                    <label htmlFor="kapasiteit">Kapasiteit</label>
+                    <label htmlFor="kapasiteit">Kapasiteit: </label>
                     <input type="number" id="kapasiteit" name="kapasiteit" 
-                    value={capacity} onChange={(e) => setCapacity(e.target.value)}/> <br/>
+                    value={capacity} onChange={(e) => setCapacity(e.target.value)}
+                    /> 
+                    <br/>
 
-                    <label htmlFor="tyd">Tyd</label>
-                    <input type="time" id="time" name="time"/> <br/>
+                    <label htmlFor="dateTime">Datum en Tyd: </label>
+                    <input type="datetime-local" id="dateTime" name="dateTime"
+                        value={datumTyd}
+                        onChange={(e) => setDatumTyd(e.target.value)}
+                    /> 
+                    <br/>
 
                 </fieldset>
                 
@@ -118,10 +132,17 @@ export default function AdminBesprekings(){
                 isConfirmOop={isConfirmOop}
                 setIsConfirmOop={setIsConfirmOop}
                 setIsPopupOop={() => {}}
-                tipe="CapacityError"
+                tipe="HanteerBespreking"
                 venueCapacity={selectedVenueData?.capacity}
                 requestedCapacity={capacity}
+                lokaalNaam={selectedVenueData?.venue_name}
+                naam={naam}
+                datumTyd={datumTyd}
+                selectedCampus={selectedCampus}
+                selectedBuilding={selectedBuilding}
+                selectedVenue={selectedVenue}
             />
+
         </div>
     )
 }
