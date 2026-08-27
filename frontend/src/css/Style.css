@@ -13,6 +13,35 @@
     src: url('/src/stitchen/Stitchen.otf') format('opentype');
 }
 
+*{
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+
+*:hover{
+    scrollbar-color: #909090 transparent;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: #909090;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: #6f6f6f;
+}
+
 body {
     overflow: hidden;
     min-height: 100%;
@@ -198,9 +227,9 @@ button.form-button:hover {
     gap: 20px;
     overflow-y: auto;
     overflow-x: hidden;
-
     background: var(--paper-deep);
 }
+
 
 .MapPaneel {
     flex: 1;
@@ -303,7 +332,6 @@ h3 {
 form.login {
     max-height: 300px;
     overflow-y: auto;
-    scrollbar-width: 0px;
 }
 
 .form-button button {
