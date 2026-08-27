@@ -113,9 +113,9 @@ Volledige interaktiewe API-dokumentasie is beskikbaar by `http://localhost:8000/
 ## Span
 
 - Martin Pretorius — 2024020161
-- Erika Cronjé — [studente nommer]
-- Savannah [Van] — [studente nommer]
-- Vaughan van Emmenis — [studente nommer]
+- Erika Cronjé — 2025060193
+- Savannah Meintjes — 2025110012
+- Vaughan van Emmenis — 2025080133
 
 ## Lisensie
 
