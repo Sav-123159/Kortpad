@@ -32,6 +32,12 @@ class CampusCreate(CampusBase):
 class Campus(CampusBase):
     campus_id : int
 
+class CampusMap(BaseModel):
+    campus_id : int
+    image_path : str
+    bounds_lat : int
+    bounds_lon : int
+
 class BuildingBase(BaseModel):
     campus_id : int
     building_name : str

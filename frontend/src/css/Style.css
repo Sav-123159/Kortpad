@@ -1,5 +1,5 @@
 :root {
-    --paper: #e3eed4;
+    --paper: #e5efd7;
     --paper-deep: #aec3b0;
     --ink: #2E2F22;
     --pine: #375534;
@@ -235,6 +235,10 @@ button.form-button:hover {
     flex: 1;
     position: relative;
     background: var(--paper);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .endJourneyBtn {

@@ -37,16 +37,21 @@ function MapSizeHandler({ collapsed }) {
 }
 
 function KortpadMap({ selectedCampus, startVenue, endVenue, collapsed }) {
+    const [map, setMap] = useState(null);
     const [route, setRoute] = useState(null);
 
-    // useEffect(() => {
-    //     // Change map to the selected campus' map
-    // }, [selectedCampus]);
-    const imageUrl = '/maps/Leriba Kaart (2026).jpg';
-    const bounds = [
-        [0,0],
-        [1500, 2000]
-    ];
+    useEffect(() => {
+        fetch(`http://127.0.0.1:8000/campus-map/${selectedCampus}`)
+            .then(res => {
+                if (!res.ok) {
+                    setMap(null);
+                    throw new Error(`Campus map not found`);
+                }
+                return res.json();
+            })
+            .then(data => setMap(data))
+            .catch(error => console.error("Failed to fetch map to render:", error));
+    }, [selectedCampus]);
 
     useEffect(() => {
         if (!selectedCampus || !startVenue || !endVenue) {
@@ -59,6 +64,34 @@ function KortpadMap({ selectedCampus, startVenue, endVenue, collapsed }) {
             .then(data => setRoute(data))
             .catch((error) => console.error("Failed to calculate route:", error));
     }, [startVenue, endVenue]);
+
+    if (!map) {
+        return (
+            <div className="deco">
+                <svg
+                    width="320"
+                    height="170"
+                    viewBox="0 0 320 170"
+                >
+                    <circle cx="80" cy="85" r="10" className="node" id="node1" />
+                    <circle cx="120" cy="35" r="10" className="node" id="node2" />
+                    <circle cx="170" cy="135" r="10" className="node" id="node3" />
+                    <circle cx="210" cy="85" r="10" className="node" id="node4" />
+                    <path
+                        className="animated-path"
+                        d=" M80 85 C95 65 110 55 140 85 C170 115 195 105 210 85"
+                    />
+                </svg>
+                <img src="../../public/LOGO_Cropped.jpeg" className="login-logo" />
+            </div>
+        );
+    }
+
+    const imageUrl = `/maps${map.image_path}`;
+    const bounds = [
+        [0,0],
+        [map.bounds_lat, map.bounds_lon]
+    ];
 
     return (
         <MapContainer

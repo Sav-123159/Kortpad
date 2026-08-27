@@ -5,7 +5,6 @@ from models import *
 from database import init_db, get_db
 from graph import GraphCache
 from dijkstra import dijkstra
-from datetime import date, time
 import bcrypt
 
 app = FastAPI()
@@ -565,7 +564,26 @@ def update_campus(campus_id : int, campus : CampusBase):
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
+        
+# ==================== CAMPUS MAP ====================
+@app.get('/campus-map/{campus_id}')
+def get_campus_map(campus_id : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
 
+        data = cursor.execute('SELECT * FROM campus_map WHERE campus_id = ?', (campus_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='campus map does not exist')
+        
+        return CampusMap(**dict(data))
+
+    finally:
+        conn.close()
+    
 # ==================== BUILDING ====================
 @app.get('/buildings/by-campus/{campus_id}') #daar was 2 get('/buildings/by-campus/{campus_id}')'s, altwee was presies dieselfde, een is delete
 def get_buildings(campus_id : int):

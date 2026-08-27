@@ -27,6 +27,16 @@ def create_tables():
         );     
     ''')
     
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS campus_map (
+            campus_id INTEGER PRIMARY KEY,
+            image_path TEXT NOT NULL,
+            bounds_lat DECIMAL(9,2) NOT NULL,
+            bounds_lon DECIMAL(9,2) NOT NULL,
+            FOREIGN KEY (campus_id) REFERENCES campus(campus_id)
+        );                
+    ''')
+    
     # FACULTY Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS faculty (
@@ -120,6 +130,7 @@ def create_tables():
         )        
     ''')
     
+    # MODULE Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS module (
             module_id INTEGER PRIMARY KEY AUTOINCREMENT,
