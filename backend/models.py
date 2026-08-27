@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import time, date, datetime
 
 class Auth(BaseModel):
@@ -11,7 +11,7 @@ class Login(BaseModel):
 class UserBase(BaseModel):
     fname : str
     sname : str
-    email : str
+    email : EmailStr
     is_admin : bool | None = False
 
 class UserCreate(UserBase):

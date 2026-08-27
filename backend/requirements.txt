@@ -2,3 +2,4 @@ fastapi
 fastapi-cors
 bcrypt
 uvicorn[standard]
+email-validator
