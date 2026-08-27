@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import LogIn from "./LogIn";
 import GeneralPopupModal from "./GeneralPopupModal";
+import Hamburger from "./Hamburger";
 import { useAuth } from "./AuthContext";
 
 export default function Header({ aktieweContainer, setAktieweContainer }) {
@@ -101,6 +102,12 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
                     onConfirm={confirmLogout}
                     onCancel={cancelLogout}
                     prompt={popupPrompt}/>
+                
+                <Hamburger
+                    aktieweContainer={aktieweContainer}
+                    setAktieweContainer={setAktieweContainer}
+                    handleAuthButtonClick={handleAuthButtonClick}
+                />
             </div>
         </header>
     );

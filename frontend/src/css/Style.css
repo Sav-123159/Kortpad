@@ -88,8 +88,8 @@ button:hover {
 }
 
 .Logo img {
-    width: 110px;
-    height: 100px;
+    width: 5vw;
+    height: auto;
     display: block;
     object-fit: cover;
 
@@ -103,6 +103,124 @@ button:hover {
     border-radius: var(--default-border-radius);
     margin-right: 2vw;
     padding: 3px;
+}
+
+.hamburger {
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 3px;
+    cursor: pointer;
+}
+
+.hamburger:hover {
+    background: none;
+    box-shadow: none;
+    transform: none;
+}
+
+.burger {
+    width: 1.8rem;
+    height: 0.22rem;
+    border-radius: 10px;
+    background-color: var(--pine-dark);
+    transform-origin: center;
+    /* pivot from the middle of each line, not the edge */
+    transition: all 0.3s ease;
+}
+
+.hamburger:hover .burger {
+    background-color: var(--pine);
+}
+
+.hamburger--open .burger1 {
+    transform: translateY(8.5px) rotate(45deg);
+}
+
+.hamburger--open .burger2 {
+    opacity: 0;
+}
+
+.hamburger--open .burger3 {
+    transform: translateY(-8.5px) rotate(-45deg);
+}
+
+/* Dropdown wrapper + panel */
+.hamburger-wrapper {
+    position: relative;
+    display: none;
+}
+
+.hamburger-menu {
+    position: absolute;
+    top: 3rem;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+
+    background-color: var(--paper);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+    padding: 8px;
+
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+    /* matches the .greeting:hover shadow weight already in your CSS */
+    z-index: 999;
+
+    animation: dropdownIn 0.2s ease;
+}
+
+@keyframes dropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Options inside the dropdown reuse your existing Nav_Knoppie look, 
+   just full-width and stacked so they read as a menu, not a row */
+.hamburger-menu .Nav_Knoppie {
+    width: 100%;
+    text-align: left;
+    box-sizing: border-box;
+    background-color: var(--paper);
+    border-radius: 10px;
+}
+
+.hamburger-menu .Nav_Knoppie:hover {
+    background-color: var(--paper-deep);
+    color: var(--ink);
+}
+
+.hamburger-menu .Nav_Knoppie--active {
+    background-color: var(--paper-deep);
+    transform: none;
+    /* no lift inside a stacked menu, looks odd there */
+}
+
+/* Show hamburger, hide full row nav on small screens */
+@media (max-width: 768px) {
+    .Nav > .Nav_Knoppie {
+        display: none;
+    }
+    .hamburger-wrapper {
+        display: block;
+    }
 }
 
 .greeting{
@@ -487,4 +605,17 @@ img.login-logo {
     60%  { transform: rotate(5deg)   translateY(-4px)  scale(1.01); }
     75%  { transform: rotate(-2deg)  translateY(-1px)  scale(1); }
     100% { transform: rotate(0deg)   translateY(0)     scale(1); }
+}
+
+@media screen and (max-width: 480px) {
+    .Logo img{
+        width: 10vw;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    body{
+        overflow-y: hidden;
+        height: 100%;
+    }
 }
