@@ -59,7 +59,7 @@ class TimetableBase(BaseModel):
     day_of_week : str
     start_time : time
     end_time : time
-    module_code : str
+    module_id : int
     semester_start : date
     semester_end : date
 
