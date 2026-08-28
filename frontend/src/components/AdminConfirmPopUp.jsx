@@ -1,4 +1,6 @@
 import "../css/Admin.css";
+import PopupAnimation from "./PopupAnimation";
+import { useRef } from "react";
 
 function ConfirmAdd({setIsConfirmOop, setIsPopupOop, lokaalNaam, equipNaam, onConfirm}){
     return(
@@ -115,6 +117,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
 
 
 export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd}){
+    const modalRef = useRef(null);
     if (!isConfirmOop) {
         return null;
     }
@@ -122,12 +125,12 @@ export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsCon
     return(
         <>
             <div className="Confirm_Houer" onClick={() => setIsConfirmOop(false)}>
-                <div className="Confirm" onClick={(e)=> e.stopPropagation()}>
+                <PopupAnimation as="div" className="Confirm" onClick={(e)=> e.stopPropagation()}>
                     {tipe === "ConfirmAdd" && <ConfirmAdd setIsConfirmOop={setIsConfirmOop} setIsPopupOop={setIsPopupOop} lokaalNaam={lokaalNaam} equipNaam={equipNaam} onConfirm={onConfirm}/>}
                     {tipe === "ConfirmDel" && <ConfirmDel setIsConfirmOop={setIsConfirmOop} onConfirm={onConfirm} itemName={itemName} />}
                     {tipe === "HanteerBespreking" && <HanteerBespreking setIsConfirmOop={setIsConfirmOop} venueCapacity={venueCapacity} requestedCapacity={requestedCapacity} 
                         selectedCampus={selectedCampus} selectedBuilding={selectedBuilding} selectedVenue={selectedVenue} duur={duur} datumTyd={datumTyd} onConfirm={onConfirm}/>}
-                </div>
+                </PopupAnimation>
             </div>
         </>
     )

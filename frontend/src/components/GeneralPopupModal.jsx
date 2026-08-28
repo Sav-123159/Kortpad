@@ -11,11 +11,11 @@ export default function GeneralPopupModal({ show, onConfirm, onCancel, prompt })
                 <div className="form">
                     <h3>{prompt}</h3>
                     <div className="button-group">
-                        <button className="form-button" onClick={onCancel}>
-                            Kanseleer
-                        </button>
                         <button className="form-button" onClick={onConfirm}>
                             Bevestig
+                        </button>
+                        <button className="form-button" onClick={onCancel}>
+                            Kanseleer
                         </button>
                     </div>
                 </div>

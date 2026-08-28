@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp";
+import PopupAnimation from "./PopupAnimation";
 
 function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding, setVenues}){
         const [capacity, setCapacity] = useState("");
@@ -163,6 +164,7 @@ function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
 
 
 export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaalNaam, setVenues, setEquipment, venueId }) {
+    const modalRef = useRef(null);
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
     useEffect(() => {
@@ -193,27 +195,29 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
         // As jy buite die vorm klik maak hy toe
         <div className="Popup_Houer" onClick={() => setIsPopupOop(false)}>
             {/* As iemand binne die vorm klik moet hy nie toe maak nie */}
-            <form className="voegby_vorm" onClick={(e)=> e.stopPropagation()}>
-                {tipe === "VoegLokaalBy" && (
-                    <AddLokaal
-                        setIsPopupOop={setIsPopupOop}
-                        campuses={campuses}
-                        selectedCampus={selectedCampus}
-                        setSelectedCampus={setSelectedCampus}
-                        buildings={buildings}
-                        selectedBuilding={selectedBuilding}
-                        setSelectedBuilding={setSelectedBuilding}
-                        setVenues={setVenues}
-                    />
-                )}
-                {tipe === "VoegToerustingBy" && 
-                    <AddToerusting 
-                        setIsPopupOop={setIsPopupOop} 
-                        lokaalNaam={lokaalNaam}
-                        venueId={venueId}
-                        setEquipment={setEquipment}
-                    />}
-            </form>
+            <PopupAnimation as="div" ref={modalRef}>
+                <form className="voegby_vorm" onClick={(e)=> e.stopPropagation()}>
+                    {tipe === "VoegLokaalBy" && (
+                        <AddLokaal
+                            setIsPopupOop={setIsPopupOop}
+                            campuses={campuses}
+                            selectedCampus={selectedCampus}
+                            setSelectedCampus={setSelectedCampus}
+                            buildings={buildings}
+                            selectedBuilding={selectedBuilding}
+                            setSelectedBuilding={setSelectedBuilding}
+                            setVenues={setVenues}
+                        />
+                    )}
+                    {tipe === "VoegToerustingBy" && 
+                        <AddToerusting 
+                            setIsPopupOop={setIsPopupOop} 
+                            lokaalNaam={lokaalNaam}
+                            venueId={venueId}
+                            setEquipment={setEquipment}
+                        />}
+                </form>
+            </PopupAnimation>
         </div>
     )
 }
