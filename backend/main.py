@@ -11,7 +11,8 @@ import bcrypt
 app = FastAPI()
 
 origins = [
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
 ]
 
 app.add_middleware(
@@ -441,16 +442,16 @@ def update_booking(booking_id : int, booking : BookingBase):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ?, booking_created_at = ? WHERE booking_id = ?',
-        (
-            booking.venue_id, 
-            booking.user_id, 
-            booking.start_time, 
-            booking.end_time, 
-            booking.booking_date, 
-            booking.booking_created_at, 
-            booking_id
-        )
+        cursor.execute(
+            'UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ? WHERE booking_id = ?',
+            (
+                booking.venue_id,
+                booking.user_id,
+                booking.start_time.isoformat(),
+                booking.end_time.isoformat(),
+                booking.booking_date.isoformat(),
+                booking_id
+            )
         )
         
         if cursor.rowcount == 0:
@@ -459,6 +460,32 @@ def update_booking(booking_id : int, booking : BookingBase):
         conn.commit()
         
         return {'message': f'Booking {booking_id} has been updated'}
+
+    except IntegrityError:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+# Kyk vir botsings met nuwe Admin booking (gee true of false terug :))
+@app.get('/booking/check-conflict/{venue_id}')
+def check_conflict(venue_id: int, start_time: str, end_time: str):
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+
+        data = cursor.execute(
+            '''SELECT * FROM booking 
+               WHERE venue_id = ? 
+               AND NOT (end_time <= ? OR start_time >= ?)''',
+            (venue_id, start_time, end_time)
+        ).fetchall()
+
+        if not data:
+            return {"conflict": False}
+
+        bookings = [Booking(**dict(d)) for d in data]
+        return {"conflict": True, "bookings": bookings}
 
     except IntegrityError:
         conn.rollback()

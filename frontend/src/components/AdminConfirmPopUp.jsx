@@ -29,9 +29,9 @@ function ConfirmDel({setIsConfirmOop, onConfirm, itemName}){
     )
 }
 
-function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, selectedCampus, selectedBuilding, selectedVenue, naam, datumTyd}) {
+function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd, onConfirm}) {
 
-    if(!selectedCampus || !selectedBuilding || !selectedVenue || !naam.trim() || !Number(requestedCapacity) || !datumTyd){
+    if(!selectedCampus || !selectedBuilding || !selectedVenue || !Number(requestedCapacity) || !datumTyd){
         return (
             <div className="BevestigErr">
                 <div>Al die velde moet ingevul wees.</div>
@@ -79,7 +79,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
     if(min !== 0 && min !== 30){
         return (
             <div className="BevestigErr">
-                <div>Tyd moet in hald uur grepe wees.</div>
+                <div>Tyd moet in half uur grepe wees.</div>
                 <div className="JaNee">
                     <button onClick={() => setIsConfirmOop(false)}>Ok</button>
                 </div>
@@ -98,11 +98,15 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
         );
     }
 
+    const start = new Date(datumTyd); 
+    const end = new Date(start);
+    end.setMinutes(end.getMinutes() + Number(duur));
+
     return(
         <div className="Bevestig">
             <p>Wil U die bespreking bevestig/oorskryf?</p>
             <div className="JaNee">
-                <button onClick={() => setIsConfirmOop(false)}>Ja</button>
+                <button onClick={async () => {await onConfirm(); setIsConfirmOop(false);}}>Ja</button>
                 <button onClick={() => setIsConfirmOop(false)}>Nee</button>
             </div>
         </div>
@@ -110,7 +114,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
 }
 
 
-export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam, selectedCampus, selectedBuilding, selectedVenue, naam, datumTyd}){
+export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd}){
     if (!isConfirmOop) {
         return null;
     }
@@ -122,7 +126,7 @@ export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsCon
                     {tipe === "ConfirmAdd" && <ConfirmAdd setIsConfirmOop={setIsConfirmOop} setIsPopupOop={setIsPopupOop} lokaalNaam={lokaalNaam} equipNaam={equipNaam} onConfirm={onConfirm}/>}
                     {tipe === "ConfirmDel" && <ConfirmDel setIsConfirmOop={setIsConfirmOop} onConfirm={onConfirm} itemName={itemName} />}
                     {tipe === "HanteerBespreking" && <HanteerBespreking setIsConfirmOop={setIsConfirmOop} venueCapacity={venueCapacity} requestedCapacity={requestedCapacity} 
-                        selectedCampus={selectedCampus} selectedBuilding={selectedBuilding} selectedVenue={selectedVenue} naam={naam} datumTyd={datumTyd}/>}
+                        selectedCampus={selectedCampus} selectedBuilding={selectedBuilding} selectedVenue={selectedVenue} duur={duur} datumTyd={datumTyd} onConfirm={onConfirm}/>}
                 </div>
             </div>
         </>
