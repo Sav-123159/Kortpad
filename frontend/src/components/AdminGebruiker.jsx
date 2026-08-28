@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import "../css/Admin.css";
 import AdminVoegByPopUp from "../components/AdminVoegByPopUp.jsx";
+import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 import "../css/Style.css";
 
 export default function AdminGebruiker() {
-
     const [isPopupOop, setIsPopupOop] = useState(false);
+    const [isDeleteOop, setIsDeleteOop] = useState(false);
+
     const [gebruikers, setGebruikers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+
     const [tipe, setTipe] = useState("gebruiker");
 
     useEffect(() => {
@@ -36,6 +40,35 @@ export default function AdminGebruiker() {
 
         return gebruiker.is_admin === false;
     });
+
+    const selectedUserName = gebruikers.find(
+        gebruiker => gebruiker.user_id === selectedUser
+    )?.fname;
+
+    const hanteerDeleteUser = async () => {
+        try {
+            const response = await fetch(
+                `http://127.0.0.1:8000/user/${selectedUser}`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Kon gebruiker nie delete nie");
+            }
+
+            setGebruikers(
+                gebruikers.filter(gebruiker => gebruiker.user_id !== selectedUser)
+            );
+
+            setIsDeleteOop(false);
+            setSelectedUser(null);
+
+        } catch (err) {
+            console.error("Error deleting user:", err);
+        }
+    };
 
     return (
         <div className="Info Gebruiker_Inligting" data-for-tab="Gebruiker">
@@ -91,15 +124,22 @@ export default function AdminGebruiker() {
                                     {gebruiker.email}
                                 </span>
                                 <button onClick={() => {
+                                    setSelectedUser(gebruiker.user_id);
                                     setIsDeleteOop(true);
-                                    setSelectedEquip(item.equip_id)}}
-                                >
+                                }}>
                                     &#x1F5D1;
                                 </button>
                             </div>
                         ))}
                     </div>
                 )}
+                <AdminConfirmPopUp
+                    isConfirmOop={isDeleteOop}
+                    setIsConfirmOop={setIsDeleteOop}
+                    tipe="ConfirmDel"
+                    onConfirm={hanteerDeleteUser}
+                    itemName={selectedUserName}
+                />
             </div>
         </div>
     );

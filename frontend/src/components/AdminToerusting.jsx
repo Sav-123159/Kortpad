@@ -81,8 +81,6 @@ export default function AdminToerusting(){
         }
     };
 
-
-
     const [editingEquip, setEditingEquip] = useState(null);
     const [tempValue, setTempValue] = useState({});
 

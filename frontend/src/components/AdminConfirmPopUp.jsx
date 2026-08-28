@@ -22,7 +22,7 @@ function ConfirmDel({setIsConfirmOop, onConfirm, itemName}){
         <div className="ConfirmDel">
             <div>Is jy seker jy wil {itemName} verwyder?</div>
             <div className="JaNee">
-                <button onClick={() => {onConfirm(); setIsConfirmOop(false);}}>Ja</button>
+                <button onClick={async() => {await onConfirm(); setIsConfirmOop(false);}}>Ja</button>
                 <button onClick={() => setIsConfirmOop(false)}>Nee</button>
             </div>
         </div>

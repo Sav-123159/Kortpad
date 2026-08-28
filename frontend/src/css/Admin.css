@@ -84,6 +84,8 @@ button{
     height: 85vh;
     width: 80%;
     padding: 10px;
+
+    overflow-y: auto;
 }
 
 /* Normale uitleg van die titels */
