@@ -8,7 +8,6 @@ import "../css/Gebruiker.css";
 const Api_Url = import.meta.env.VITE_API_URL; //set URL to vite value (localhost:5173)
 
 function LoginModal({ onLogin, error }) {
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("")
 
@@ -107,6 +106,8 @@ function RegisterModal({ onRegister, error }) {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$"
+                title="Wagwoord moet minstens 'n hoofletter, kleinletter en getal bevat"
                 required
             />
 
