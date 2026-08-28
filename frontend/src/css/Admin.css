@@ -92,7 +92,8 @@ h2{
 }
 
 .Lokale__Inligting h3, 
-.Toerusting__Inligting h3{
+.Toerusting__Inligting h3
+.Gebruiker_Inligting h3{
     font-family: var(--button-font);
     font-size: medium;
 
@@ -102,7 +103,7 @@ h2{
 }
 
 /* ============================ Lokaal en Toerusting gedeeld ============================== */
-.Lokaal__titel button, .Toerusting__title button{
+.Lokaal__titel button, .Toerusting__title button, .Gebruiker_Title button{
     position: absolute;
     left: 85%;
 }
@@ -214,13 +215,13 @@ h2{
 }
 
 /* ==================== Gerigistreerde Lokale ontwerp ==================== */
-.Lokaal__titel, .Toerusting__title{
+.Lokaal__titel, .Toerusting__title, .Gebruiker_Title{
     display: flex;
     flex-direction: row;
     margin-bottom: 10px;
 }
 
-.Lokale__Inligting, .Toerusting__Inligting{
+.Lokale__Inligting, .Toerusting__Inligting, .Gebruiker_Inligting{
     position: relative;
     min-height: 450px;
 }
@@ -244,7 +245,7 @@ h2{
     pointer-events: none;
 }
 
-.Lokale__kampus{
+.Lokale__kampus, .Gebruiker_Keuse{
     background-color: var(--pine);
     color: var(--paper);
 
@@ -258,6 +259,19 @@ h2{
 
     text-align: center;
     font-size: medium;
+}
+
+.Gebruiker_Keuse{
+    display: flex;
+    flex-direction: row;
+    gap: 5%;
+
+    justify-content: center;
+}
+
+.Gebruiker_Keuse label{
+    font-size: large;
+    margin: 5px;
 }
 
 .Lokale__kampus select{
@@ -274,7 +288,8 @@ h2{
 }
 
 .Lokale__lys, 
-.Lokale__equip{
+.Lokale__equip, 
+.Gebruiker__item{
     background-color: var(--pine);
     color: var(--paper);
     font-size: medium;
@@ -290,6 +305,7 @@ h2{
     border-radius: var(--default-border-radius);  
 }
 
+.Gebruiker__item button,
 .Lokale__lys button, 
 .Lokale__equip button{
     position: relative;
@@ -300,6 +316,7 @@ h2{
     margin-left: auto;
 }
 
+.Gebruiker__item button:hover,
 .Lokale__lys button:hover,
 .Lokale__equip button:hover, 
 .Cancel_Edit:hover{
@@ -319,11 +336,11 @@ h2{
   border-radius: var(--default-border-radius);
 }
 
-.Lokale__equip label {
+.Lokale__equip label, .Gebruiker__item label {
    width: 33%;
 }
 
-.Lokale__equip input {
+.Lokale__equip input, .Gebruiker__item input {
     width: 60px;
     padding: 5px;
 
@@ -350,8 +367,23 @@ h2{
     color: var(--ink);
 }
 
+.Gebruiker__item div button,
 .Lokale__equip div button{
     margin-left: 20px;
+}
+
+.Gebruiker_Title{
+    display: flex;
+    flex-direction: column;
+}
+
+.Gebruiker_Keuse input{
+    border-radius: var(--default-border-radius);
+    padding: 5px;
+
+    font-family: var(--button-font);
+    font-size: medium;
+    margin-right: 10px;
 }
 
 /* ==================== Eksamen en Semester ontwerp ==================== */

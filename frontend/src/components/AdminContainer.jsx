@@ -4,6 +4,7 @@ import AdminLokaleInfo from "./AdminLokaleInfo.jsx";
 import AdminToerusting from "./AdminToerusting.jsx";
 import AdminRoosters from "./AdminRoosters.jsx";
 import AdminBesprekings from "./AdminBesprekings.jsx";
+import AdminGebruiker from "./AdminGebruiker.jsx";
 import '../css/Admin.css';
 import "../css/Style.css";
 // import AdminLPaneel from "./AdminLPaneel";
@@ -22,6 +23,7 @@ function AdminContainer() {
                 <div className="RegterPaneel">
                     {aktieweTab === "AdminLokaleInfo" && <AdminLokaleInfo />}
                     {aktieweTab === "AdminToerusting" && <AdminToerusting />}
+                    {aktieweTab === "AdminGebruiker" && <AdminGebruiker/>}
                     {aktieweTab === "AdminRoosters" && <AdminRoosters />}
                     {aktieweTab === "AdminBesprekings" && <AdminBesprekings />}
                 </div>
