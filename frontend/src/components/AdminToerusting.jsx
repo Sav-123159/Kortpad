@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
+import "../css/Style.css";
 import "../css/Admin.css";
 import AdminVoegByPopUp from "../components/AdminVoegByPopUp.jsx";
 import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 import { createRoot } from 'react-dom/client';
-import "../css/Style.css";
+
 
 export default function AdminToerusting(){
     const [isPopupOop, setIsPopupOop] = useState(false);
@@ -122,7 +123,6 @@ export default function AdminToerusting(){
                     ))}
                 </select>
 
-                &ensp;&ensp;
                 <h3>Gebou:</h3>
                 <select 
                     value={selectedBuilding} 
@@ -141,7 +141,6 @@ export default function AdminToerusting(){
                     ))}
                 </select>
 
-                &ensp;&ensp;
                 <h3>Lokaal: </h3>
                 <select
                     name="lokale"

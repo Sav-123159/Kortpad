@@ -31,6 +31,23 @@ function ConfirmDel({setIsConfirmOop, onConfirm, itemName}){
     )
 }
 
+function ConfirmGebruiker({ setIsConfirmOop, setIsPopupOop, gebruikerNaam, isAdmin, onConfirm }) {
+    return (
+        <div className="ConfirmAdd">
+            <div>
+                {isAdmin
+                    ? `Is jy seker jy wil ${gebruikerNaam} as 'n admin byvoeg?`
+                    : `Is jy seker jy wil ${gebruikerNaam} as gebruiker byvoeg?`
+                }
+            </div>
+            <div className="JaNee">
+                <button onClick={() => { onConfirm(); setIsConfirmOop(false); setIsPopupOop(false); }}>Ja</button>
+                <button onClick={() => setIsConfirmOop(false)}>Nee</button>
+            </div>
+        </div>
+    );
+}
+
 function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd, onConfirm}) {
 
     if(!selectedCampus || !selectedBuilding || !selectedVenue || !Number(requestedCapacity) || !datumTyd){
@@ -116,7 +133,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
 }
 
 
-export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd}){
+export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam, gebruikerNaam, isAdmin, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd,}){
     const modalRef = useRef(null);
     if (!isConfirmOop) {
         return null;
@@ -127,6 +144,15 @@ export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsCon
             <div className="Confirm_Houer" onClick={() => setIsConfirmOop(false)}>
                 <PopupAnimation as="div" className="Confirm" onClick={(e)=> e.stopPropagation()}>
                     {tipe === "ConfirmAdd" && <ConfirmAdd setIsConfirmOop={setIsConfirmOop} setIsPopupOop={setIsPopupOop} lokaalNaam={lokaalNaam} equipNaam={equipNaam} onConfirm={onConfirm}/>}
+                    {tipe === "ConfirmGebruiker" && (
+                        <ConfirmGebruiker
+                            setIsConfirmOop={setIsConfirmOop}
+                            setIsPopupOop={setIsPopupOop}
+                            gebruikerNaam={gebruikerNaam}
+                            isAdmin={isAdmin}
+                            onConfirm={onConfirm}
+                        />
+                    )}
                     {tipe === "ConfirmDel" && <ConfirmDel setIsConfirmOop={setIsConfirmOop} onConfirm={onConfirm} itemName={itemName} />}
                     {tipe === "HanteerBespreking" && <HanteerBespreking setIsConfirmOop={setIsConfirmOop} venueCapacity={venueCapacity} requestedCapacity={requestedCapacity} 
                         selectedCampus={selectedCampus} selectedBuilding={selectedBuilding} selectedVenue={selectedVenue} duur={duur} datumTyd={datumTyd} onConfirm={onConfirm}/>}

@@ -83,7 +83,8 @@ export default function AdminGebruiker() {
                 <AdminVoegByPopUp 
                     isPopupOop={isPopupOop}
                     setIsPopupOop={setIsPopupOop}
-                    tipe="VoeggebruikerBy"
+                    tipe="VoegGebruikerBy"
+                    setUsers={setGebruikers}
                 />
             </div>
             &ensp;Geregistreerde gebruikers
