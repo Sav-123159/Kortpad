@@ -634,8 +634,8 @@ def create_building(building : BuildingCreate):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('INSERT INTO building (campus_id, building_name, faculty_id) VALUES (?, ?, ?)',
-        (building.campus_id, building.building_name, building.faculty_id))
+        cursor.execute('INSERT INTO building (campus_id, building_name) VALUES (?, ?)',
+        (building.campus_id, building.building_name))
         
         conn.commit()
         
@@ -680,8 +680,8 @@ def update_building(building_id : int, building : BuildingBase):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('UPDATE building SET campus_id = ?, building_name = ?, faculty_id = ? WHERE building_id = ?',
-        (building.campus_id, building.building_name, building.faculty_id, building_id)
+        cursor.execute('UPDATE building SET campus_id = ?, building_name = ? WHERE building_id = ?',
+        (building.campus_id, building.building_name, building_id)
         )
         
         if cursor.rowcount == 0:

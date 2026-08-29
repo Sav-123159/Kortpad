@@ -41,7 +41,6 @@ class CampusMap(BaseModel):
 class BuildingBase(BaseModel):
     campus_id : int
     building_name : str
-    faculty_id : int | None = None
     
 class BuildingCreate(BuildingBase):
     pass

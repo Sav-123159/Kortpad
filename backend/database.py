@@ -27,6 +27,7 @@ def create_tables():
         );     
     ''')
     
+    # CAMPUS_MAP Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS campus_map (
             campus_id INTEGER PRIMARY KEY,
@@ -37,23 +38,13 @@ def create_tables():
         );                
     ''')
     
-    # FACULTY Table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS faculty (
-            faculty_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            faculty_name VARCHAR(100) NOT NULL
-        );            
-    ''')
-    
     # BUILDING Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS building (
             building_id INTEGER PRIMARY KEY AUTOINCREMENT,
             campus_id INTEGER NOT NULL,
             building_name VARCHAR(100) NOT NULL,
-            faculty_id INTEGER,
-            FOREIGN KEY (campus_id) REFERENCES campus(campus_id),
-            FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id)
+            FOREIGN KEY (campus_id) REFERENCES campus(campus_id)
         );
     ''')
     
@@ -204,8 +195,7 @@ def create_views():
             t.semester_start,
             t.semester_end,
             t.start_time,
-            t.end_time,
-            t.module_code AS description
+            t.end_time
         FROM timetable t
         JOIN venue v ON v.venue_id = t.venue_id
 
@@ -220,8 +210,7 @@ def create_views():
             NULL AS semester_start,
             NULL AS semester_end,
             b.start_time,
-            b.end_time,
-            'Boeking deur ' || u.fname || ' ' || u.sname AS description
+            b.end_time
         FROM booking b
         JOIN venue v ON v.venue_id = b.venue_id
         JOIN app_user u ON u.user_id = b.user_id;
