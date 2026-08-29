@@ -13,71 +13,71 @@
 /* =================== Hoof ontwerp ===================== */
 /* Vat onnodige spasie weg */
 /* Fix layout */
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
 /* Default ontwerp van elke knoppie */
-button{
+button {
     font-weight: bold;
     border-radius: var(--default-border-radius);
 }
 
 /* Laat die 2 sections langs mekaar vertoon */
-.Houer{
+.Houer {
     display: flex;
     flex-direction: row;
 }
 
 /* ==================== Linker paneel ==================== */
-.LinkerPaneel{
+.LinkerPaneel {
     height: 85vh;
 }
 
-.LinkerPaneel div{
+.LinkerPaneel div {
     color: var(--ink);
     font-size: 25px;
     font-weight: bold;
     font-family: var(--button-font);
-    
+
     padding: 10px;
 }
 
 /* Knoppies om tussen funksies op die admin blad te beweeg */
-.Opsies{
+.Opsies {
     display: flex;
     flex-direction: column;
     gap: 30px;
     margin-top: 1vw;
 }
 
-.Opsies button{
+.Opsies button {
     padding: 20px;
-    
+
     color: var(--paper);
     background-color: var(--pine-dark);
 
     font-size: medium;
     font-family: var(--button-font);
-    text-align: left; 
+    text-align: left;
     border: none;
 }
 
-.Opsies button:hover{
+.Opsies button:hover {
     background-color: var(--pine);
     transform: translateY(-2px);
 }
 
-.Opsies button.Opsie_Knoppie--active{
+.Opsies button.Opsie_Knoppie--active {
     background-color: var(--pine);
     transform: translateY(-2px);
     /* font-size: large; */
 }
 
 /* ==================== Regter paneel ==================== */
-.RegterPaneel{
+.RegterPaneel {
     background-color: var(--paper);
     color: var(--ink);
 
@@ -89,13 +89,13 @@ button{
 }
 
 /* Normale uitleg van die titels */
-h2{
+h2 {
     font-family: var(--button-font);
 }
 
-.Lokale__Inligting h3, 
-.Toerusting__Inligting h3
-.Gebruiker_Inligting h3{
+.Lokale__Inligting h3,
+.Toerusting__Inligting h3,
+.Gebruiker_Inligting h3 {
     font-family: var(--button-font);
     font-size: medium;
 
@@ -105,12 +105,14 @@ h2{
 }
 
 /* ============================ Lokaal en Toerusting gedeeld ============================== */
-.Lokaal__titel button, .Toerusting__title button, .Gebruiker_Title button{
+.Lokaal__titel button,
+.Toerusting__title button,
+.Gebruiker_Title button {
     position: absolute;
     left: 85%;
 }
 
-.Popup_Houer{
+.Popup_Houer {
     position: fixed;
     inset: 0;
 
@@ -118,20 +120,20 @@ h2{
     justify-content: center;
     align-items: center;
 
-    background: rgba(46, 47, 34, 0.45);   
+    background: rgba(46, 47, 34, 0.45);
     backdrop-filter: blur(6px);
 
     z-index: 500;
 }
 
-.voegby_vorm{
+.voegby_vorm {
     width: 400px;
     height: fit-content;
     background-color: var(--paper);
     border-radius: var(--default-border-radius);
 }
 
-.VoegBy{
+.VoegBy {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -142,34 +144,34 @@ h2{
     border: none;
 }
 
-.VoegBy label{
+.VoegBy label {
     font-size: large;
     font-weight: bold;
     align-items: left;
 }
 
-.VoegBy button{
+.VoegBy button {
     position: static;
     padding: 15px;
     margin-top: 10px;
     font-size: medium;
 }
 
-.VoegBy h3{
+.VoegBy h3 {
     color: var(--ink);
     font-size: x-large;
     margin-bottom: 10px;
 }
 
-.VoegBy input{
+.VoegBy input {
     border: none;
 }
 
-.VoegBy input:focus{
+.VoegBy input:focus {
     transform: scale(1.05);
 }
 
-.Confirm_Houer{
+.Confirm_Houer {
     position: fixed;
     inset: 0;
 
@@ -177,13 +179,16 @@ h2{
     justify-content: center;
     align-items: center;
 
-    background: rgba(46, 47, 34, 0.45) !important;   
+    background: rgba(46, 47, 34, 0.45) !important;
     backdrop-filter: blur(6px);
 
     z-index: 999;
 }
 
-.ConfirmAdd, .ConfirmDel, .BevestigErr, .Bevestig{
+.ConfirmAdd,
+.ConfirmDel,
+.BevestigErr,
+.Bevestig {
     font-size: medium;
     display: flex;
     flex-direction: column;
@@ -196,20 +201,20 @@ h2{
     font-weight: bold;
 }
 
-.Confirm{
+.Confirm {
     background-color: var(--paper);
     border-radius: var(--default-border-radius);
     width: 300px;
     padding: 20px;
 }
 
-.JaNee{
+.JaNee {
     display: flex;
     flex-direction: row;
     gap: 5px;
 }
 
-.Confirm button{
+.Confirm button {
     position: static;
     padding: 15px;
     margin-top: 10px;
@@ -217,13 +222,17 @@ h2{
 }
 
 /* ==================== Gerigistreerde Lokale ontwerp ==================== */
-.Lokaal__titel, .Toerusting__title, .Gebruiker_Title{
+.Lokaal__titel,
+.Toerusting__title,
+.Gebruiker_Title {
     display: flex;
     flex-direction: row;
     margin-bottom: 10px;
 }
 
-.Lokale__Inligting, .Toerusting__Inligting, .Gebruiker_Inligting{
+.Lokale__Inligting,
+.Toerusting__Inligting,
+.Gebruiker_Inligting {
     position: relative;
     min-height: 450px;
 }
@@ -247,13 +256,14 @@ h2{
     pointer-events: none;
 }
 
-.Lokale__kampus, .Gebruiker_Keuse{
+.Lokale__kampus,
+.Gebruiker_Keuse {
     background-color: var(--pine);
     color: var(--paper);
 
     padding: 10px;
     border-radius: var(--default-border-radius);
-    
+
     margin-bottom: 15px;
     margin-top: 15px;
     margin-left: 5%;
@@ -263,7 +273,7 @@ h2{
     font-size: medium;
 }
 
-.Gebruiker_Keuse{
+.Gebruiker_Keuse {
     display: flex;
     flex-direction: row;
     gap: 5%;
@@ -271,12 +281,12 @@ h2{
     justify-content: center;
 }
 
-.Gebruiker_Keuse label{
+.Gebruiker_Keuse label {
     font-size: large;
     margin: 5px;
 }
 
-.Lokale__kampus select{
+.Lokale__kampus select {
     border-radius: var(--default-border-radius);
     padding: 5px;
 
@@ -285,13 +295,13 @@ h2{
     margin-right: 10px;
 }
 
-.Lokale__kampus h3{
+.Lokale__kampus h3 {
     margin-left: 10px;
 }
 
-.Lokale__lys, 
-.Lokale__equip, 
-.Gebruiker__item{
+.Lokale__lys,
+.Lokale__equip,
+.Gebruiker__item {
     background-color: var(--pine);
     color: var(--paper);
     font-size: medium;
@@ -304,12 +314,12 @@ h2{
     margin-left: 15%;
     margin-right: 15%;
     margin-bottom: 7px;
-    border-radius: var(--default-border-radius);  
+    border-radius: var(--default-border-radius);
 }
 
 .Gebruiker__item button,
-.Lokale__lys button, 
-.Lokale__equip button{
+.Lokale__lys button,
+.Lokale__equip button {
     position: relative;
     background-color: var(--pine);
     font-size: large;
@@ -320,29 +330,31 @@ h2{
 
 .Gebruiker__item button:hover,
 .Lokale__lys button:hover,
-.Lokale__equip button:hover, 
-.Cancel_Edit:hover{
+.Lokale__equip button:hover,
+.Cancel_Edit:hover {
     background-color: var(--pine-dark);
 }
 
-.Lokale__equip button.Edit_Aktief{
+.Lokale__equip button.Edit_Aktief {
     background-color: var(--pine-dark);
 }
 
 .Cancel_Edit {
-  background-color: var(--pine-dark);
-  color: var(--paper);
-  font-size: large;
-  border: none;
-  margin-left: 5px;
-  border-radius: var(--default-border-radius);
+    background-color: var(--pine-dark);
+    color: var(--paper);
+    font-size: large;
+    border: none;
+    margin-left: 5px;
+    border-radius: var(--default-border-radius);
 }
 
-.Lokale__equip label, .Gebruiker__item label {
-   width: 33%;
+.Lokale__equip label,
+.Gebruiker__item label {
+    width: 33%;
 }
 
-.Lokale__equip input, .Gebruiker__item input {
+.Lokale__equip input,
+.Gebruiker__item input {
     width: 60px;
     padding: 5px;
 
@@ -355,7 +367,7 @@ h2{
     font-size: medium;
 }
 
-.Lokale__lys input{
+.Lokale__lys input {
     border-radius: var(--default-border-radius);
     background-color: var(--paper);
 
@@ -369,17 +381,19 @@ h2{
     color: var(--ink);
 }
 
+/* ================ Gebruiker Ontwerp ==========================*/
+
 .Gebruiker__item div button,
-.Lokale__equip div button{
+.Lokale__equip div button {
     margin-left: 20px;
 }
 
-.Gebruiker_Title{
+.Gebruiker_Title {
     display: flex;
     flex-direction: column;
 }
 
-.Gebruiker_Keuse input{
+.Gebruiker_Keuse input {
     border-radius: var(--default-border-radius);
     padding: 5px;
 
@@ -388,24 +402,72 @@ h2{
     margin-right: 10px;
 }
 
+.Gebruiker__item>div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.Gebruiker__item input[type="text"],
+.Gebruiker__item input[type="email"] {
+    width: 150px;
+    text-align: left;
+    margin-right: 10px;
+}
+
+.Gebruiker__item input[type="text"]:focus,
+.Gebruiker__item input[type="email"]:focus {
+    outline: none;
+    border-color: var(--pine-dark);
+    transform: scale(1.05);
+}
+
+.Gebruiker__item .Edit_Admin_Label {
+    width: auto;
+}
+
+.Edit_Admin_Label {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+
+    font-size: medium;
+    color: var(--paper);
+    white-space: nowrap;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.Edit_Admin_Label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+
+    accent-color: var(--pine-dark);
+    cursor: pointer;
+}
+
+
+
 /* ==================== Eksamen en Semester ontwerp ==================== */
-#eksamenl{
+#eksamenl {
     margin-right: 25%;
 }
 
-.Roosters__Inligting{
+.Roosters__Inligting {
     max-height: 100vh;
     overflow-y: auto;
 }
 
-.timetable-grid{
+.timetable-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
     grid-template-areas: "Timetable SidePanel";
     gap: 10px;
 }
 
-.timetable-panel{
+.timetable-panel {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -451,12 +513,12 @@ td {
     border: var(--default-border);
 }
 
-.bespreek{
+.bespreek {
     background-color: var(--paper);
     border: solid 1px var(--ink);
 }
 
-.dag{
+.dag {
     border: solid 1px var(--ink);
     padding: 8px;
     background-color: var(--paper-deep);
@@ -465,16 +527,16 @@ td {
     font-weight: bold;
 }
 
-.tye{
+.tye {
     font-size: small;
     font-weight: bold;
-    
+
     padding: 5px;
     background-color: var(--paper-deep);
     border: solid 1px var(--ink);
 }
 
-.side-panel{
+.side-panel {
     background-color: var(--paper-deep);
     padding: 8px;
     border-radius: var(--default-border-radius);
@@ -484,39 +546,39 @@ td {
     max-height: 58vh;
 }
 
-.module-selection{
+.module-selection {
     display: flex;
     flex-direction: column;
     align-self: flex-start;
 }
 
-.module-selection form{
+.module-selection form {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
 }
 
-.select-Module{
+.select-Module {
     background-color: var(--paper);
     font-size: small;
     width: auto;
 }
 
-.sidePanelButtons{
+.sidePanelButtons {
     display: flex;
     justify-content: center;
     gap: 10px;
 }
 
-.chosen-display{
+.chosen-display {
     display: flex;
     justify-content: center;
     margin-bottom: 5px;
 }
 
 /* ======================= Besprekings ======================== */
-.Besprekings__Inligting > div{
+.Besprekings__Inligting>div {
     background-color: var(--pine);
     border-radius: var(--default-border-radius);
     margin-top: 10px;
@@ -526,12 +588,12 @@ td {
     justify-content: center;
 }
 
-.Besprekings__Inligting button{
+.Besprekings__Inligting button {
     background-color: var(--pine);
     font-size: medium;
 }
 
-.Besprekings__Inligting button:hover{
+.Besprekings__Inligting button:hover {
     background-color: var(--pine-dark);
 }
 
@@ -557,7 +619,7 @@ td {
     border-radius: var(--default-border-radius);
 }
 
-.Besprekings__Inligting fieldset label{
+.Besprekings__Inligting fieldset label {
     display: inline-block;
     width: 40%;
 
@@ -566,7 +628,7 @@ td {
 }
 
 .Besprekings__Inligting fieldset input,
-.Besprekings__Inligting fieldset select{
+.Besprekings__Inligting fieldset select {
     display: inline-block;
     width: 50%;
     height: 42px;
@@ -581,29 +643,28 @@ td {
     font-size: 16px;
 }
 
-.Besprekings__Inligting form button{
+.Besprekings__Inligting form button {
     padding: 10px;
     width: 200px;
-    border: none;             
+    border: none;
     outline: none;
     border-radius: var(--default-border-radius);
     background: var(--pine-dark);
     margin: auto;
-    
+
     color: var(--paper);
     font-size: large;
     font-weight: bold;
 }
 
-.Besprekings__Inligting form button:hover{
+.Besprekings__Inligting form button:hover {
     background: var(--pine);
     transform: scale(1.05);
 }
 
 .Besprekings__Inligting form input:focus,
-.Besprekings__Inligting form select:focus{
+.Besprekings__Inligting form select:focus {
     outline: none;
     border-color: var(--pine);
     transform: scale(1.05);
 }
-
