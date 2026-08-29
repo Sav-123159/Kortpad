@@ -16,7 +16,7 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
         }),
         });
         const data = await res.json();
-        console.log("Venue added:", data);
+        // console.log("Venue added:", data);
 
         // Herlaai die volledige lys venues ná insert
         const res2 = await fetch(`http://127.0.0.1:8000/venues/by-building/${selectedBuilding}`);
@@ -112,7 +112,7 @@ function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
                 }),
             });
             const data = await res.json();
-            console.log("Equipment added:", data);
+            // console.log("Equipment added:", data);
 
             const res2 = await fetch(`http://127.0.0.1:8000/equipment/by-venue_id/${venueId}`);
             const allEquip = await res2.json();
@@ -184,7 +184,7 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
 
     }, [selectedCampus]);
  
-    console.log(isPopupOop);
+    // console.log(isPopupOop);
     if (!isPopupOop){
         return null;
     }
