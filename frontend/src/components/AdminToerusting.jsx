@@ -53,7 +53,7 @@ export default function AdminToerusting(){
         fetch(`http://127.0.0.1:8000/equipment/by-venue_id/${selectedVenue}`)
             .then(res => res.json())
             .then(data => {
-                console.log("EQUIPMENT:", data);
+                // console.log("EQUIPMENT:", data);
                 setEquipment(data);
             })
             .catch(error => console.error(error));
