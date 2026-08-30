@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp";
+import PopupAnimation from "./PopupAnimation";
 
 function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding, setVenues}){
         const [capacity, setCapacity] = useState(0);
@@ -166,8 +167,137 @@ function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
     );
 }
 
+function AddGebruiker({ setIsPopupOop, setUsers }) {
+    const [isConfirmOop, setIsConfirmOop] = useState(false);
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [error, setError] = useState("");
 
-export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaalNaam, setVenues, setEquipment, venueId }) {
+    const hanteerAdd = async () => {
+        setError("");
+
+        if (password !== confirmPassword) {
+            setError("Wagwoord stem nie ooreen nie.");
+            setPassword("");
+            setConfirmPassword("");
+            return;
+        }
+
+        const userInfo = {
+            fname: firstName,
+            sname: lastName,
+            email: email,
+            is_admin: isAdmin,
+        };
+
+        try {
+            const res = await fetch("http://127.0.0.1:8000/user/admin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user: userInfo, auth: { password } }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                setError(data.detail || "Email bestaan reeds.");
+                setEmail("");
+                return;
+            }
+
+            const newUser = await res.json();
+            console.log("User added:", newUser);
+
+            const res2 = await fetch("http://127.0.0.1:8000/users");
+            const allUsers = await res2.json();
+            setUsers?.(allUsers);
+
+            setIsPopupOop(false);
+        } catch (err) {
+            console.error("Error adding user:", err);
+            setError("Kon nie rekening skep nie.");
+        }
+    };
+
+    return (
+        <fieldset className="VoegBy">
+            <h3>Voeg 'n gebruiker by:</h3>
+
+            <label htmlFor="fName">Voor Naam:</label>
+            <input
+                type="text"
+                id="fName"
+                name="fName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+            /> <br />
+
+            <label htmlFor="lName">Van:</label>
+            <input
+                type="text"
+                id="lName"
+                name="lName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+            /> <br />
+
+            <label htmlFor="email">Epos:</label>
+            <input
+                type="text"
+                id="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+            /> <br />
+
+            <label htmlFor="admin">Admin Regte:</label>
+            <input
+                type="checkbox"
+                id="admin"
+                name="admin"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+            /> <br />
+
+            <label htmlFor="password">Wagwoord:</label>
+            <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+            /> <br />
+
+            <label htmlFor="password--confirm">Bevestig Wagwoord:</label>
+            <input
+                type="password"
+                id="password--confirm"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+            /> <br />
+
+            {error && <p className="register-error">{error}</p>}
+
+            <button type="button" onClick={() => setIsConfirmOop(true)}>Voeg By.</button>
+            <AdminConfirmPopUp
+                setIsPopupOop={setIsPopupOop}
+                isConfirmOop={isConfirmOop}
+                setIsConfirmOop={setIsConfirmOop}
+                gebruikerNaam={`${firstName} ${lastName}`.trim()}
+                isAdmin={isAdmin}
+                tipe="ConfirmGebruiker"
+                onConfirm={hanteerAdd}
+            />
+        </fieldset>
+    );
+}
+
+export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaalNaam, setVenues, setEquipment, setUsers, venueId }) {
+    const modalRef = useRef(null);
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
     useEffect(() => {
@@ -198,27 +328,34 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
         // As jy buite die vorm klik maak hy toe
         <div className="Popup_Houer" onClick={() => setIsPopupOop(false)}>
             {/* As iemand binne die vorm klik moet hy nie toe maak nie */}
-            <form className="voegby_vorm" onClick={(e)=> e.stopPropagation()}>
-                {tipe === "VoegLokaalBy" && (
-                    <AddLokaal
-                        setIsPopupOop={setIsPopupOop}
-                        campuses={campuses}
-                        selectedCampus={selectedCampus}
-                        setSelectedCampus={setSelectedCampus}
-                        buildings={buildings}
-                        selectedBuilding={selectedBuilding}
-                        setSelectedBuilding={setSelectedBuilding}
-                        setVenues={setVenues}
-                    />
-                )}
-                {tipe === "VoegToerustingBy" && 
-                    <AddToerusting 
-                        setIsPopupOop={setIsPopupOop} 
-                        lokaalNaam={lokaalNaam}
-                        venueId={venueId}
-                        setEquipment={setEquipment}
-                    />}
-            </form>
+            <PopupAnimation as="div" ref={modalRef}>
+                <form className="voegby_vorm" onClick={(e)=> e.stopPropagation()}>
+                    {tipe === "VoegLokaalBy" && (
+                        <AddLokaal
+                            setIsPopupOop={setIsPopupOop}
+                            campuses={campuses}
+                            selectedCampus={selectedCampus}
+                            setSelectedCampus={setSelectedCampus}
+                            buildings={buildings}
+                            selectedBuilding={selectedBuilding}
+                            setSelectedBuilding={setSelectedBuilding}
+                            setVenues={setVenues}
+                        />
+                    )}
+                    {tipe === "VoegToerustingBy" && 
+                        <AddToerusting 
+                            setIsPopupOop={setIsPopupOop} 
+                            lokaalNaam={lokaalNaam}
+                            venueId={venueId}
+                            setEquipment={setEquipment}
+                        />}
+                    {tipe === "VoegGebruikerBy" &&
+                        <AddGebruiker
+                            setIsPopupOop={setIsPopupOop}
+                            setUsers={setUsers}
+                        />}
+                </form>
+            </PopupAnimation>
         </div>
     )
 }

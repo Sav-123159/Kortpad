@@ -16,6 +16,10 @@ export default function AdminLPaneel({aktieweTab, setAktieweTab}){
                 onClick={() => setAktieweTab("AdminToerusting")}>
                     | Lokaal Toerusting
                 </button>
+                <button className={aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => setAktieweTab("AdminGebruiker")}>
+                    | Gebruikers
+                </button>
                 <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
                 onClick={() => setAktieweTab("AdminRoosters")}>
                     | Klas Roosters

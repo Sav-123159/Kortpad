@@ -1,4 +1,6 @@
 import "../css/Admin.css";
+import PopupAnimation from "./PopupAnimation";
+import { useRef } from "react";
 
 function ConfirmAdd({setIsConfirmOop, setIsPopupOop, lokaalNaam, equipNaam, onConfirm}){
     return(
@@ -22,11 +24,28 @@ function ConfirmDel({setIsConfirmOop, onConfirm, itemName}){
         <div className="ConfirmDel">
             <div>Is jy seker jy wil {itemName} verwyder?</div>
             <div className="JaNee">
-                <button type="button" onClick={() => {onConfirm(); setIsConfirmOop(false);}}>Ja</button>
-                <button type="button" onClick={() => setIsConfirmOop(false)}>Nee</button>
+                <button onClick={async() => {await onConfirm(); setIsConfirmOop(false);}}>Ja</button>
+                <button onClick={() => setIsConfirmOop(false)}>Nee</button>
             </div>
         </div>
     )
+}
+
+function ConfirmGebruiker({ setIsConfirmOop, setIsPopupOop, gebruikerNaam, isAdmin, onConfirm }) {
+    return (
+        <div className="ConfirmAdd">
+            <div>
+                {isAdmin
+                    ? `Is jy seker jy wil ${gebruikerNaam} as 'n admin byvoeg?`
+                    : `Is jy seker jy wil ${gebruikerNaam} as gebruiker byvoeg?`
+                }
+            </div>
+            <div className="JaNee">
+                <button onClick={() => { onConfirm(); setIsConfirmOop(false); setIsPopupOop(false); }}>Ja</button>
+                <button onClick={() => setIsConfirmOop(false)}>Nee</button>
+            </div>
+        </div>
+    );
 }
 
 function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd, onConfirm}) {
@@ -36,7 +55,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
             <div className="BevestigErr">
                 <div>Al die velde moet ingevul wees.</div>
                 <div className="JaNee">
-                    <button type="button" onClick={() => setIsConfirmOop(false)}>Ok</button>
+                    <button onClick={() => setIsConfirmOop(false)}>Ok</button>
                 </div>
             </div>
         );
@@ -47,7 +66,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
             <div className="BevestigErr">
                 <div>Die lokaal se kapasiteit is te min.</div>
                 <div className="JaNee">
-                    <button type="button" onClick={() => setIsConfirmOop(false)}>Ok</button>
+                    <button onClick={() => setIsConfirmOop(false)}>Ok</button>
                 </div>
             </div>
         );
@@ -65,12 +84,12 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
     const min = selectedDatumTyd.getMinutes();
     const uur = selectedDatumTyd.getHours();
 
-    if (selectedDatumTyd < vandag) {
+    if (selectedDatumTyd < vandag || selectedDatumTyd > eindeVanWeek){
         return (
             <div className="BevestigErr">
                 <div>Die datum is buite die korrekte grense.</div>
                 <div className="JaNee">
-                    <button type="button" onClick={() => setIsConfirmOop(false)}>Ok</button>
+                    <button onClick={() => setIsConfirmOop(false)}>Ok</button>
                 </div>
             </div>
         );
@@ -114,7 +133,8 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
 }
 
 
-export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd}){
+export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsConfirmOop, tipe, onConfirm, itemName, venueCapacity, requestedCapacity, lokaalNaam, equipNaam, gebruikerNaam, isAdmin, selectedCampus, selectedBuilding, selectedVenue, duur, datumTyd,}){
+    const modalRef = useRef(null);
     if (!isConfirmOop) {
         return null;
     }
@@ -122,12 +142,21 @@ export default function AdminConfirmPopUp({setIsPopupOop, isConfirmOop, setIsCon
     return(
         <>
             <div className="Confirm_Houer" onClick={() => setIsConfirmOop(false)}>
-                <div className="Confirm" onClick={(e)=> e.stopPropagation()}>
+                <PopupAnimation as="div" className="Confirm" onClick={(e)=> e.stopPropagation()}>
                     {tipe === "ConfirmAdd" && <ConfirmAdd setIsConfirmOop={setIsConfirmOop} setIsPopupOop={setIsPopupOop} lokaalNaam={lokaalNaam} equipNaam={equipNaam} onConfirm={onConfirm}/>}
+                    {tipe === "ConfirmGebruiker" && (
+                        <ConfirmGebruiker
+                            setIsConfirmOop={setIsConfirmOop}
+                            setIsPopupOop={setIsPopupOop}
+                            gebruikerNaam={gebruikerNaam}
+                            isAdmin={isAdmin}
+                            onConfirm={onConfirm}
+                        />
+                    )}
                     {tipe === "ConfirmDel" && <ConfirmDel setIsConfirmOop={setIsConfirmOop} onConfirm={onConfirm} itemName={itemName} />}
                     {tipe === "HanteerBespreking" && <HanteerBespreking setIsConfirmOop={setIsConfirmOop} venueCapacity={venueCapacity} requestedCapacity={requestedCapacity} 
                         selectedCampus={selectedCampus} selectedBuilding={selectedBuilding} selectedVenue={selectedVenue} duur={duur} datumTyd={datumTyd} onConfirm={onConfirm}/>}
-                </div>
+                </PopupAnimation>
             </div>
         </>
     )
