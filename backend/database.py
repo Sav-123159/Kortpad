@@ -48,6 +48,19 @@ def create_tables():
         );
     ''')
     
+    # BUILDING_MAP Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS building_map (
+            building_id INTEGER NOT NULL,
+            image_path TEXT NOT NULL,
+            floor INTEGER NOT NULL,
+            bounds_lat DECIMAL(9,2) NOT NULL,
+            bounds_lon DECIMAL(9,2) NOT NULL,
+            PRIMARY KEY (building_id, floor),
+            FOREIGN KEY (building_id) REFERENCES building(building_id)
+        );                
+    ''')
+    
     # VERTEX Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS vertex (
@@ -56,14 +69,15 @@ def create_tables():
             campus_id INTEGER,
             building_id INTEGER,
             venue_id INTEGER,
+            floor INTEGER,
             latitude DECIMAL(9,6) NOT NULL,
             longitude DECIMAL(9,6) NOT NULL,
             FOREIGN KEY (campus_id) REFERENCES campus(campus_id),
             FOREIGN KEY (building_id) REFERENCES building(building_id),
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id),
             CHECK (
-                (level = 'campus'   AND campus_id IS NOT NULL AND venue_id IS NULL)
-                OR (level = 'building' AND building_id IS NOT NULL)
+                (level = 'campus' AND campus_id IS NOT NULL AND venue_id IS NULL AND floor IS NULL)
+                OR (level = 'building' AND building_id IS NOT NULL AND floor IS NOT NULL)
             )
         );    
     ''')
@@ -89,6 +103,7 @@ def create_tables():
             building_id INTEGER NOT NULL,
             venue_name VARCHAR(100) NOT NULL,
             capacity INT,
+            floor INTEGER NOT NULL,
             FOREIGN KEY (building_id) REFERENCES building(building_id)
         );            
     ''')
@@ -99,7 +114,7 @@ def create_tables():
             equip_id INTEGER PRIMARY KEY AUTOINCREMENT,
             venue_id INTEGER,
             equip_name VARCHAR(100) NOT NULL,
-            equip_qty INT DEFAULT 0,
+            equip_qty INTEGER DEFAULT 0,
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id)
         );                
     ''')

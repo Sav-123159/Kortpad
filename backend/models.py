@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import time, date, datetime
+from typing import Union, Literal
 
 class Auth(BaseModel):
     password : str
@@ -48,10 +49,18 @@ class BuildingCreate(BuildingBase):
 class Building(BuildingBase):
     building_id : int
 
+class BuildingMap(BaseModel):
+    building_id : int
+    floor : int
+    image_path : str
+    bounds_lat : int
+    bounds_lon : int
+
 class VenueBase(BaseModel):
     building_id : int
     venue_name : str
     capacity : int | None = None
+    floor : int
     
 class VenueCreate(VenueBase):
     pass
@@ -99,6 +108,19 @@ class EquipmentCreate(EquipmentBase):
 class Equipment(EquipmentBase):
     equipment_id : int
     
+class CampusContext(BaseModel):
+    level : Literal['campus']
+    campus_id : int
+    
+class BuildingContext(BaseModel):
+    level : Literal['building']
+    building_id : int
+    floor : int
+
+class Segment(BaseModel):
+    context : Union[CampusContext, BuildingContext]
+    coordinates : list[list[float]]
+    
 class Route(BaseModel):
-    path_coordinates : list[tuple[float, float]]
+    path_data: list[Segment]
     distance : float

@@ -31,7 +31,7 @@ class GraphCache:
                 )
             
         cursor.execute('''
-            SELECT v.vertex_id, v.level, v.campus_id, v.building_id, v.venue_id,
+            SELECT v.vertex_id, v.level, v.campus_id, v.building_id, v.venue_id, v.floor,
                    v.latitude, v.longitude
             FROM vertex AS v
             LEFT JOIN building AS b ON b.building_id = v.building_id
