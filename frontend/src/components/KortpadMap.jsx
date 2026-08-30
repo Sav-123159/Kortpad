@@ -7,7 +7,7 @@ import {
     Popup,
     useMap
 } from 'react-leaflet';
-import { CRS } from 'leaflet';
+import L, { CRS } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 function MapSizeHandler({ collapsed }) {
@@ -36,11 +36,68 @@ function MapSizeHandler({ collapsed }) {
     return null;
 }
 
-function KortpadMap({ selectedCampus, startVenue, endVenue, collapsed }) {
+function pinIcon({ fillColor, iconMarkup, className }) {
+    const html = `
+        <svg width="40" height="52" viewBox="0 0 40 52" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M20 1C9.5 1 1 9.5 1 20c0 14 19 30 19 30s19-16 19-30C39 9.5 30.5 1 20 1z"
+                fill="${fillColor}"
+                stroke="var(--ink)"
+                stroke-width="3"
+            />
+            <circle cx="20" cy="20" r="12" fill="var(--paper)" stroke="var(--ink)" stroke-width="3" />
+            <g transform="translate(20,20)">${iconMarkup}</g>
+        </svg>
+    `;
+    return L.divIcon({
+        className: className,
+        html,
+        iconSize: [40, 52],
+        iconAnchor: [20, 52],
+        popupAnchor: [0, -46],
+    });
+}
+
+const personIcon = `
+    <circle cx="0" cy="-4" r="4" fill="var(--pine-dark)" />
+    <path d="M-6 8c0-5 3-8 6-8s6 3 6 8" fill="var(--pine-dark)" />
+`;
+
+const bookIcon = `
+    <rect x="-6" y="-8" width="12" height="16" rx="2" fill="var(--pine-dark)" />
+    <line x1="-6" y1="-3" x2="6" y2="-3" stroke="var(--paper)" stroke-width="1.5" />
+`;
+
+const startIcon = pinIcon({
+    fillColor: 'var(--pine)',
+    iconMarkup: personIcon,
+    className: 'KortpadMarker KortpadMarker--start',
+});
+
+const endIcon = pinIcon({
+    fillColor: 'var(--pine)',
+    iconMarkup: bookIcon,
+    className: 'KortpadMarker KortpadMarker--end',
+});
+
+const transitionIconInstance = L.divIcon({
+    className: 'KortpadMarker KortpadMarker--transition',
+    html: `
+        <svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="13" cy="13" r="11" fill="var(--paper)" stroke="var(--ink)" stroke-width="2.5" />
+            <circle cx="8" cy="13" r="1.6" fill="var(--ink)" />
+            <circle cx="13" cy="13" r="1.6" fill="var(--ink)" />
+            <circle cx="18" cy="13" r="1.6" fill="var(--ink)" />
+        </svg>
+    `,
+    iconSize: [26, 26],
+    iconAnchor: [13, 13],
+});
+
+function KortpadMap({ selectedCampus, startVenue, endVenue, pageIndex, setPageCount, collapsed }) {
     const [map, setMap] = useState(null);
     const [route, setRoute] = useState(null);
     const [buildingMaps, setBuildingMaps] = useState({});
-    const [pageIndex, setPageIndex] = useState(0);
 
     useEffect(() => {
         fetch(`http://127.0.0.1:8000/campus-map/${selectedCampus}`)
@@ -136,7 +193,9 @@ function KortpadMap({ selectedCampus, startVenue, endVenue, collapsed }) {
         return resolvedPages;
     }, [route, map, buildingMaps]);
 
-    useEffect(() => { setPageIndex(0); }, [pages]);
+    useEffect(() => {
+        setPageCount?.(pages.length);
+    }, [pages]);
 
     if (!map) {
         return (
@@ -186,26 +245,46 @@ function KortpadMap({ selectedCampus, startVenue, endVenue, collapsed }) {
                 />
 
                 {active?.coordinates?.length > 0 && (
-                    <Polyline
-                        positions={active.coordinates}
-                        pathOptions={{
-                            lineJoin: 'round',
-                            lineCap: 'round',
-                            weight: 6,
-                            color: '#42643f'
-                        }}
-                    />
+                    <>
+                        <Polyline
+                            key={`${pageIndex}-solid`}
+                            positions={active.coordinates}
+                            className="KortpadRoute KortpadRoute--solid"
+                            pathOptions={{
+                                lineJoin: 'round',
+                                lineCap: 'round',
+                                weight: 6,
+                                color: '#42643f'
+                            }}
+                        />
+                        <Polyline
+                            key={`${pageIndex}-dashed`}
+                            positions={active.coordinates}
+                            className="KortpadRoute KortpadRoute--dashed"
+                            pathOptions={{
+                                lineJoin: 'round',
+                                lineCap: 'round',
+                                weight: 6,
+                                color: '#42643f'
+                            }}
+                        />
+                    </>
+                )}
+                {pageIndex >= 0 && active?.coordinates?.length > 0 && (
+                    <Marker position={active.coordinates[0]} icon={startIcon} />
+                )}
 
+                {pageIndex === pages.length - 1 && active?.coordinates?.length > 0 && (
+                    <Marker position={active.coordinates[active.coordinates.length - 1]} icon={endIcon} />
+                )}
+
+                {pageIndex !== pages.length - 1 && active?.coordinates?.length > 0 && (
+                    <Marker
+                        position={active.coordinates[active.coordinates.length - 1]}
+                        icon={transitionIconInstance}
+                    />
                 )}
             </MapContainer>
-
-            {pages.length > 1 && (
-                <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, display: 'flex', gap: '10px' }}>
-                    <button disabled={pageIndex === 0} onClick={() => setPageIndex(i => i - 1)}>&larr; Terug</button>
-                    <span>{pageIndex + 1} / {pages.length}</span>
-                    <button disabled={pageIndex === pages.length - 1} onClick={() => setPageIndex(i => i + 1)}>Volgende &rarr;</button>
-                </div>
-            )}
         </div>
     );
 }

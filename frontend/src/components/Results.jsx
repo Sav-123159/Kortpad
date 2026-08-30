@@ -114,6 +114,11 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
                             <br />
                             {venue.capacity}
                         </div>
+                        <div className="vloer">
+                            <b>Vloer:</b>
+                            <br />
+                            {venue.floor == 0 ? 'G' : venue.floor}
+                        </div>
                     </div>
                 );
             })}
