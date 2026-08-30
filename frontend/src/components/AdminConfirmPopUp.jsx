@@ -10,8 +10,8 @@ function ConfirmAdd({setIsConfirmOop, setIsPopupOop, lokaalNaam, equipNaam, onCo
                 }
             </div>
             <div className="JaNee">
-                <button onClick={() => {onConfirm(); setIsConfirmOop(false); setIsPopupOop(false);}}>Ja</button>
-                <button onClick={() => setIsConfirmOop(false)}>Nee</button>
+                <button type="button" onClick={() => {onConfirm(); setIsConfirmOop(false); setIsPopupOop(false);}}>Ja</button>
+                <button type="button" onClick={() => setIsConfirmOop(false)}>Nee</button>
             </div>
         </div>  
     )
@@ -22,8 +22,8 @@ function ConfirmDel({setIsConfirmOop, onConfirm, itemName}){
         <div className="ConfirmDel">
             <div>Is jy seker jy wil {itemName} verwyder?</div>
             <div className="JaNee">
-                <button onClick={() => {onConfirm(); setIsConfirmOop(false);}}>Ja</button>
-                <button onClick={() => setIsConfirmOop(false)}>Nee</button>
+                <button type="button" onClick={() => {onConfirm(); setIsConfirmOop(false);}}>Ja</button>
+                <button type="button" onClick={() => setIsConfirmOop(false)}>Nee</button>
             </div>
         </div>
     )
@@ -36,7 +36,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
             <div className="BevestigErr">
                 <div>Al die velde moet ingevul wees.</div>
                 <div className="JaNee">
-                    <button onClick={() => setIsConfirmOop(false)}>Ok</button>
+                    <button type="button" onClick={() => setIsConfirmOop(false)}>Ok</button>
                 </div>
             </div>
         );
@@ -47,7 +47,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
             <div className="BevestigErr">
                 <div>Die lokaal se kapasiteit is te min.</div>
                 <div className="JaNee">
-                    <button onClick={() => setIsConfirmOop(false)}>Ok</button>
+                    <button type="button" onClick={() => setIsConfirmOop(false)}>Ok</button>
                 </div>
             </div>
         );
@@ -70,7 +70,7 @@ function HanteerBespreking({setIsConfirmOop, venueCapacity, requestedCapacity, s
             <div className="BevestigErr">
                 <div>Die datum is buite die korrekte grense.</div>
                 <div className="JaNee">
-                    <button onClick={() => setIsConfirmOop(false)}>Ok</button>
+                    <button type="button" onClick={() => setIsConfirmOop(false)}>Ok</button>
                 </div>
             </div>
         );

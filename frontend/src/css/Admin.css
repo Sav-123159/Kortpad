@@ -16,7 +16,7 @@
 *{
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    /* s */
 }
 
 /* Default ontwerp van elke knoppie */
@@ -27,15 +27,13 @@ button{
 
 /* Laat die 2 sections langs mekaar vertoon */
 .Houer{
+    padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: row;
 }
 
 /* ==================== Linker paneel ==================== */
-.LinkerPaneel{
-    height: 85vh;
-}
-
 .LinkerPaneel div{
     color: var(--ink);
     font-size: 25px;
@@ -81,8 +79,8 @@ button{
     background-color: var(--paper);
     color: var(--ink);
 
-    height: 85vh;
-    width: 80%;
+    height: 100vh;
+    width: 100%;
     padding: 10px;
 }
 
@@ -446,7 +444,7 @@ td {
     border-radius: var(--default-border-radius);
     text-align: center;
     grid-area: SidePanel;
-    overflow-y: scroll;
+    overflow-y: auto;
     max-height: 58vh;
 }
 

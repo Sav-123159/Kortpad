@@ -237,8 +237,8 @@ button.form-button:hover {
     background: var(--paper);
 
     display: flex;
-    justify-content: center;
-    align-items: center;
+    /* justify-content: center;
+    align-items: center; */
 }
 
 .endJourneyBtn {
