@@ -46,7 +46,7 @@ async function boekBespreking(payload) {
         }
 
         const data = await res.json();
-        console.log("Bespreking geskep:", data);
+        // console.log("Bespreking geskep:", data);
         return data;
     } catch (err) {
         console.error("Fout met POST:", err);
@@ -68,7 +68,7 @@ async function oorskryfBespreeking(bookingId, payload) {
         }
 
         const data = await res.json();
-        console.log("Bespreking opgedateer:", data);
+        // console.log("Bespreking opgedateer:", data);
         return data;
     } catch (err) {
         console.error("Fout met PUT:", err);
@@ -221,7 +221,6 @@ export default function AdminBesprekings(){
                         onChange={(e) => setDuur(e.target.value)}
                     >
                         <option value="">Kies duur</option>
-                        <option value="30">30 minute</option>
                         <option value="60">1 uur</option>
                         <option value="120">2 ure</option>
                         <option value="180">3 ure</option>

@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import time, date, datetime
+from typing import Union, Literal
 
 class Auth(BaseModel):
     password : str
@@ -11,7 +12,7 @@ class Login(BaseModel):
 class UserBase(BaseModel):
     fname : str
     sname : str
-    email : str
+    email : EmailStr
     is_admin : bool | None = False
 
 class UserCreate(UserBase):
@@ -32,10 +33,15 @@ class CampusCreate(CampusBase):
 class Campus(CampusBase):
     campus_id : int
 
+class CampusMap(BaseModel):
+    campus_id : int
+    image_path : str
+    bounds_lat : int
+    bounds_lon : int
+
 class BuildingBase(BaseModel):
     campus_id : int
     building_name : str
-    faculty_id : int | None = None
     
 class BuildingCreate(BuildingBase):
     pass
@@ -43,10 +49,18 @@ class BuildingCreate(BuildingBase):
 class Building(BuildingBase):
     building_id : int
 
+class BuildingMap(BaseModel):
+    building_id : int
+    floor : int
+    image_path : str
+    bounds_lat : int
+    bounds_lon : int
+
 class VenueBase(BaseModel):
     building_id : int
     venue_name : str
     capacity : int | None = None
+    floor : int
     
 class VenueCreate(VenueBase):
     pass
@@ -59,7 +73,7 @@ class TimetableBase(BaseModel):
     day_of_week : str
     start_time : time
     end_time : time
-    module_code : str
+    module_id : int
     semester_start : date
     semester_end : date
 
@@ -94,6 +108,19 @@ class EquipmentCreate(EquipmentBase):
 class Equipment(EquipmentBase):
     equipment_id : int
     
+class CampusContext(BaseModel):
+    level : Literal['campus']
+    campus_id : int
+    
+class BuildingContext(BaseModel):
+    level : Literal['building']
+    building_id : int
+    floor : int
+
+class Segment(BaseModel):
+    context : Union[CampusContext, BuildingContext]
+    coordinates : list[list[float]]
+    
 class Route(BaseModel):
-    path_coordinates : list[tuple[float, float]]
+    path_data: list[Segment]
     distance : float

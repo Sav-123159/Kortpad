@@ -1,11 +1,45 @@
 :root {
-    --paper: #e3eed4;
+    --paper: #e5efd7;
     --paper-deep: #aec3b0;
     --ink: #2E2F22;
     --pine: #375534;
     --pine-dark: #0f2a1d;
     --default-border: 2px solid var(--ink);
     --default-border-radius: 15px;
+}
+
+@font-face {
+    font-family: 'Stitchen';
+    src: url('/src/stitchen/Stitchen.otf') format('opentype');
+}
+
+*{
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+}
+
+*:hover{
+    scrollbar-color: #909090 transparent;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: #909090;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background-color: #6f6f6f;
 }
 
 body {
@@ -193,14 +227,18 @@ button.form-button:hover {
     gap: 20px;
     overflow-y: auto;
     overflow-x: hidden;
-
     background: var(--paper-deep);
 }
+
 
 .MapPaneel {
     flex: 1;
     position: relative;
     background: var(--paper);
+
+    display: flex;
+    /* justify-content: center;
+    align-items: center; */
 }
 
 .endJourneyBtn {
@@ -298,7 +336,6 @@ h3 {
 form.login {
     max-height: 300px;
     overflow-y: auto;
-    scrollbar-width: 0px;
 }
 
 .form-button button {
@@ -324,7 +361,6 @@ form.login {
 img.login-logo {
     width: 400px;
     height: 150px;
-
 }
 
 .node {
@@ -487,4 +523,230 @@ img.login-logo {
     60%  { transform: rotate(5deg)   translateY(-4px)  scale(1.01); }
     75%  { transform: rotate(-2deg)  translateY(-1px)  scale(1); }
     100% { transform: rotate(0deg)   translateY(0)     scale(1); }
+}
+
+.global-intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--paper);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+    opacity: 1;
+    visibility: visible;
+}
+
+.global-intro-overlay.fade-out-active {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.intro-deco {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 300px;
+}
+
+.intro-deco svg {
+    display: block;
+    width: 300px;
+    height: 170px;
+}
+
+.intro-deco .welkom-text {
+    position: relative;
+    left: -15px;
+    text-align: center;
+}
+
+.intro-node {
+    fill: var(--pine-dark);
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+.intro-animation-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    transition: opacity 0.8s ease-in-out;
+    opacity: 1;
+}
+
+.intro-animation-wrapper.fade-out-active {
+    opacity: 0;
+}
+
+#intro-node1 {
+    animation: introPulse1 5s ease-in-out infinite;
+}
+
+#intro-node2 {
+    animation: introPulse2 5s ease-in-out infinite;
+}
+
+#intro-node3 {
+    animation: introPulse3 5s ease-in-out infinite;
+}
+
+#intro-node4 {
+    animation: introPulse4 5s ease-in-out infinite;
+}
+
+@keyframes introPulse1 {
+    0%, 10%, 100% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+
+    12%, 16% {
+        transform: scale(1.35);
+        fill: #5fcf7d;
+    }
+
+    18% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+}
+
+@keyframes introPulse2 {
+    0%, 20%, 100% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+
+    22%, 26% {
+        transform: scale(1.35);
+        fill: #5fcf7d;
+    }
+
+    28% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+}
+
+@keyframes introPulse3 {
+    0%, 30%, 100% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+
+    32%, 36% {
+        transform: scale(1.35);
+        fill: #5fcf7d;
+    }
+
+    38% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+}
+
+@keyframes introPulse4 {
+    0%, 40%, 100% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+
+    42%, 46% {
+        transform: scale(1.35);
+        fill: #5fcf7d;
+    }
+
+    48% {
+        transform: scale(1);
+        fill: var(--pine-dark);
+    }
+}
+
+.intro-animated-path {
+    fill: none;
+    stroke: var(--pine-dark);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+
+    animation: introDrawPath 5s linear infinite;
+}
+
+@keyframes introDrawPath {
+
+    0%, 48% {
+        stroke-dashoffset: 340;
+        opacity: 0;
+    }
+
+    49% {
+        stroke-dashoffset: 340;
+        opacity: 1;
+    }
+
+    80% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+
+    90% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+}
+
+.welkom-text {
+    font-family: 'Stitchen';
+    color: var(--pine-dark);
+    font-size: 4rem;
+    font-weight: normal;
+    margin: 10px 0 0 0;
+
+    opacity: 0;
+
+    clip-path: inset(0 100% 0 0);
+
+    animation: introShowWelkom 5s linear infinite;
+}
+
+@keyframes introShowWelkom {
+
+    0%, 48% {
+        opacity: 0;
+        clip-path: inset(0 100% 0 0);
+        transform: translateY(10px);
+    }
+
+    49% {
+        opacity: 1;
+        clip-path: inset(0 100% 0 0);
+        transform: translateY(0);
+    }
+
+    65% {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 1;
+        clip-path: inset(0 0 0 0);
+        transform: translateY(0);
+    }
 }

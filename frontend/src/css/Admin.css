@@ -1,5 +1,5 @@
 :root {
-    --paper: #e3eed4;
+    --paper: #e5efd7;
     --paper-deep: #aec3b0;
     --ink: #2E2F22;
     --pine: #375534;
@@ -16,7 +16,7 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    /* s */
 }
 
 /* Default ontwerp van elke knoppie */
@@ -27,13 +27,15 @@ button {
 
 /* Laat die 2 sections langs mekaar vertoon */
 .Houer {
+    padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: row;
 }
 
 /* ==================== Linker paneel ==================== */
 .LinkerPaneel {
-    height: 85vh;
+    height: 100vh;
 }
 
 .LinkerPaneel div {
@@ -81,8 +83,8 @@ button {
     background-color: var(--paper);
     color: var(--ink);
 
-    height: 85vh;
-    width: 80%;
+    height: 100vh;
+    width: 100%;
     padding: 10px;
 
     overflow-y: auto;
@@ -542,7 +544,7 @@ td {
     border-radius: var(--default-border-radius);
     text-align: center;
     grid-area: SidePanel;
-    overflow-y: scroll;
+    overflow-y: auto;
     max-height: 58vh;
 }
 
@@ -578,7 +580,7 @@ td {
 }
 
 /* ======================= Besprekings ======================== */
-.Besprekings__Inligting>div {
+.Besprekings__Inligting > div{
     background-color: var(--pine);
     border-radius: var(--default-border-radius);
     margin-top: 10px;

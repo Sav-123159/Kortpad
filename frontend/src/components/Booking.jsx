@@ -4,7 +4,7 @@ import LogIn from "./LogIn";
 import { useAuth } from "./AuthContext";
 
 function Booking({ show, onConfirm, onCancel, onClose }) {
-    
+
     const { user, isLoggedIn } = useAuth();
 
     //----------------------- CONTSTANTS -----------------------
@@ -137,7 +137,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         const closeModalonClickOut = (e) => {
             if (
                 show &&
-                !showLogIn && 
+                !showLogIn &&
                 modalRef.current &&
                 !modalRef.current.contains(e.target) &&
                 onClose
@@ -269,11 +269,13 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || "Booking failed");
+                throw new Error(typeof errorData.detail === "string"
+                    ? errorData.detail
+                    : JSON.stringify(errorData.detail));
             }
 
             const result = await response.json();
-            
+
             alert("Bespreking suksesvol!");
 
             // Refresh the bookings after a successful booking
@@ -294,20 +296,6 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             alert(error.message);
         }
 
-    }
-
-    //----------------------- VALIDATION -----------------------
-
-    function checkSelectedDate(e) {
-        if (e.target.value >= new Date().toISOString().split("T")[0]) {
-            setDate(e.target.value);
-            setSelectedSlots([]);
-        }
-        else {
-            alert("Kies asseblief 'n geldige datum.");
-            setDate("");
-            setSelectedSlots([]);
-        }
     }
 
     //----------------------- RENDER -----------------------
@@ -361,7 +349,11 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                         id="date"
                         type="date"
                         value={date}
-                        onChange={checkSelectedDate}
+                        min={new Date().toISOString().split("T")[0]}
+                        onChange={(e) => {
+                            setDate(e.target.value);
+                            setSelectedSlots([]);
+                        }}
                     />
 
                     {selectedSlots.length > 0 && (
@@ -504,7 +496,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                 </section>
             </PopupAnimation>
 
-            <LogIn show={showLogIn} onClose={hideLoginModal}/>
+            <LogIn show={showLogIn} onClose={hideLoginModal} />
         </section>
     );
 }

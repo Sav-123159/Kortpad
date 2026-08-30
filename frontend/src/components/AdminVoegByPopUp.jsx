@@ -4,7 +4,8 @@ import AdminConfirmPopUp from "./AdminConfirmPopUp";
 import PopupAnimation from "./PopupAnimation";
 
 function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding, setVenues}){
-        const [capacity, setCapacity] = useState("");
+        const [capacity, setCapacity] = useState(0);
+        const [floor, setFloor] = useState(0);
         const hanteerAdd = async () => {
     try {
         const res = await fetch("http://127.0.0.1:8000/venue", {
@@ -14,10 +15,11 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
             building_id: parseInt(selectedBuilding),
             venue_name: lokaalNaam,
             capacity: parseInt(capacity),
+            floor: parseInt(floor)
         }),
         });
         const data = await res.json();
-        console.log("Venue added:", data);
+        // console.log("Venue added:", data);
 
         // Herlaai die volledige lys venues ná insert
         const res2 = await fetch(`http://127.0.0.1:8000/venues/by-building/${selectedBuilding}`);
@@ -80,6 +82,9 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
 
                 <label htmlFor="capacity">Kapasiteit: </label>
                 <input type="number" id="capacity" name="capacity" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)}/> <br />
+
+                <label htmlFor="floor">Kies vloer nommer: </label>
+                <input type="number" id="floor" name="floor" min={0} value={floor} onChange={(e) => setFloor(e.target.value)} /> <br />
                 
                 <button type="button" onClick={() => setIsConfirmOop(true)}>Voeg By.</button> 
                 <AdminConfirmPopUp 
@@ -113,7 +118,7 @@ function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
                 }),
             });
             const data = await res.json();
-            console.log("Equipment added:", data);
+            // console.log("Equipment added:", data);
 
             const res2 = await fetch(`http://127.0.0.1:8000/equipment/by-venue_id/${venueId}`);
             const allEquip = await res2.json();
@@ -314,7 +319,7 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
 
     }, [selectedCampus]);
  
-    console.log(isPopupOop);
+    // console.log(isPopupOop);
     if (!isPopupOop){
         return null;
     }

@@ -12,8 +12,8 @@ function ConfirmAdd({setIsConfirmOop, setIsPopupOop, lokaalNaam, equipNaam, onCo
                 }
             </div>
             <div className="JaNee">
-                <button onClick={() => {onConfirm(); setIsConfirmOop(false); setIsPopupOop(false);}}>Ja</button>
-                <button onClick={() => setIsConfirmOop(false)}>Nee</button>
+                <button type="button" onClick={() => {onConfirm(); setIsConfirmOop(false); setIsPopupOop(false);}}>Ja</button>
+                <button type="button" onClick={() => setIsConfirmOop(false)}>Nee</button>
             </div>
         </div>  
     )

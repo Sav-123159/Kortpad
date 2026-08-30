@@ -145,7 +145,8 @@ export default function AdminLokaleInfo(){
                                                     body: JSON.stringify({
                                                         building_id: selectedBuilding,   
                                                         venue_name: tempName[venue.venue_id],
-                                                        capacity: venue.capacity ?? 0  
+                                                        capacity: venue.capacity ?? 0,
+                                                        floor: venue.floor ?? 0
                                                     }),
                                                 });
 

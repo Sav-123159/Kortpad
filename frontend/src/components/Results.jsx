@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import GeneralPopupModal from "./GeneralPopupModal";
 
+let selectedVenue;
+
 function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setCollapsed}) {
     const [timetables, setTimetables] = useState([]);
     const [venues, setVenues] = useState([]);
@@ -8,11 +10,8 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
     const [popupPrompt, setPopupPrompt] = useState();
     const [show, setShow] = useState(false);
 
-    const showModal = () => {
-        setShow(true);
-    };
-
     const confirmResult = () => {
+        setEndVenue(selectedVenue);
         setShow(false);
         setCollapsed(true);
     };
@@ -77,9 +76,9 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
     );
 
     const handleClick = (venue) => { 
-        setEndVenue(venue.venue_id);
+        selectedVenue = venue.venue_id;
         setPopupPrompt(`Is jy seker jy wil ${venue.venue_name} kies?`);
-        showModal();
+        setShow(true);
     }
 
     onLoaded?.();

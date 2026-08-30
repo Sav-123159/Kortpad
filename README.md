@@ -2,7 +2,7 @@
 
 Kortpad is 'n webtoepassing wat studente help om oop, beskikbare lokale op kampus te vind en dit vir toekomstige datums en tye te bespreek. Dit sluit ook 'n interaktiewe kampuskaart in wat die kortste looproete tussen lokale bereken.
 
-Gebou as 'n groepprojek vir [kursusnaam/kode] by [universiteit se naam].
+Gebou as 'n groepprojek vir NGPRO262 by Akademia.
 
 ## Kenmerke
 
@@ -113,10 +113,6 @@ Volledige interaktiewe API-dokumentasie is beskikbaar by `http://localhost:8000/
 ## Span
 
 - Martin Pretorius — 2024020161
-- Erika Cronjé — [studente nommer]
-- Savannah [Van] — [studente nommer]
-- Vaughan van Emmenis — [studente nommer]
-
-## Lisensie
-
-[Voeg 'n lisensie by, of noem dat dit 'n universiteitsprojek is wat nie vir hergebruik/verspreiding bedoel is nie.]
+- Erika Cronjé — 2025060193
+- Savannah Meintjes — 2025110012
+- Vaughan van Emmenis — 2025080133

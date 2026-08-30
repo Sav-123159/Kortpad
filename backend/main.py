@@ -1,11 +1,11 @@
 from sqlite3 import IntegrityError
+from click import group
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from models import *
 from database import init_db, get_db
 from graph import GraphCache
 from dijkstra import dijkstra
-from datetime import date, time
 import bcrypt
 
 app = FastAPI()
@@ -592,7 +592,26 @@ def update_campus(campus_id : int, campus : CampusBase):
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
+        
+# ==================== CAMPUS MAP ====================
+@app.get('/campus-map/{campus_id}')
+def get_campus_map(campus_id : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
 
+        data = cursor.execute('SELECT * FROM campus_map WHERE campus_id = ?', (campus_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Campus map does not exist')
+        
+        return CampusMap(**dict(data))
+
+    finally:
+        conn.close()
+    
 # ==================== BUILDING ====================
 @app.get('/buildings/by-campus/{campus_id}') #daar was 2 get('/buildings/by-campus/{campus_id}')'s, altwee was presies dieselfde, een is delete
 def get_buildings(campus_id : int):
@@ -643,8 +662,8 @@ def create_building(building : BuildingCreate):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('INSERT INTO building (campus_id, building_name, faculty_id) VALUES (?, ?, ?)',
-        (building.campus_id, building.building_name, building.faculty_id))
+        cursor.execute('INSERT INTO building (campus_id, building_name) VALUES (?, ?)',
+        (building.campus_id, building.building_name))
         
         conn.commit()
         
@@ -689,8 +708,8 @@ def update_building(building_id : int, building : BuildingBase):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('UPDATE building SET campus_id = ?, building_name = ?, faculty_id = ? WHERE building_id = ?',
-        (building.campus_id, building.building_name, building.faculty_id, building_id)
+        cursor.execute('UPDATE building SET campus_id = ?, building_name = ? WHERE building_id = ?',
+        (building.campus_id, building.building_name, building_id)
         )
         
         if cursor.rowcount == 0:
@@ -703,6 +722,33 @@ def update_building(building_id : int, building : BuildingBase):
     except IntegrityError:
         conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+        
+# ==================== BUILDING MAP ====================
+@app.get('/building-map/{campus_id}-{building_id}-{floor}')
+def get_building_map(campus_id : int, building_id : int, floor : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+
+        data = cursor.execute('''
+            SELECT bm.*
+            FROM building_map bm
+            JOIN building b
+            ON bm.building_id = b.building_id
+            WHERE b.campus_id = ? 
+            AND bm.building_id = ?
+            AND bm.floor = ?
+        ''', (campus_id, building_id, floor)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Building map does not exist')
+        
+        return BuildingMap(**dict(data))
+
     finally:
         conn.close()
 
@@ -762,8 +808,8 @@ def create_venue(venue : VenueCreate):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('INSERT INTO venue (building_id, venue_name, capacity) VALUES (?, ?, ?)',
-        (venue.building_id, venue.venue_name, venue.capacity))
+        cursor.execute('INSERT INTO venue (building_id, venue_name, capacity, floor) VALUES (?, ?, ?, ?)',
+        (venue.building_id, venue.venue_name, venue.capacity, venue.floor))
         
         conn.commit()
         
@@ -808,8 +854,8 @@ def update_venue(venue_id : int, venue : VenueBase):
     try:
         cursor = conn.cursor()
         
-        cursor.execute('UPDATE venue SET building_id = ?, venue_name = ?, capacity = ? WHERE venue_id = ?',
-        (venue.building_id, venue.venue_name, venue.capacity, venue_id)
+        cursor.execute('UPDATE venue SET building_id = ?, venue_name = ?, capacity = ?, floor = ? WHERE venue_id = ?',
+        (venue.building_id, venue.venue_name, venue.capacity, venue.floor, venue_id)
         )
         
         if cursor.rowcount == 0:
@@ -914,7 +960,27 @@ def update_equipment(equip_id: int, equipment: EquipmentBase):
         raise HTTPException(status_code=400, detail='Something went wrong while updating equipment')
     finally:
         conn.close()
-# ==================== MAP ====================
+
+# ==================== ROUTE ====================
+def vertex_context(vertex):
+    if vertex['level'] == 'campus':
+        return (vertex['level'], vertex['campus_id'])
+    else:
+        return (vertex['level'], vertex['building_id'], vertex['floor'])
+    
+def build_context(vertex):
+    if vertex['level'] == 'campus':
+        return {
+            'level': vertex['level'], 
+            'campus_id': vertex['campus_id']
+        }
+    else:
+        return {
+            'level': vertex['level'], 
+            'building_id': vertex['building_id'], 
+            'floor': vertex['floor']
+        }
+
 @app.get('/route/{campus_id}-{start_venue}-{destination_venue}')
 def get_route(campus_id : int, start_venue : int, destination_venue : int):
     if campus_id <= 0:
@@ -943,12 +1009,25 @@ def get_route(campus_id : int, start_venue : int, destination_venue : int):
         adjacency, vertices = _map_cache.get_graph(campus_id)
         path_data, distance_data = dijkstra(adjacency, vertices, start_from, destination)
         
-        coordinates = [
-            [vertices[vertex_id]['latitude'], vertices[vertex_id]['longitude']]
-            for vertex_id in path_data
-        ]
+        groups = []
+        current_group = None
+        previous_key = None
+
+        for vertex_id in path_data:
+            vertex = vertices[vertex_id]
+            key = vertex_context(vertex)
+
+            if key != previous_key:
+                current_group = {'context': build_context(vertex), 'coordinates': []}
+                groups.append(current_group)
+                
+            current_group['coordinates'].append(
+                [vertex['latitude'], vertex['longitude']]
+            )
+            previous_key = key
         
-        return Route(path_coordinates=coordinates, distance=distance_data)
+        
+        return Route(path_data=groups, distance=distance_data)
     
     except Exception:
         raise HTTPException(status_code=400, detail='Route could not be determined')
