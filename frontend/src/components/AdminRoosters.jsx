@@ -419,15 +419,38 @@ export default function AdminRoosters() {
                             </div>
                         )}
 
-                        {groupedEntries.length > 0 && (
+                        {(groupedEntries.length > 0 || deselectedSlots.length > 0) && (
                             <div>
                                 <h4>Opsomming:</h4>
-                                {groupedEntries.map((group, idx) => (
-                                    <div key={idx} className="chosen-display">
-                                        <strong>{group.day}</strong>: {group.startTime} - {group.endTime} [{" "}
-                                        {group.moduleCode || "Geen module"} ]
-                                    </div>
-                                ))}
+
+                                {groupedEntries.length > 0 && (
+                                    <>
+                                        <h5>Bygevoeg:</h5>
+                                        {groupedEntries.map((group, idx) => (
+                                            <div key={idx} className="chosen-display">
+                                                <strong>{group.day}</strong>: {group.startTime} - {group.endTime} [{" "}
+                                                {group.moduleCode || "Geen module"} ]
+                                            </div>
+                                        ))}
+                                    </>
+                                )}
+
+                                {deselectedSlots.length > 0 && (
+                                    <>
+                                        <h5>Verwyder:</h5>
+                                        {deselectedSlots.map((timetableId) => {
+                                            const entry = timetables.find(
+                                                (t) => t.timetable_id === timetableId
+                                            );
+                                            return (
+                                                <div key={timetableId} className="chosen-display">
+                                                    <strong>{entry?.day_of_week}</strong>: {entry?.start_time} - {entry?.end_time} [{" "}
+                                                    {entry?.module_code || "Geen module"} ]
+                                                </div>
+                                            );
+                                        })}
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
