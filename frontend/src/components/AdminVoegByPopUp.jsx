@@ -3,7 +3,8 @@ import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp";
 
 function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding, setVenues}){
-        const [capacity, setCapacity] = useState("");
+        const [capacity, setCapacity] = useState(0);
+        const [floor, setFloor] = useState(0);
         const hanteerAdd = async () => {
     try {
         const res = await fetch("http://127.0.0.1:8000/venue", {
@@ -13,6 +14,7 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
             building_id: parseInt(selectedBuilding),
             venue_name: lokaalNaam,
             capacity: parseInt(capacity),
+            floor: parseInt(floor)
         }),
         });
         const data = await res.json();
@@ -79,6 +81,9 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
 
                 <label htmlFor="capacity">Kapasiteit: </label>
                 <input type="number" id="capacity" name="capacity" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)}/> <br />
+
+                <label htmlFor="floor">Kies vloer nommer: </label>
+                <input type="number" id="floor" name="floor" min={0} value={floor} onChange={(e) => setFloor(e.target.value)} /> <br />
                 
                 <button type="button" onClick={() => setIsConfirmOop(true)}>Voeg By.</button> 
                 <AdminConfirmPopUp 
