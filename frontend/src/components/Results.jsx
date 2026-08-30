@@ -3,8 +3,9 @@ import GeneralPopupModal from "./GeneralPopupModal";
 
 let selectedVenue;
 
-function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setCollapsed}) {
+function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setCollapsed }) {
     const [timetables, setTimetables] = useState([]);
+    const [bookings, setBookings] = useState([]);
     const [venues, setVenues] = useState([]);
     const [buildings, setBuildings] = useState([]);
     const [popupPrompt, setPopupPrompt] = useState();
@@ -30,6 +31,7 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
     useEffect(() => {
         if (venues.length === 0) {
             setTimetables([]);
+            setBookings([]);
             return;
         }
 
@@ -45,6 +47,16 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
             // flat() combines all those arrays into one array
             .then((data) => setTimetables(data.flat()))
             .catch((error) => console.error("Failed to fetch timetables:", error));
+
+        //  Haal die besprekings vir elke lokaal in die geselekteerde kampus, in dieselfde patroon
+        Promise.all(
+            venues.map((venue) =>
+                fetch(`http://127.0.0.1:8000/booking/by-venue/${venue.venue_id}`)
+                    .then((res) => res.json())
+            )
+        )
+            .then((data) => setBookings(data.flat()))
+            .catch((error) => console.error("Failed to fetch bookings:", error));
     }, [venues]);
 
     useEffect(() => {
@@ -59,23 +71,33 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
     const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
     const currentDay = days[now.getDay()];
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:00`;
+    const currentDate = now.toISOString().split("T")[0];
 
     const targetTime = (selectedTime != null) ? selectedTime : currentTime;
 
-    const occupiedVenueIds = timetables
+    const occupiedByTimetable = timetables
         .filter(timetable =>
-                timetable.day_of_week === currentDay &&
-                timetable.start_time <= targetTime &&
-                timetable.end_time > targetTime
+            timetable.day_of_week === currentDay &&
+            timetable.start_time <= targetTime &&
+            timetable.end_time > targetTime
         )
         .map((timetable) => timetable.venue_id);
 
+    const occupiedByBooking = bookings
+        .filter(booking =>
+            booking.booking_date === currentDate &&
+            booking.start_time <= targetTime &&
+            booking.end_time > targetTime
+        )
+        .map((booking) => booking.venue_id);
+
+    const occupiedVenueIds = [...occupiedByTimetable, ...occupiedByBooking];
 
     const availableVenues = venues.filter(
         venue => !occupiedVenueIds.includes(venue.venue_id)
     );
 
-    const handleClick = (venue) => { 
+    const handleClick = (venue) => {
         selectedVenue = venue.venue_id;
         setPopupPrompt(`Is jy seker jy wil ${venue.venue_name} kies?`);
         setShow(true);
@@ -92,7 +114,7 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
                 );
 
                 return (
-                    <div 
+                    <div
                         className="res-houer"
                         key={venue.venue_id}
                         onClick={() => handleClick(venue)}

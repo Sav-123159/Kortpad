@@ -127,11 +127,10 @@ def create_tables():
             day_of_week TEXT NOT NULL CHECK (day_of_week IN ('MON','TUE','WED','THU','FRI','SAT','SUN')),
             start_time TIME NOT NULL,
             end_time TIME NOT NULL,
-            module_id TEXT,
+            module_code TEXT,
             semester_start DATE NOT NULL,
             semester_end DATE NOT NULL,
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id),
-            FOREIGN KEY (module_id) REFERENCES module(module_id),
             CHECK (end_time > start_time)
         )        
     ''')
