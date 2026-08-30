@@ -14,8 +14,8 @@
     grid-template-columns: 1fr 1fr;
     grid-template-areas: 
         "Lokaal Gebou"
-        "Afstand Kapasiteit";
-    width: 350px;
+        "Kapasiteit Vloer";
+    width: auto;
     margin: auto;
     margin-top: 15px;
     gap: 15px;
@@ -38,12 +38,12 @@
     grid-area: Gebou;
 }
 
-.afstand{
-    grid-area: Afstand;
+.kapasiteit{
+    grid-area: Kapasiteit;
 }
 
-.kapasiteit{
-    grid-area: Afstand;
+.vloer{
+    grid-area: Vloer;
 }
 
 .MapPaneel .leaflet-container{

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import LeftPanel from "./LeftPanel";
 import KortpadMap from "./KortpadMap";
 import '../css/Gebruiker.css';
@@ -8,6 +8,9 @@ function StudentContainer() {
     const [selectedCampus, setSelectedCampus] = useState(1);
     const [startVenue, setStartVenue] = useState("");
     const [endVenue, setEndVenue] = useState("");
+
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageCount, setPageCount] = useState(0);
     
     const [hasSearched, setHasSearched] = useState(false);
 
@@ -19,6 +22,8 @@ function StudentContainer() {
         setEndVenue("");
         setCollapsed(false);
     }
+
+    useEffect(() => { setPageIndex(0); }, [startVenue, endVenue]);
 
     return (
         <div className="app">
@@ -38,8 +43,18 @@ function StudentContainer() {
                         selectedCampus={selectedCampus}
                         startVenue={startVenue}
                         endVenue={endVenue}
+                        pageIndex={pageIndex}
+                        setPageCount={setPageCount}
                         collapsed={collapsed}
                     />
+
+                    {pageCount > 1 && (
+                        <div className="RoutePager">
+                            <button disabled={pageIndex === 0} onClick={() => setPageIndex(i => i - 1)}>&larr; Terug</button>
+                            <span>{pageIndex + 1} / {pageCount}</span>
+                            <button disabled={pageIndex === pageCount - 1} onClick={() => setPageIndex(i => i + 1)}>Volgende &rarr;</button>
+                        </div>
+                    )}
 
                     {collapsed && (
                         <button

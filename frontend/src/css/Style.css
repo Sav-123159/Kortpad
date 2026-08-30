@@ -241,6 +241,42 @@ button.form-button:hover {
     align-items: center; */
 }
 
+.KortpadRoute--solid {
+    stroke-dasharray: 3000;
+    stroke-dashoffset: 3000;
+    animation:
+        draw-route 1.4s ease-out forwards,
+        fade-out 0.5s ease-in forwards 1.4s;
+}
+
+.KortpadRoute--dashed {
+    stroke-dasharray: 12 14;
+    opacity: 0;
+    animation:
+        fade-in 0.5s ease-in forwards 1.4s,
+        route-flow 0.9s linear infinite 1.4s;
+}
+
+@keyframes draw-route { to { stroke-dashoffset: 0; } }
+@keyframes fade-out    { to { opacity: 0; } }
+@keyframes fade-in     { to { opacity: 1; } }
+@keyframes route-flow  { to { stroke-dashoffset: -26; } }
+
+.RoutePager {
+    background: var(--paper);
+    height: auto;
+    width: auto;
+    padding: 8px 5px;
+    border-radius: 14px;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
 .endJourneyBtn {
     position: absolute;
 
