@@ -1,14 +1,20 @@
+// Invoere
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import StudentContainer from "./components/StudentContainer";
 import AdminContainer from "./components/AdminContainer";
 import "./css/Style.css";
 
-
+// Hoof app komponent wat die intro animasie wys wanneer die webblad aanvanklik oopgemaak word
+// Bevat Header, Student en Admin houers
 function App() {
     const [introState, setIntroState] = useState('playing');
     const [aktieweContainer, setAktieweContainer] = useState("StudentContainer");
 
+    /*
+        Speel intro een keer per sessie -> Gebruik Session Storage
+        Skakel tussen playing, fading en done met behulp van timers om die vervaag animasie te wys
+    */
     useEffect(() => {
         const hasSeenIntro = sessionStorage.getItem("hasSeenIntro");
 
@@ -57,10 +63,12 @@ function App() {
                 aktieweContainer={aktieweContainer}
                 setAktieweContainer={setAktieweContainer} />
 
+            {/* Wys net komponent wat aan die geselekteerde knoppie hoort */}
             {aktieweContainer === "StudentContainer" && <StudentContainer />}
             {aktieweContainer === "AdminContainer" && <AdminContainer />}
         </div>
     );
 }
 
+// Uitvoer van die App funksie
 export default App;

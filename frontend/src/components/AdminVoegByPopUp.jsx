@@ -1,42 +1,55 @@
+// Imports vir die komponent
+// useState word ingevoer om data te stoor wat in die komponent kan verander
+// useEffect word gebruik wanneer ons wil hê iets in die komponent moet gebeur as hy laai, of wanneer sekere data verander word
 import { useState, useEffect, useRef } from "react";
 import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp";
 import PopupAnimation from "./PopupAnimation";
 
+// Funksie om die lokaal by te voeg
 function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding, setVenues}){
-        const [capacity, setCapacity] = useState(0);
-        const [floor, setFloor] = useState(0);
-        const hanteerAdd = async () => {
-    try {
-        const res = await fetch("http://127.0.0.1:8000/venue", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"}, 
-        body: JSON.stringify({
-            building_id: parseInt(selectedBuilding),
-            venue_name: lokaalNaam,
-            capacity: parseInt(capacity),
-            floor: parseInt(floor)
-        }),
-        });
-        const data = await res.json();
-        // console.log("Venue added:", data);
+    // Hou die kapasiteit en vloer van die nuwe lokaal
+    const [capacity, setCapacity] = useState(0);
+    const [floor, setFloor] = useState(0);
 
-        // Herlaai die volledige lys venues ná insert
-        const res2 = await fetch(`http://127.0.0.1:8000/venues/by-building/${selectedBuilding}`);
-        const allVenues = await res2.json();
-        setVenues(allVenues);
+    // hierdie deel hanteer die eintlike byvoeg van die lokaal in die databasis
+    // nadat die lokaal bygevoeg is, gaan haal ek weer al die lokale in die gebou om die skikking met die nuwe lokaal ingesluit te laai
+    const hanteerAdd = async () => {
+        try {
+            const res = await fetch("http://127.0.0.1:8000/venue", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"}, 
+            body: JSON.stringify({
+                building_id: parseInt(selectedBuilding),
+                venue_name: lokaalNaam,
+                capacity: parseInt(capacity),
+                floor: parseInt(floor)
+            }),
+            });
+            
+            const res2 = await fetch(`http://127.0.0.1:8000/venues/by-building/${selectedBuilding}`);
+            const allVenues = await res2.json();
+            
+            setVenues(allVenues);
+            setIsPopupOop(false);
+        } catch (err) {
+            console.error("Error adding venue:", err);
+        }
+    };
 
-        setIsPopupOop(false);
-    } catch (err) {
-        console.error("Error adding venue:", err);
-    }
-};
-
-    
+    // Boolean waarde vir die popup en die lokaal se naam wat bygevoeg gaan word
     const [isConfirmOop, setIsConfirmOop] = useState(false);
     const [lokaalNaam, setLokaalNaam] = useState("");
+
+    // Die popup vorm word hieronder geskep
     return(
         <>
+            {/* Fieldset groepeer al die inputs van die vorm */}
+            {/* Kampus word gekies en gekose waarde word in selectedCampus gestoor */}
+            {/* map() word weer gebruik om die kampusse en geboue met hulle id as die key, as options te laai om van te kies */}
+            {/* die onChange stoor die gebruiker se invoer vir die lokaal naam en die setLokalNaam verander die state */}
+            {/* Wanneer die voeg by knoppie gedruk word kom daar eers 'n confirmation popup in */}
+            {/* Die confirm komponent word geroep met onCOnfirm{hanteerAdd}, so as gebruiker bevestig dan moet hanteerAdd uitgevoer word om die lokaal by te voeg */}
             <fieldset className="VoegBy">
                 <h3>Voeg 'n lokaal by: </h3>
 
@@ -101,11 +114,14 @@ function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, 
     )
 }
 
+// Hierdie funksie werk baie soos die AddLokaal funksie, net toerusting i.p.v n lokaal
 function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
+    // Veranderlikes om die nuwe toerusting waardes te stoor
     const [isConfirmOop, setIsConfirmOop] = useState(false);
     const [equipNaam, setEquipNaam] = useState("");
     const [equipQty, setEquipQty] = useState(1);
 
+    // Word geroep om die nuwe toerusting in die databasis te stoor
     const hanteerAdd = async () => {
         try {
             const res = await fetch("http://127.0.0.1:8000/equipment", {
@@ -117,20 +133,19 @@ function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
                     equip_qty: parseInt(equipQty),
                 }),
             });
-            const data = await res.json();
-            // console.log("Equipment added:", data);
-
+            
             const res2 = await fetch(`http://127.0.0.1:8000/equipment/by-venue_id/${venueId}`);
             const allEquip = await res2.json();
             setEquipment(allEquip);
-
             setIsPopupOop(false);
         } catch (err) {
             console.error("Error adding equipment:", err);
         }
     };
 
+    // Bou die vorm wat vertoon as die gebruiker op die voeg toerusting by klik
     return (
+        // Die h3 gebruik die veranderlike wat die naam van die gekose lokaal gestoor het om dit dan te vertoon
         <fieldset className="VoegBy">
             <h3>Voeg toerusting vir {lokaalNaam} by: </h3> <br />
 
@@ -167,6 +182,7 @@ function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
     );
 }
 
+// Voeg 'n nuwe gebruiker by
 function AddGebruiker({ setIsPopupOop, setUsers }) {
     const [isConfirmOop, setIsConfirmOop] = useState(false);
     const [firstName, setFirstName] = useState("");
@@ -177,6 +193,8 @@ function AddGebruiker({ setIsPopupOop, setUsers }) {
     const [isAdmin, setIsAdmin] = useState(false);
     const [error, setError] = useState("");
 
+    // Word geroep om die nuwe gebruiker in die databasis te stoor
+    // Kyk eers of wagwoorde ooreenstem voordat die versoek gestuur word
     const hanteerAdd = async () => {
         setError("");
 
@@ -201,6 +219,7 @@ function AddGebruiker({ setIsPopupOop, setUsers }) {
                 body: JSON.stringify({ user: userInfo, auth: { password } }),
             });
 
+            // As epos reeds bestaan of daar is 'n ander fout, wys dit 'n foutboodskap sonder om die modal toe te maak
             if (!res.ok) {
                 const data = await res.json().catch(() => ({}));
                 setError(data.detail || "Email bestaan reeds.");
@@ -211,6 +230,7 @@ function AddGebruiker({ setIsPopupOop, setUsers }) {
             const newUser = await res.json();
             console.log("User added:", newUser);
 
+            // Haal die opgedateerde gebruikers lys sodat alle gebruikers aan die admin kant vertoon kan word
             const res2 = await fetch("http://127.0.0.1:8000/users");
             const allUsers = await res2.json();
             setUsers?.(allUsers);
@@ -222,6 +242,7 @@ function AddGebruiker({ setIsPopupOop, setUsers }) {
         }
     };
 
+    // Bou die vorm wat vertoon as die gebruiker op die voeg gebruikerby knoppie klik
     return (
         <fieldset className="VoegBy">
             <h3>Voeg 'n gebruiker by:</h3>
@@ -307,6 +328,7 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
             .catch(error => console.error(error));
         }, []);
 
+    // Building word binne die popup gestoor
     const [buildings, setBuildings] = useState([]);
     const [selectedBuilding, setSelectedBuilding] = useState("");
     useEffect(() => {
@@ -318,14 +340,17 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
             .catch(error => console.error(error));
 
     }, [selectedCampus]);
- 
-    // console.log(isPopupOop);
+    
+    // Bepaal of iets op die bladsy gerender moet word
     if (!isPopupOop){
         return null;
     }
 
+    // Hier word die funksies geroep om te bepaal watse vorm moet verskein
     return(
         // As jy buite die vorm klik maak hy toe
+        // Hierdie kies watter vorm vertoon word gebaseer op die tipe
+        // So in die ander komponente spesifiseer ek die tipe en dan kies hy hier watse vorm om oop te maak
         <div className="Popup_Houer" onClick={() => setIsPopupOop(false)}>
             {/* As iemand binne die vorm klik moet hy nie toe maak nie */}
             <PopupAnimation as="div" ref={modalRef}>

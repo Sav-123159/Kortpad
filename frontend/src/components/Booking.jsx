@@ -5,9 +5,10 @@ import { useAuth } from "./AuthContext";
 
 function Booking({ show, onConfirm, onCancel, onClose }) {
 
+    //Kyk of 'n gebruiker in geteken is, anders gaan 'n bespreking nie gemaak kan word nie
     const { user, isLoggedIn } = useAuth();
 
-    //----------------------- CONTSTANTS -----------------------
+    //----------------------- KONSTANTES -----------------------
 
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
@@ -26,10 +27,12 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     const [showLogIn, setShowLogin] = useState(false);
 
+    // Wys die login modal
     const showLoginModal = () => {
         setShowLogin(true);
     };
 
+    // Maak die login modal toe
     const hideLoginModal = () => {
         setShowLogin(false);
     };
@@ -38,15 +41,16 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     const times = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
 
-    //Choose date first, pull d.o.w. out
+    //Kies datum eerste, onttrek die dag van die week uit
     const activeDay =
         date !== ""
             ? days[new Date(date).getDay()]
             : "";
 
 
-    //----------------------- API FETCHES -----------------------
+    //----------------------- API ROEP -----------------------
 
+    //Haal kampusse deur API, stel die eerste kampus as die verstek waarde
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
             .then((res) => res.json())
@@ -62,6 +66,8 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             .catch((error) => console.error(error));
     }, []);
 
+    //Haal die lokale wat aan die geselekteerde kampus behoort, stel die eerste een as die verstek
+    //Herlaai elke keer as kampus verander
     useEffect(() => {
         if (!selectedCampus) {
             setVenues([]);
@@ -86,6 +92,8 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             .catch((error) => console.error(error));
     }, [selectedCampus]);
 
+    //Haal rooster en bestaande besprekings vir die lokaal
+    //Herlaai elke keer as lokaal verander
     useEffect(() => {
         if (!selectedVenue) {
             setTimetables([]);
@@ -102,7 +110,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     }, [selectedVenue]);
 
-    // Load bookings for the selected venue
+    // Laai besprekings vir die geselekteerde lokaal
     async function loadBookings(venueId) {
         try {
             const response = await fetch(
@@ -126,6 +134,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     const modalRef = useRef(null);
 
+    // Stel vorm terug na verstek waardes
     function resetForm() {
         setSelectedCampus(defaultValues.campus);
         setSelectedVenue(defaultValues.venue);
@@ -133,6 +142,8 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         setSelectedSlots(defaultValues.slots);
     }
 
+    // Maak modal toe en herstel vorm as daar buite die modal of Esc geklik word
+    //showLogIn check voorkom dat 'n klik buite die login modal ook die booking modal toe maak
     useEffect(() => {
         const closeModalonClickOut = (e) => {
             if (
@@ -163,10 +174,12 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         };
     }, [show, onClose, showLogIn]);
 
+    //Maak geselekteerde tydgleuwe skoon
     function clearSelection() {
         setSelectedSlots([]);
     }
 
+    // Herstel vorm en maak modal toe
     function onCancelClicked() {
         resetForm();
         if (onClose) onClose();
@@ -175,27 +188,28 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     //----------------------- TABLE CELL LOGIC -----------------------
 
+    // Kies/ deselekteer tydgleuwe. Kan net aaneenlopende tye kies
     function handleCellClick(day, time, occupied) {
         if (occupied || !activeDay || day !== activeDay) return;
 
         const slot = `${day}-${time}`;
 
-        // Deselect
+        // Deselekteer
         if (selectedSlots.includes(slot)) {
-            // Time index of the slot being removed
+            // Tyd index van die gleuf wat verwyder word
             const timeIndex = times.indexOf(time);
 
-            // Time indexes of all currently selected slots
+            // Tyd indekse van all die huidige geselekteerde gleuwe
             const selectedTimeIndexes = selectedSlots.map((s) =>
                 times.indexOf(s.split("-")[1])
             );
 
-            // Earliest and latest time in the current selection
+            // Vroegste en laatste tyd in die huidige reeks gleuwe
             const lowest = Math.min(...selectedTimeIndexes);
             const highest = Math.max(...selectedTimeIndexes);
 
-            // Only allow removing a boundary slot (earliest or latest time)
-            // Removing a slot in the middle breaks the row, clear everything
+            // Laat slegs toe dat 'n grens gleuf (vroegste of laatste tyd) verwyder word
+            //'n Gleuf in die middel van die reeks deselekteer breek die ry, deselekteer alles
             if (timeIndex !== lowest && timeIndex !== highest) {
                 clearSelection();
             } else {
@@ -203,13 +217,13 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             }
             return;
         }
-        // First select
+        // Eerste gekies
         if (selectedSlots.length === 0) {
             setSelectedSlots([slot]);
             return;
         }
 
-        // Time indexes of the selected slots
+        // Tyd indekse van die geselekteerde geleuwe
         const selectedIndexes = selectedSlots.map((s) =>
             times.indexOf(s.split("-")[1])
         );
@@ -217,14 +231,14 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         //["MON", "10:00"]
         //[2] = ["10:00"]
 
-        // Time index of the new slot
+        // Tyd index van die nuwe gleuf
         const newIndex = times.indexOf(time);
 
-        // Get the lowest and highest indexes of the current selection
+        // Kry die laagste en hoogste indekse van die huidige reeks
         const lowest = Math.min(...selectedIndexes);
         const highest = Math.max(...selectedIndexes);
 
-        // Only select a value 1 higher or lower than set of slots
+        // Kan slegs 'n waarde 1 hoër of laer van die stel gleuwe kies
         if (newIndex === lowest - 1 || newIndex === highest + 1) {
             setSelectedSlots([...selectedSlots, slot]);
         }
@@ -232,19 +246,21 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
     //----------------------- SUBMIT LOGIC -----------------------
 
+    // Stuur bespreking na API vir die geselekteerde lokal, datum en tye
+    // begin en eind  tye kom van die eerste en laaste gekose gleuf
     async function handleSubmit(e) {
         e.preventDefault();
 
         const selectedTimes = selectedSlots
             .map((slot) => slot.split("-")[1])
-            // Sort the times to ensure they are in order
-            // Because the user can select times in any order, we need to sort them to find the start and end times correctly
+            // Sorteer tye om seker te maak hulle is in volgorde
+            // Omdat die gebruiker tye in enige volgorde kan kies, moet ons hulle sorteer sodat ons die regte begin en eind tye kan kry
             .sort();
 
         const startTime = selectedTimes[0];
 
         const endTime =
-            // Get the time after the last selected time
+            // Kry tyd na due laaste geselekteerde tyd
             times[times.indexOf(selectedTimes.at(-1)) + 1];
 
         const bookingData = {
@@ -278,7 +294,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
             alert("Bespreking suksesvol!");
 
-            // Refresh the bookings after a successful booking
+            // Herlaai besprekings na 'n suksesvolle bespreking
             await loadBookings(selectedVenue);
             resetForm();
 
@@ -349,13 +365,16 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                         id="date"
                         type="date"
                         value={date}
+                        // Voorkom datums wat in die verlede is
                         min={new Date().toISOString().split("T")[0]}
                         onChange={(e) => {
                             setDate(e.target.value);
+                            // Maak keuse leeg, want die tyd gleuwe tel nie vir die nuwe datum nie
                             setSelectedSlots([]);
                         }}
                     />
 
+                    {/* Wys net as daar tye al gekies is */}
                     {selectedSlots.length > 0 && (
                         <div className="booking-selection">
                             <strong>Gekose Tye ({activeDay}):</strong>
@@ -377,6 +396,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                     )}
 
                     <div className="booking-actions">
+                        {/* Wys login prompt as die gebruiker nie ingeteken is nie, kan daarop klik om die login modal oop te maak */}
                         {isLoggedIn === false && (
                             <div className="Sign-In-Prompt">
                                 <a onClick={showLoginModal}><strong><i>Teken In om 'n bespreking te maak.</i></strong></a>
@@ -386,6 +406,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                         <button
                             type="submit"
                             className="booking-confirm"
+                            // Kan nie indien as daar geen tye gekies is nie, of as die gebruiker nie ingeteken is nie
                             disabled={selectedSlots.length === 0 || isLoggedIn === false}
                         >
                             Bevestig Bespreking
@@ -421,6 +442,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                                 {days.map((day) => (
                                     <th
                                         key={day}
+                                        // Disable dae wat nie die gekose datum se dag is nie
                                         className={
                                             activeDay && day !== activeDay
                                                 ? "disabled-header"
@@ -442,6 +464,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                                     {days.map((day) => {
                                         const slot = `${day}-${time}`;
 
+                                        // Die tydgleuf is deur die rooster beset of 'n bestaande bespreking is op daai tyd
                                         const occupied = (timetables.some(
                                             (timetable) =>
                                                 timetable.day_of_week === day &&
@@ -457,6 +480,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
                                         const selected = selectedSlots.includes(slot);
 
+                                        // Net die aktiewe dag is aktief
                                         const disabled =
                                             !activeDay || day !== activeDay;
 
@@ -501,4 +525,5 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
     );
 }
 
+// Uitvoer van die booking funksie
 export default Booking;

@@ -1,10 +1,13 @@
+// invoere
 import { useState, useEffect } from "react";
 import "../css/Admin.css";
+import "../css/Style.css";
 import AdminVoegByPopUp from "../components/AdminVoegByPopUp.jsx";
 import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
-import "../css/Style.css";
 
+// Administratiewe gebruikers bestuur, voeg by, verwyder en wysig
 export default function AdminGebruiker() {
+    // Veranderlikes
     const [isPopupOop, setIsPopupOop] = useState(false);
     const [isDeleteOop, setIsDeleteOop] = useState(false);
 
@@ -15,11 +18,10 @@ export default function AdminGebruiker() {
 
     const [editingUser, setEditingUser] = useState(null);
     const [tempValue, setTempValue] = useState({});
-
-    useEffect(() => {
-        haalGebruikers();
-    }, []);
-
+    
+    // Kry die gebruikers in die databasis en stoor dit in n skikking
+    // Die haalGebruikers funksie stuur die request na die backend om die gebruikers te laai
+    useEffect(() => { haalGebruikers();}, []);
     const haalGebruikers = async () => {
         try {
             const response = await fetch("http://localhost:8000/users");
@@ -36,18 +38,17 @@ export default function AdminGebruiker() {
         }
     };
 
+    // Filtreer die gebruikers gebaseer op hulle admin regte
     const gefiltreerdeGebruikers = gebruikers.filter((gebruiker) => {
         if (tipe === "admin") {
             return gebruiker.is_admin === true;
         }
-
         return gebruiker.is_admin === false;
     });
 
-    const selectedUserName = gebruikers.find(
-        gebruiker => gebruiker.user_id === selectedUser
-    )?.fname;
-
+    // Kry die geselekteerde gebruiker se naam
+    const selectedUserName = gebruikers.find( gebruiker => gebruiker.user_id === selectedUser )?.fname;
+    // Roep die backend om die gebruiker te delete
     const hanteerDeleteUser = async () => {
         try {
             const response = await fetch(
@@ -73,6 +74,8 @@ export default function AdminGebruiker() {
         }
     };
 
+    // Eerste klik -> Skakel wysiging aan, stoor die huidige waardes
+    // Tweede klik -> Stuur PUT om te stoor
     const hanteerEditUser = async (gebruiker) => {
         if (editingUser !== gebruiker.user_id) {
             setEditingUser(gebruiker.user_id);
@@ -123,6 +126,7 @@ export default function AdminGebruiker() {
         }
     };
 
+    // Kanselleer wysiging, stel die temp waardes terug na die oorspronklikes toe
     const kanselleerEditUser = (gebruiker) => {
         setTempValue({
             ...tempValue,
@@ -184,6 +188,7 @@ export default function AdminGebruiker() {
                     <div className="Gebruiker__lys">
                         {gefiltreerdeGebruikers.map((gebruiker) => {
                             const isEditing = editingUser === gebruiker.user_id;
+                            // Gebruik tempValye terwyl die gewysig word, anders werklike waardes
                             const huidige = tempValue[gebruiker.user_id] || {
                                 fname: gebruiker.fname,
                                 sname: gebruiker.sname,
@@ -268,6 +273,7 @@ export default function AdminGebruiker() {
                                     )}
 
                                     <div>
+                                        {/* Potlood verander na regmerkie terwyl daar gewysig word */}
                                         <button
                                             className={isEditing ? "Edit_Aktief" : ""}
                                             onClick={() => hanteerEditUser(gebruiker)}
@@ -275,6 +281,7 @@ export default function AdminGebruiker() {
                                             {isEditing ? "\u2713" : "\u270E"}
                                         </button>
 
+                                        {/* Kruisie wys net terwyl daar gewysig word */}
                                         {isEditing && (
                                             <button
                                                 className="Cancel_Edit"

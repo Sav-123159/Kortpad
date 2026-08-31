@@ -1,17 +1,25 @@
 import {createContext, useContext, useState, useEffect } from "react";
 
-//Context is accessible from any page, checks if user is logged in
+//Maak gebruiker (user) konteks beskikbaar op enige webbladsy
+
+//Kyk in localstorage vir gebruiker (user)
+//  if empty -> geen gebruiker (logged out)
+//  if not empty -> gebruiker besonderhede, UserBase(fname, sname, email, is_admin) -> gebruik backend UserBase model
+
+//As gebruiker verander -> wysig localstorage
+
+//AuthContext.Provider gee onderlinge metodes -> user, login, logout, isLoggedIn: !!user
+//import { useAuth } from "./AuthContext" -> voor in om AuthContext se onderlinge metodes te gebruik
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }){
 
-    //Look in local storage for possible previous user
     const [user, setUser] = useState(() => {
         const stored = localStorage.getItem("user");
         return stored ? JSON.parse(stored) : null; 
     });
 
-    //if user has changed, update local storage
     useEffect(() => {
         
         if(user){
@@ -22,7 +30,6 @@ export function AuthProvider({ children }){
         }
     }, [user]);
 
-    //Successful login
     function login(userData){
         setUser(userData);
     }
@@ -31,11 +38,9 @@ export function AuthProvider({ children }){
         setUser(null);
     }
 
-    //Children of AuthProvider get useAuth and the 4 values
     return(<AuthContext.Provider value={{ user, login, logout, isLoggedIn: !!user }}>{children}</AuthContext.Provider>);
 }
 
-//const { user, isLoggedIn, logout } = useAuth()
 export function useAuth(){
     return useContext(AuthContext);
 }

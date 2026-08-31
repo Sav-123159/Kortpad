@@ -1,10 +1,16 @@
+//Houer vir Studente Koppelvlak om studente en admin kante te skei
+
+//Invoere
 import { use, useEffect, useState } from "react";
 import LeftPanel from "./LeftPanel";
 import KortpadMap from "./KortpadMap";
 import '../css/Gebruiker.css';
 import '../css/Style.css';
 
+//Hoof komponent wat uit gevoer word
 function StudentContainer() {
+
+    //Veranderlikes
     const [selectedCampus, setSelectedCampus] = useState(1);
     const [startVenue, setStartVenue] = useState("");
     const [endVenue, setEndVenue] = useState("");
@@ -16,6 +22,11 @@ function StudentContainer() {
 
     const [collapsed, setCollapsed] = useState(false);
 
+
+    /*
+        Stel al die soek toestande na hul verstek waardes,
+        sodat 'n nuwe roete begin kan word
+    */
     const endJourney = () => {
         setHasSearched(false);
         setStartVenue("");
@@ -25,9 +36,11 @@ function StudentContainer() {
 
     useEffect(() => { setPageIndex(0); }, [startVenue, endVenue]);
 
+    //Html uitvoer
     return (
         <div className="app">
             <div className="Container">
+                {/* Houer vir die linker paneel en sy kinders */}
                 <LeftPanel
                     hasSearched={hasSearched}
                     setHasSearched={setHasSearched}
@@ -38,6 +51,8 @@ function StudentContainer() {
                     collapsed={collapsed}
                     setCollapsed={setCollapsed}
                 />
+
+                {/* Houer vir die kaart */}
                 <div className="MapPaneel">
                     <KortpadMap 
                         selectedCampus={selectedCampus}
@@ -56,6 +71,16 @@ function StudentContainer() {
                         </div>
                     )}
 
+                    {/*  Knoppie om die huidige roete te eindig, net sigbaar terwyl die paneel ingetrek is */}
+                    {pageCount > 1 && (
+                        <div className="RoutePager">
+                            <button disabled={pageIndex === 0} onClick={() => setPageIndex(i => i - 1)}>&larr; Terug</button>
+                            <span>{pageIndex + 1} / {pageCount}</span>
+                            <button disabled={pageIndex === pageCount - 1} onClick={() => setPageIndex(i => i + 1)}>Volgende &rarr;</button>
+                        </div>
+                    )}
+
+                    {/*  Knoppie om die huidige roete te eindig, net sigbaar terwyl die paneel ingetrek is */}
                     {collapsed && (
                         <button
                             className="endJourneyBtn"
@@ -71,4 +96,5 @@ function StudentContainer() {
     );
 }
 
+//Uitvoer van StudentContainer funksie
 export default StudentContainer;
