@@ -1,3 +1,4 @@
+// Invoere
 import "../css/Admin.css";
 import React, { useState, useEffect } from "react";
 import GeneralPopupModal from "./GeneralPopupModal";
@@ -16,12 +17,14 @@ export default function AdminRoosters() {
     const [show, setShow] = useState(false);
     const [modules, setModules] = useState([]);
 
-    const [pendingEntryId, setPendingEntryId] = useState(null); // occupied slot waiting on confirmation
+    const [pendingEntryId, setPendingEntryId] = useState(null); // besete gleuf wag vir bevestiging
 
+    // Wys die bevestigings modal
     const showModal = () => {
         setShow(true);
     };
 
+    // Bevestig verwydering van 'n besette gleuf -> voeg by deselectedSlots 
     const confirmDeselect = () => {
         if (pendingEntryId !== null) {
             setDeselectedSlots([...deselectedSlots, pendingEntryId]);
@@ -30,6 +33,7 @@ export default function AdminRoosters() {
         setPendingEntryId(null);
     };
 
+    // Maak prompt toe sonder om die gleuf te verwyder
     const cancelDeselect = () => {
         setShow(false);
         setPendingEntryId(null);
@@ -46,6 +50,8 @@ export default function AdminRoosters() {
     const year = new Date().getFullYear();
 
     //----------------------- API FETCHES -----------------------
+    
+    // Haal kampusse deur API, stel eerste kampus as die verstek waarde
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
             .then((res) => res.json())
@@ -56,6 +62,7 @@ export default function AdminRoosters() {
             .catch((error) => console.error(error));
     }, []);
 
+    // Haal lokale wat aan die geselekteerde kampus behoort, en stel die eerste een as die verstek waarde
     useEffect(() => {
         if (!selectedCampus) {
             setVenues([]);
@@ -74,6 +81,7 @@ export default function AdminRoosters() {
             .catch((error) => console.error(error));
     }, [selectedCampus]);
 
+    // Haal die rooster vir die geselekteerde lokaal
     useEffect(() => {
         if (!selectedVenue) {
             setTimetables([]);
@@ -86,6 +94,7 @@ export default function AdminRoosters() {
             .catch((error) => console.error(error));
     }, [selectedVenue]);
 
+    // Haal die modules, wat gebruik word in die opstelling van 'n klas
     useEffect(() => {
         fetch("http://127.0.0.1:8000/modules")
             .then((res) => res.json())
@@ -95,6 +104,7 @@ export default function AdminRoosters() {
 
     //18:00:00 > 18:00
     //Slice seconds
+    // API gee HH:MM:SS terug, maar ons werk net met HH:MM
     function normalizeTimetableEntry(entry) {
         return {
             ...entry,
@@ -104,12 +114,21 @@ export default function AdminRoosters() {
     }
 
     //----------------------- TABLE CELL LOGIC -----------------------
+
+    // Maak alle keuses skoon
     const clearSelection = () => {
         setSelectedSlots([]);
         setSlotModules({});
         setDeselectedSlots([]);
     };
 
+    /*
+        Hanteer klik op 'n rooster sel:
+        Alklaar gekies: Deselekteer
+        Beset (nog nie gemerk vir verwydering): wys bevestigning om die klas te verwyder
+        Beset (gemerk vir verwydering): Selekteer as nuwe gleuf
+        Oop: Kies as nuwe gleuf
+    */
     function handleCellClick(day, time, occupied) {
         const slot = `${day}-${time}`;
 
@@ -144,53 +163,59 @@ export default function AdminRoosters() {
         setSelectedSlots([...selectedSlots, slot]);
     }
 
+    // Stel die geselekteerde module vir 'n spesifieke gleuf
     const handleModuleChange = (slot, moduleCode) => {
         setSlotModules((prev) => ({
             ...prev, [slot]: moduleCode,
         }));
     };
 
-    // Sort slots by day order and time order
+    // Sorteer gleuwe volgens dag en tyd
     const sortedSelectedSlots = [...selectedSlots].sort((a, b) => {
         const [dayA, timeA] = a.split("-");
         const [dayB, timeB] = b.split("-");
         const dayDiff = days.indexOf(dayA) - days.indexOf(dayB);
-        if (dayDiff !== 0) return dayDiff; //Not on the same day, don't need to compare hours
-        return times.indexOf(timeA) - times.indexOf(timeB); //They are on the same day, compare hours
+        if (dayDiff !== 0) return dayDiff; // nie op dieselfde dag nie, hoef nie ure te vergelyk nie
+        return times.indexOf(timeA) - times.indexOf(timeB); // Hulle is op dieselfde dag, vergelyk die ure
     });
 
     //----------------------- GROUPING LOGIC -----------------------
+    
+    /*
+        Groepeer opeenvolgende tydgleuwe met dieselfde module in een blok, sodat die 
+        submit dit as een klas stuur inplaas van aparte een uur gleuwe
+    */
     const getGroupedEntries = () => {
         if (selectedSlots.length === 0) return [];
 
-        //Groups of consecutive time slots with the same module code
+        //Groepe opeenvolgende tydgleuwe met dieselfde modulekode
         const groups = [];
 
-        //Use sorted list of slots
+        //Gebruik gesorteerde lys van geselekteerde gleuwe
         sortedSelectedSlots.forEach((slot) => {
             const [day, time] = slot.split("-");
             const timeIndex = times.indexOf(time);
             const moduleCode = slotModules[slot] || "";
 
-            // Calculate end time (time index + 1)
+            // Bereken eindtyd (tydindeks + 1)
             const nextTime =
                 times[timeIndex + 1] || `${parseInt(time.split(":")[0], 10) + 1}:00`;
-            //Fallback for last time slot (16:00), need to compute a end-time (17:00)
+            // Terugval vir laaste tydgleuf (16:00), moet 'n eindtyd bereken (17:00)
 
 
             const lastGroup = groups[groups.length - 1];
 
-            // Merge if contiguous on same day AND matching non-empty module code
+            // Voeg saam indien aangrensend op dieselfde dag EN ooreenstemmende nie-leë modulekode
             if (
-                lastGroup &&                                //not empty (-1)
-                lastGroup.day === day &&                    //is the next consecutive slot on the same day as the previous group
-                lastGroup.moduleCode === moduleCode &&      //is the next consecutive slot in the same module as the previous group
-                moduleCode !== "" &&                        //is the module code empty (can't group)
-                lastGroup.endIndex === timeIndex            //is the next index of the last group the same as the current time index
+                lastGroup &&                                //nie leeg (-1)
+                lastGroup.day === day &&                    //is die volgende opeenvolgende gleuf op dieselfde dag as die vorige groep
+                lastGroup.moduleCode === moduleCode &&      //is die volgende opeenvolgende gleuf in dieselfde module as die vorige groep
+                moduleCode !== "" &&                        //is die modulekode leeg (kan nie groepeer nie)
+                lastGroup.endIndex === timeIndex            //is die volgende indeks van die laaste groep dieselfde as die huidige tydindeks
             ) {
                 lastGroup.endTime = nextTime;
                 lastGroup.endIndex = timeIndex + 1;
-                lastGroup.slots.push(slot); //Add to end of array in the slots object
+                lastGroup.slots.push(slot); //Voeg by die einde van die skikking in die gleuwe-objek
             } else {
                 groups.push({
                     day,
@@ -199,7 +224,7 @@ export default function AdminRoosters() {
                     startIndex: timeIndex,
                     endIndex: timeIndex + 1,
                     moduleCode,
-                    slots: [slot],  //single array
+                    slots: [slot],  //enkele skikking
                 });
             }
         });
@@ -210,6 +235,11 @@ export default function AdminRoosters() {
     const chosenSemester = semesters.find((s) => s.id === selectedSemester);
 
     //----------------------- SUBMIT HANDLER -----------------------
+    
+    /*
+        Stuur al die gegroepeerde inskrywings (POST) en al die gemerkte verwyderings (DELETE)
+        gelyktydig na die API, en herlaai die rooster vir die geselekteerde lokaal en vee keuses uit
+    */
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -273,6 +303,7 @@ export default function AdminRoosters() {
 
     const SemesterStart = `${year}${chosenSemester.start}`;
     const SemesterEnd = `${year}${chosenSemester.end}`;
+    // Wys net inskrywings vir die geselekteerde semester
     const filteredTimetables = timetables.filter(
         (t) =>
             t.semester_start === SemesterStart &&
@@ -348,6 +379,7 @@ export default function AdminRoosters() {
                                                 t.end_time > time
                                         );
                                         const selected = selectedSlots.includes(slot);
+                                        // Beset gleuf wat gemerk is vir verwydering -> Wys as beskikbaar
                                         const deselected = occupied && deselectedSlots.includes(occupied.timetable_id)
 
                                         let Class = "available";

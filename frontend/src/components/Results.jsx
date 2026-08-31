@@ -1,8 +1,18 @@
+// Invoere
 import { useState, useEffect } from "react";
 import GeneralPopupModal from "./GeneralPopupModal";
 
+/*
+    Hou tred van watter lokaal laas gekies is buite die Results komponent se toestand
+    Sodat dit beskikbaar is in confirmResult() sonder om dit as 'n prop deur te gee
+*/
 let selectedVenue;
 
+/*
+    Wys 'n lys van die beskikbare lokale wat op die oomblik oop is vir die kampus wat gekies is.
+    Haal die lokale, hulle verwante rossters en gebou van die API
+    Bevestig die gekose lokaal deur 'n popup
+*/
 function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setCollapsed }) {
     const [timetables, setTimetables] = useState([]);
     const [bookings, setBookings] = useState([]);
@@ -11,16 +21,21 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
     const [popupPrompt, setPopupPrompt] = useState();
     const [show, setShow] = useState(false);
 
+    /*
+        Bevestig die gekose lokaal as die eind punt van die roete, en vou die linker paneel  in
+    */
     const confirmResult = () => {
         setEndVenue(selectedVenue);
         setShow(false);
         setCollapsed(true);
     };
 
+    //Maak popup toe sonder om te bevestig
     const cancelResult = () => {
         setShow(false);
     };
 
+    //Haal lokale van die gekose kampus
     useEffect(() => {
         fetch(`http://127.0.0.1:8000/venue/by-campus/${selectedCampus}`)
             .then(res => res.json())
@@ -28,23 +43,25 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
             .catch((error) => console.error("Failed to fetch venues:", error));
     }, [selectedCampus]);
 
+    //Haal die roosters vir die lokale wat deur die kampus besit word
     useEffect(() => {
+        //As daar nie 'n lokaal gekies is nie, sal geen roosters laai nie
         if (venues.length === 0) {
             setTimetables([]);
             setBookings([]);
             return;
         }
 
-        // Fetch the timetable for every venue in the selected campus
-        // Each fetch returns a Promise because the response arrives later
+        //Haal die roosters vir elke lokaal in die geselekteerde kampus
+        //Elke haal gee 'n belofte terug omdat die antwoord eers later deur kom
         Promise.all(
             venues.map((venue) =>
                 fetch(`http://127.0.0.1:8000/timetable/by-venue/${venue.venue_id}`)
                     .then((res) => res.json())
             )
         )
-            // Each venue returns an array of timetables
-            // flat() combines all those arrays into one array
+            //Elke lokaal gee 'n skikking van roosters terug
+            // flat() kombineer al die skikkings in een in
             .then((data) => setTimetables(data.flat()))
             .catch((error) => console.error("Failed to fetch timetables:", error));
 
@@ -59,6 +76,7 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
             .catch((error) => console.error("Failed to fetch bookings:", error));
     }, [venues]);
 
+    //Haal die lys geboue vir die gekose kampus, vir die uitvoer van die lokale
     useEffect(() => {
         fetch("http://127.0.0.1:8000/buildings")
             .then((res) => res.json())
@@ -73,8 +91,10 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:00`;
     const currentDate = now.toISOString().split("T")[0];
 
+    //Gebruik die gekose tyd indien een gegee was, anders gebruik die huidige uur van die soektog
     const targetTime = (selectedTime != null) ? selectedTime : currentTime;
 
+    //Soek die lokale wat vir die huidige dag en tyd beset is
     const occupiedByTimetable = timetables
         .filter(timetable =>
             timetable.day_of_week === currentDay &&
@@ -92,23 +112,29 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
         .map((booking) => booking.venue_id);
 
     const occupiedVenueIds = [...occupiedByTimetable, ...occupiedByBooking];
-
+    //Filtreer die lokale deur die wat beset is, om die beskikbare lokale te vertoon
     const availableVenues = venues.filter(
         venue => !occupiedVenueIds.includes(venue.venue_id)
     );
 
+    /*
+        Stel die gekose lokaal 
+        Stel die prompt vir die bevestigings popup
+    */
     const handleClick = (venue) => {
         selectedVenue = venue.venue_id;
         setPopupPrompt(`Is jy seker jy wil ${venue.venue_name} kies?`);
         setShow(true);
     }
 
+    //Laat die ouer komponent weet as die resultate klaar gelaai is, sodat die blaai animasie
     onLoaded?.();
 
     return (
         <section className="Results">
             {availableVenues.map((venue) => {
 
+                //Vind die ooreenstemmende gebou vir die lokaal
                 const building = buildings.find(
                     building => building.building_id === venue.building_id
                 );
@@ -153,4 +179,6 @@ function Results({ selectedTime, selectedCampus, setEndVenue, onLoaded, setColla
         </section>
     );
 }
+
+//Uitvoer van die Results funksie
 export default Results;

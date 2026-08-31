@@ -1,6 +1,12 @@
+//Invoere
 import PopupAnimation from "./PopupAnimation";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
+/*
+    Herbruikbare bevestigings popup, wys slegs as show waar is.
+    Die prompt is die vraag teks wat ingevoer word as 'n prop.
+    Die bevestig en kanseleer knoppies gebruik die event handlers van hul ouer komponent
+*/
 export default function GeneralPopupModal({ show, onConfirm, onCancel, prompt }) {
     const modalRef = useRef(null);
     if (!show) return null;
@@ -23,4 +29,3 @@ export default function GeneralPopupModal({ show, onConfirm, onCancel, prompt })
         </div>
     );
 }
-

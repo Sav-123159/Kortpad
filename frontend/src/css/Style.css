@@ -8,11 +8,13 @@
     --default-border-radius: 15px;
 }
 
+/* Cusrom letter tipe, gebruik in die welkom animasie */
 @font-face {
     font-family: 'Stitchen';
     src: url('/src/stitchen/Stitchen.otf') format('opentype');
 }
 
+/* Skuifbalk nie sigbaar totdat muis oor dit beweeg */
 *{
     scrollbar-gutter: stable;
     scrollbar-width: thin;
@@ -23,6 +25,7 @@
     scrollbar-color: #909090 transparent;
 }
 
+/* Web-kit weergawe van dieselfde onsigbaar-tot-hover skuifbalk styling */
 *::-webkit-scrollbar-track {
     background: transparent;
 }
@@ -42,6 +45,7 @@
     background-color: #6f6f6f;
 }
 
+/* Verhoed dat hele baldsy skuif */
 body {
     overflow: hidden;
     min-height: 100%;
@@ -50,7 +54,7 @@ body {
     padding: 0;
 }
 
-
+/* Basiese houer styl vir alle fieldsets */
 fieldset {
     display: block;
     justify-content: left;
@@ -63,12 +67,14 @@ fieldset {
     border-radius: var(--default-border-radius);
 }
 
+/* Globale vorm uitleg */
 form {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
+/* Globale uitleg vir invoervelde */
 form input,
 form select,
 form textarea {
@@ -87,7 +93,7 @@ form textarea:focus {
     border-color: var(--clay);
 }
 
-
+/* Globale knoppie  styl */
 button {
     padding: 10px;
     border: var(--default-border);
@@ -139,6 +145,7 @@ button:hover {
     padding: 3px;
 }
 
+/* Groet-knoppie langs die logo */
 .greeting{
     background-color: var(--paper);
     color: var(--ink);
@@ -161,6 +168,7 @@ button:hover {
     box-shadow:  0 6px 10px rgba(0, 0, 0, 0.25);
 }
 
+/* Roep die waai animasie wanneer is-waving klas bygevoeg word */
 .greeting.is-waving {
     animation: Wave 0.65s ease forwards;
 }
@@ -182,6 +190,7 @@ button:hover {
     color: var(--ink);
 }
 
+/* Wys watter bladsy tans aktief is */
 .Nav_Knoppie--active {
     background-color: var(--paper-deep);
     transform: translateY(-2px);
@@ -191,6 +200,7 @@ button:hover {
     display: flex;
 }
 
+/* Knoppie styl in vorms */
 button.form-button {
     width: 50%;
     margin: 5px;
@@ -213,6 +223,7 @@ button.form-button:hover {
     height: calc(100vh - 120px);
 }
 
+/* Linkerpaneel van gebruiker of admin */
 .LeftPanel,
 .LinkerPaneel {
     width: 360px;
@@ -230,7 +241,7 @@ button.form-button:hover {
     background: var(--paper-deep);
 }
 
-
+/* Regter paneel wat die kaart vul */
 .MapPaneel {
     flex: 1;
     position: relative;
@@ -277,6 +288,43 @@ button.form-button:hover {
     z-index: 1000;
 }
 
+.KortpadRoute--solid {
+    stroke-dasharray: 3000;
+    stroke-dashoffset: 3000;
+    animation:
+        draw-route 1.4s ease-out forwards,
+        fade-out 0.5s ease-in forwards 1.4s;
+}
+
+.KortpadRoute--dashed {
+    stroke-dasharray: 12 14;
+    opacity: 0;
+    animation:
+        fade-in 0.5s ease-in forwards 1.4s,
+        route-flow 0.9s linear infinite 1.4s;
+}
+
+@keyframes draw-route { to { stroke-dashoffset: 0; } }
+@keyframes fade-out    { to { opacity: 0; } }
+@keyframes fade-in     { to { opacity: 1; } }
+@keyframes route-flow  { to { stroke-dashoffset: -26; } }
+
+.RoutePager {
+    background: var(--paper);
+    height: auto;
+    width: auto;
+    padding: 8px 5px;
+    border-radius: 14px;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+/* Beëing rit knoppie */
 .endJourneyBtn {
     position: absolute;
 
@@ -286,6 +334,7 @@ button.form-button:hover {
     z-index: 1000;
 }
 
+/* Basiese tabel styl */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -315,6 +364,7 @@ h3 {
     color: var(--ink);
 }
 
+/* Vol skerm verdofte agtergrond vir die login en popup modals */
 .login-page,
 .popup-page {
     position: fixed;
@@ -330,6 +380,7 @@ h3 {
     z-index: 999;
 }
 
+/* Login modal, met vorms links en animasie regs */
 .login-container {
     display: flex;
     flex-direction: row;      
@@ -348,6 +399,7 @@ h3 {
     box-sizing: border-box;
 }
 
+/* Algemene gebruik popup houer */
 .popup-container {
     display: flex;
     flex-direction: row;      
@@ -369,6 +421,7 @@ h3 {
     gap: 20px;
 }
 
+/* Vaste hoogte onafhanklik van grootte van vorm */
 form.login {
     max-height: 300px;
     overflow-y: auto;
@@ -399,6 +452,7 @@ img.login-logo {
     height: 150px;
 }
 
+/* Basiese styl vir die node sirkels in die login modal se SVG */
 .node {
     fill: var(--pine-dark);
     transform-origin: center;
@@ -425,21 +479,23 @@ img.login-logo {
     animation: pulse4 16s ease-in-out infinite;
 }
 
+/* Node 1 puls */
 @keyframes pulse1 {
 
+    /* Bly stil tot 14% */
     0%,
     14%,
     100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
-
+    /* Verkleur en groei van 16%-20% */
     16%,
     20% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
-
+    /* Terug na normaal by 22% */
     22% {
         transform: scale(1);
         fill: var(--pine-dark);
@@ -447,20 +503,20 @@ img.login-logo {
 }
 
 @keyframes pulse2 {
-
+    /* Bly stil tot 24% */
     0%,
     24%,
     100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
-
+    /* Verkleur en groei van 26%-30% */
     26%,
     30% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
-
+    /* Terug na normaal by 32% */
     32% {
         transform: scale(1);
         fill: var(--pine-dark);
@@ -468,20 +524,20 @@ img.login-logo {
 }
 
 @keyframes pulse3 {
-
+    /* Bly stil tot 34% */
     0%,
     34%,
     100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
-
+    /* Verkleur en groei van 36%-40% */
     36%,
     40% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
-
+    /* Terug na normaal by 42% */
     42% {
         transform: scale(1);
         fill: var(--pine-dark);
@@ -489,26 +545,27 @@ img.login-logo {
 }
 
 @keyframes pulse4 {
-
+    /* Bly stil tot 44% */
     0%,
     44%,
     100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
-
+    /* Verkleur en groei van 46%-50% */
     46%,
     50% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
-
+    /* Terug na normaal by 52% */
     52% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
 }
 
+/* Lyn tussen die 4 nodes */
 .animated-path {
     fill: none;
     stroke: var(--pine-dark);
@@ -521,6 +578,8 @@ img.login-logo {
     animation: drawPath 16s linear infinite;
 }
 
+/* Trek die pad-lyn stadig nadat al 4 nodes klaar gepols het, hou die lyn sigbaar vir 'n rukkie
+En laat dit in die rigting waarin dit geteken is verdwyn */
 @keyframes drawPath {
 
     0%,
@@ -551,6 +610,7 @@ img.login-logo {
     }
 }
 
+/* Waai animasie vir die groet knoppie, draai en skaal 'n paar keer in albei rigtings soos wat 'n hand sou waai */
 @keyframes Wave {
     0%   { transform: rotate(0deg)   translateY(0)    scale(1); }
     15%  { transform: rotate(-9deg)  translateY(-8px)  scale(1.03); }
@@ -561,6 +621,7 @@ img.login-logo {
     100% { transform: rotate(0deg)   translateY(0)     scale(1); }
 }
 
+/* Vol skerm intro overlay wat op die program-begin wys en na die animasie verdwyn */
 .global-intro-overlay {
     position: fixed;
     top: 0;
@@ -577,6 +638,7 @@ img.login-logo {
     visibility: visible;
 }
 
+/* Klas wat deur JS bygevoeg word om die intro overlay te laat verdwyn */
 .global-intro-overlay.fade-out-active {
     opacity: 0;
     visibility: hidden;
@@ -603,12 +665,14 @@ img.login-logo {
     text-align: center;
 }
 
+/* Basis styl vir die nodes op die intro-SVG */
 .intro-node {
     fill: var(--pine-dark);
     transform-origin: center;
     transform-box: fill-box;
 }
 
+/* Houer wat die hele animasie bevat en laat uitvaag */
 .intro-animation-wrapper {
     display: flex;
     flex-direction: column;
@@ -623,6 +687,7 @@ img.login-logo {
     opacity: 0;
 }
 
+/* Dieselfde animasie as die gewone nodes, met tye korter gestel */
 #intro-node1 {
     animation: introPulse1 5s ease-in-out infinite;
 }
@@ -746,6 +811,7 @@ img.login-logo {
     }
 }
 
+/* Welkom teks wat saam met die pad animasie verskyn */
 .welkom-text {
     font-family: 'Stitchen';
     color: var(--pine-dark);
