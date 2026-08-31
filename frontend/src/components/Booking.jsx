@@ -239,7 +239,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
         const highest = Math.max(...selectedIndexes);
 
         // Kan slegs 'n waarde 1 hoër of laer van die stel gleuwe kies
-        if (newIndex === lowest - 1 || newIndex === highest + 1) {
+        if (newIndex === lowest - 1 || (newIndex === highest + 1)) {
             setSelectedSlots([...selectedSlots, slot]);
         }
     }
@@ -259,9 +259,12 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
 
         const startTime = selectedTimes[0];
 
+        const lastSelectedTime = selectedTimes.at(-1);
+        const nextIndex = times.indexOf(lastSelectedTime) + 1;
+
         const endTime =
-            // Kry tyd na due laaste geselekteerde tyd
-            times[times.indexOf(selectedTimes.at(-1)) + 1];
+            times[nextIndex] ||
+            `${parseInt(lastSelectedTime.split(":")[0], 10) + 1}:00`;
 
         const bookingData = {
             venue_id: Number(selectedVenue),
