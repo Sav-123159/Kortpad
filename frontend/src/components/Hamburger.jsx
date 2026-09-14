@@ -23,11 +23,24 @@ export default function Hamburger({ aktieweContainer, setAktieweContainer, handl
             <button
                 className={isOpen ? "hamburger hamburger--open" : "hamburger"}
                 onClick={toggleMenu}
-                aria-label="Toggle menu"
+                aria-label={isOpen ? "Close menu" : "Open menu"}
             >
-                <span className="burger burger1"></span>
-                <span className="burger burger2"></span>
-                <span className="burger burger3"></span>
+                <svg viewBox="0 0 24 24" width="26" height="26" className="hamburger-icon">
+                    {/* account ikoon wys as dit nie geklik is nie */}
+                    {/* g is svg se div */}
+                    <g className="icon-account">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+                    </g>
+
+                    {/* hamburger ikoon wys as knoppie geklik is */}
+                    <g className="icon-burger">
+                        <line x1="4" y1="7" x2="20" y2="7" />
+                        <line x1="4" y1="12" x2="20" y2="12" />
+                        <line x1="4" y1="17" x2="20" y2="17" />
+                    </g>
+                </svg>
+
             </button>
 
             {isOpen && (

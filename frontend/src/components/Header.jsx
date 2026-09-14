@@ -115,7 +115,7 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
             )}
 
             <div className="Nav">
-                {isAdmin && (
+                {/* {isAdmin && (
                     <button
                         className={aktieweContainer === "StudentContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
                         onClick={() => setAktieweContainer("StudentContainer")}
@@ -125,9 +125,9 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
                     <button
                         className={aktieweContainer === "AdminContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
                         onClick={() => setAktieweContainer("AdminContainer")}
-                    >Admin</button>)}
+                    >Admin</button>)} */}
 
-                <button className="Nav_Knoppie" onClick={handleAuthButtonClick}>{isLoggedIn ? "Log Out" : "Log In"}</button>
+                {/* <button className="Nav_Knoppie" onClick={handleAuthButtonClick}>{isLoggedIn ? "Log Out" : "Log In"}</button> */}
 
                 <LogIn show={show} onClose={hideModal} />
 

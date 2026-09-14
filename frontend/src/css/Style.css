@@ -149,10 +149,8 @@ button:hover {
     width: 2.2rem;
     height: 2.2rem;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 5px;
     background: none;
     border: none;
     box-shadow: none;
@@ -168,36 +166,52 @@ button:hover {
     transform: none;
 }
 
-.burger {
-    width: 1.8rem;
-    height: 0.22rem;
-    border-radius: 10px;
-    background-color: var(--pine-dark);
-    transform-origin: center;
-    /* pivot from the middle of each line, not the edge */
-    transition: all 0.3s ease;
+.hamburger-icon {
+    display: block;
+    overflow: visible;
 }
 
-.hamburger:hover .burger {
-    background-color: var(--pine);
+/* svg = g, html = div */
+.hamburger-icon g {
+    fill: none;
+    stroke: var(--pine-dark);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    transform-origin: 12px 12px;
+    transition: opacity 0.25s ease, transform 0.3s ease, stroke 0.25s ease;
 }
 
-.hamburger--open .burger1 {
-    transform: translateY(8.5px) rotate(45deg);
+.hamburger:hover .hamburger-icon g {
+    stroke: var(--pine);
 }
 
-.hamburger--open .burger2 {
+/* account teken-wys as dit nie geklik is nie */
+.icon-account {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+/* Hamburger teken wys nie as knoppie nie geklik is nie */
+.icon-burger {
     opacity: 0;
+    transform: scale(0.6) rotate(-45deg);
 }
 
-.hamburger--open .burger3 {
-    transform: translateY(-8.5px) rotate(-45deg);
+/* Account teken-wys nie as dit geklik is nie */
+.hamburger--open .icon-account {
+    opacity: 0;
+    transform: scale(0.6) rotate(45deg);
+}
+
+/* Hamburger teken wys as knoppie geklik is */
+.hamburger--open .icon-burger {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
 }
 
 /* Dropdown wrapper + panel */
 .hamburger-wrapper {
     position: relative;
-    display: none;
 }
 
 .hamburger-menu {
@@ -251,16 +265,6 @@ button:hover {
     background-color: var(--paper-deep);
     transform: none;
     /* no lift inside a stacked menu, looks odd there */
-}
-
-/* Show hamburger, hide full row nav on small screens */
-@media (max-width: 768px) {
-    .Nav > .Nav_Knoppie {
-        display: none;
-    }
-    .hamburger-wrapper {
-        display: block;
-    }
 }
 
 /* Groet-knoppie langs die logo */
