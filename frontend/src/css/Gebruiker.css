@@ -1,5 +1,5 @@
 :root {
-    --paper: #e3eed4;
+    --paper: #e5efd7;
     --paper-deep: #aec3b0;
     --ink: #2E2F22;
     --pine: #375534;
@@ -9,13 +9,14 @@
     --default-border-radius: 15px;
 }
 
+/* Kaart wat 'n enkele lokaal wys (naam, gebou en kapasiteit) */
 .res-houer{
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas: 
         "Lokaal Gebou"
-        "Afstand Kapasiteit";
-    width: 350px;
+        "Kapasiteit Vloer";
+    width: auto;
     margin: auto;
     margin-top: 15px;
     gap: 15px;
@@ -25,11 +26,13 @@
     border-radius: var(--default-border-radius);
 }
 
+/* Hover toestand vir die resultaat kaar, gee 'n "lifting" effek */
 .res-houer:hover{
     background-color: var(--paper-deep);
     transform: translateY(-2px);
 }
 
+/* Grid-area plasing vir elke veld binne die resultaat-kaart */
 .lokaal{
     grid-area: Lokaal;
 }
@@ -38,20 +41,21 @@
     grid-area: Gebou;
 }
 
-.afstand{
-    grid-area: Afstand;
-}
-
 .kapasiteit{
-    grid-area: Afstand;
+    grid-area: Kapasiteit;
 }
 
+.vloer{
+    grid-area: Vloer;
+}
+
+/* Maak die leaflet-kaart die  houer volledig vol */
 .MapPaneel .leaflet-container{
     width:100%;
     height:100%;
 }
 
-
+/* Vol-skerm verdofte agtergrond agter die besprekings modal */
 .booking-page {
     position: fixed;
     inset: 0;
@@ -66,6 +70,7 @@
     z-index: 999;
 }
 
+/* Besprekings modal self, met die sypaneel en die rooster */
 .booking-modal {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -84,6 +89,7 @@
     overflow: auto;
 }
 
+/* Linkerkant van die bespreking modal */
 .booking-sidebar {
     display: flex;
     flex-direction: column;
@@ -95,6 +101,7 @@
     color: var(--ink);
 }
 
+/* Opsommende blokkie van gekose tydgleuwe */
 .booking-selection {
     padding: 10px;
     background: var(--paper-deep);
@@ -107,6 +114,7 @@
     font-size: 0.95rem;
 }
 
+/* Vee skoon skakel in opsomming blokkie */
 .booking-clear {
     margin-top: 8px;
 
@@ -119,6 +127,7 @@
     text-decoration: underline;
 }
 
+/* Knoppie groep, onder in kant paneel */
 .booking-actions {
     margin-top: auto;
 
@@ -127,15 +136,18 @@
     gap: 8px;
 }
 
+/* Deaktiveer toestand van bevestig knoppie */
 .booking-confirm:disabled {
     background: var(--pine);
     cursor: not-allowed;
 }
 
+/* Bespreking tabel afdeling */
 .booking-grid {
     overflow-x: auto;
 }
 
+/* Opskrif en onderskrif bo die tabel */
 .booking-grid-header {
     margin-bottom: 15px;
 }
@@ -151,12 +163,14 @@
     font-size: 0.95rem;
 }
 
+/* Linker tyd kolom in die tabel */
 .time-label {
     background: white;
     font-weight: 600;
     color: var(--ink);
 }
 
+/* Bespreking sel toestande */
 .available {
     background: white;
     cursor: pointer;
@@ -187,11 +201,13 @@
     cursor: not-allowed;
 }
 
+/* Verdof die dag kolom opskrifte wat nie die dag van die geselekteerde datum is nie */
 .disabled-header {
     background: #b9c9ba !important;
     color: #4b5563 !important;
 }
 
+/* Teken in prompt vir gebruikers wat nie ingeteken is nie */
 .Sign-In-Prompt{
     display: flex;
     justify-content: center;

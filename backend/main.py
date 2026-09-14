@@ -1,19 +1,21 @@
 from sqlite3 import IntegrityError
+from click import group
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from models import *
 from database import init_db, get_db
 from graph import GraphCache
 from dijkstra import dijkstra
-from datetime import date, time
 import bcrypt
 
 app = FastAPI()
 
 origins = [
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
 ]
 
+# Hier stel ons die toegelate domeins wat mag versoeke maak na die bediener
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -22,21 +24,50 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+# Hierdie funksie maak seker dat die instansie van die bediener het 'n databasis
 init_db()
 
+# 'n Cache wat kampus kaarte stoor elke keer wat die Frontend 'n versoek maak vir 'n kaart,
+# kan die bediener eers kyk of die kaart klaar gelaai is binne die cache om prestasie te spaar op komplekse data struktuur skeppings 
 _map_cache = GraphCache()
+
+# ==================== API ====================
+# Daar bestaan basiese API CRUD metodes vir alle data wat modelle voor bestaan, soos:
+#       - GET Metodes om een spesifieke rekord te kry of alle bestaande rekords te kry
+#       - POST Metodes om 'n nuwe rekord te skep en te stoor
+#       - DELETE Metodes om 'n spesifieke gestoorde rekord te verwyder
+#       - PUT Metodes om 'n spesifieke rekord te wysig
 
 @app.get('/')
 def root():
     return {'message': 'API'}
 
 # ==================== AUTH ====================
+#Gebruik salt om selfde passwords van ander users unique te maak
+#Eenrigting hash nie encryption nie
+#Passwords bestaan uit 60 karakters
+#   Identifier -> bcrypt weergawe -> "$2b$"
+#   Koste faktoor -> 12 -> "12$"
+#   Sout (salt) -> 128-bits ewekansige sout (salt) unieke vir elke wagwoord al is dit presies dieselfde wagwoord (Base64 formaat) -> 22 karakters lang string
+#   Hash payload -> 192-bits vingerprint gebruik Eksblowfish om die wagwoord en 'n sout saam te skommel (2^kostefaktoor) = 4096 keer (Base64 formaat) -> 31 karakters lang string
+
+#Base64 bcrypt formaat
+#   Groupeer bits in blokke van 6 bits
+#   Elke bit is 'n waarde van 0-63 -> elke waarde map na 'n karakter
+#   Vir die sout is die 128bits / 6 = 21.33 karakters -> sisteem round op na 22 karakters en vul die laaste 4 bits met padding
+#   Gebruik A-Z, a-z, 0-9, ., / vir karakters
+#   Gebruik 0'e vir padding
+
 def encrypt_password(password: str) -> str:
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed.decode('utf-8')
 
 def verify_password(password: str, hashed_password: str) -> bool:
+    #bcrypt 
+    #   -> Kry sout, koste faktoor van die hashed password
+    #   -> Gebruik dit dan om die ander password te hash
+    #   -> Die resultaat word met mekaar dan vergelyk en gee [true|false]
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 
@@ -70,6 +101,9 @@ def get_users():
     conn.close()
     return users
 
+#Gebruikers se informasie word in twee verdeel
+#   User (app_user) -> naam, van, epos, is_admin
+#   Auth (auth) -> wagwoord, epos
 @app.post('/user')
 def create_user(user : UserCreate, auth : Auth):
     conn = get_db()
@@ -83,6 +117,7 @@ def create_user(user : UserCreate, auth : Auth):
         user_id = cursor.lastrowid
 
         #Auth
+        #Hash die password voor hy in die databasis gestoor word
         hashed_password = encrypt_password(auth.password)
         cursor.execute('INSERT INTO auth (user_id, password, email) VALUES (?, ?, ?)',
         (user_id, hashed_password, user.email))
@@ -96,8 +131,10 @@ def create_user(user : UserCreate, auth : Auth):
     finally:
         conn.close()
 
-@app.post('/user/admin') #vir admins wat users create, kan hulle initialise met admin rights
-def create_user(user : AdminUserCreate, auth : Auth): #gebruik Auth vir password field om die password te protect
+#Vir admins wat ander admin accounts kan maak
+#Presies dieselfde as normale post, maar kan ook is_admin stel
+@app.post('/user/admin') 
+def create_user(user : AdminUserCreate, auth : Auth): 
     conn = get_db()
     try:
         cursor = conn.cursor()
@@ -122,8 +159,11 @@ def create_user(user : AdminUserCreate, auth : Auth): #gebruik Auth vir password
     finally:
         conn.close()
 
-@app.post('/user/login') #omdat email unique is
-def login(login : Login): #omdat HandleLogin 'n user object verwag moet ek 'n nuwe mode skep
+#Werwag 'n regte wagwoord dan stuur dit 'n User objek 
+#Gebruik epos om die user te identifiseer -> epos is unique per gebruiker
+#Omdat HandleLogin op LogIn.jsx 'n user objek verwag was 'n nuwe model geskep
+@app.post('/user/login')
+def login(login : Login):
     conn = get_db()
     try:
         cursor = conn.cursor()
@@ -134,7 +174,7 @@ def login(login : Login): #omdat HandleLogin 'n user object verwag moet ek 'n nu
             raise HTTPException(status_code=401, detail='Wrong password') 
 
         data = cursor.execute('SELECT * FROM app_user WHERE email = ?', (login.email,)).fetchone()
-        return User(**dict(data)) #stuur frontend toe, vir local storage ook, so gebruik UserCheck
+        return User(**dict(data))
     finally:
         conn.close()
 
@@ -163,7 +203,7 @@ def delete_user(user_id : int):
         conn.close()
 
 @app.put('/user/{user_id}')
-def update_user(user_id : int, user : UserBase, is_admin : bool): #moet die is_admin by die put function ook kom?
+def update_user(user_id : int, user : UserBase, is_admin : bool):
     if user_id <= 0:
         raise HTTPException(status_code=400, detail='User id needs to be greater than 0')
     
@@ -308,7 +348,7 @@ def update_timetable(timetable_id : int, timetable : TimetableBase):
         )
         )
 
-        if cursor.rowcount == 0: #extra check in gesit
+        if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail='Timetable does not exist') 
         
         conn.commit()
@@ -441,16 +481,16 @@ def update_booking(booking_id : int, booking : BookingBase):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ?, booking_created_at = ? WHERE booking_id = ?',
-        (
-            booking.venue_id, 
-            booking.user_id, 
-            booking.start_time, 
-            booking.end_time, 
-            booking.booking_date, 
-            booking.booking_created_at, 
-            booking_id
-        )
+        cursor.execute(
+            'UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ? WHERE booking_id = ?',
+            (
+                booking.venue_id,
+                booking.user_id,
+                booking.start_time.isoformat(),
+                booking.end_time.isoformat(),
+                booking.booking_date.isoformat(),
+                booking_id
+            )
         )
         
         if cursor.rowcount == 0:
@@ -459,6 +499,33 @@ def update_booking(booking_id : int, booking : BookingBase):
         conn.commit()
         
         return {'message': f'Booking {booking_id} has been updated'}
+
+    except IntegrityError:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+# Kyk vir botsings met nuwe Admin booking (gee true of false terug :))
+@app.get('/booking/check-conflict/{venue_id}')
+def check_conflict(venue_id: int, booking_date: str, start_time: str, end_time: str):
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+
+        data = cursor.execute(
+            '''SELECT * FROM booking 
+               WHERE venue_id = ? 
+               AND booking_date = ?
+               AND NOT (end_time <= ? OR start_time >= ?)''',
+            (venue_id, booking_date, start_time, end_time)
+        ).fetchall()
+
+        if not data:
+            return {"conflict": False}
+
+        bookings = [Booking(**dict(d)) for d in data]
+        return {"conflict": True, "bookings": bookings}
 
     except IntegrityError:
         conn.rollback()
@@ -565,9 +632,28 @@ def update_campus(campus_id : int, campus : CampusBase):
         raise HTTPException(status_code=400, detail='Something went wrong')
     finally:
         conn.close()
+        
+# ==================== CAMPUS MAP ====================
+@app.get('/campus-map/{campus_id}')
+def get_campus_map(campus_id : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
 
+        data = cursor.execute('SELECT * FROM campus_map WHERE campus_id = ?', (campus_id,)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Campus map does not exist')
+        
+        return CampusMap(**dict(data))
+
+    finally:
+        conn.close()
+    
 # ==================== BUILDING ====================
-@app.get('/buildings/by-campus/{campus_id}') #daar was 2 get('/buildings/by-campus/{campus_id}')'s, altwee was presies dieselfde, een is delete
+@app.get('/buildings/by-campus/{campus_id}')
 def get_buildings(campus_id : int):
     conn = get_db()
     
@@ -589,7 +675,7 @@ def get_building(building_id : int):
     try:
         cursor = conn.cursor()
 
-        data = cursor.execute('SELECT * FROM building WHERE building_id = ?', (building_id,)).fetchone() #campus_id na building_id to verander
+        data = cursor.execute('SELECT * FROM building WHERE building_id = ?', (building_id,)).fetchone()
         if not data:
             raise HTTPException(status_code=404, detail='Building does not exist')
         
@@ -616,8 +702,8 @@ def create_building(building : BuildingCreate):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('INSERT INTO building (campus_id, building_name, faculty_id) VALUES (?, ?, ?)',
-        (building.campus_id, building.building_name, building.faculty_id))
+        cursor.execute('INSERT INTO building (campus_id, building_name) VALUES (?, ?)',
+        (building.campus_id, building.building_name))
         
         conn.commit()
         
@@ -662,8 +748,8 @@ def update_building(building_id : int, building : BuildingBase):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('UPDATE building SET campus_id = ?, building_name = ?, faculty_id = ? WHERE building_id = ?',
-        (building.campus_id, building.building_name, building.faculty_id, building_id)
+        cursor.execute('UPDATE building SET campus_id = ?, building_name = ? WHERE building_id = ?',
+        (building.campus_id, building.building_name, building_id)
         )
         
         if cursor.rowcount == 0:
@@ -676,6 +762,33 @@ def update_building(building_id : int, building : BuildingBase):
     except IntegrityError:
         conn.rollback()
         raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+        
+# ==================== BUILDING MAP ====================
+@app.get('/building-map/{campus_id}-{building_id}-{floor}')
+def get_building_map(campus_id : int, building_id : int, floor : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+
+        data = cursor.execute('''
+            SELECT bm.*
+            FROM building_map bm
+            JOIN building b
+            ON bm.building_id = b.building_id
+            WHERE b.campus_id = ? 
+            AND bm.building_id = ?
+            AND bm.floor = ?
+        ''', (campus_id, building_id, floor)).fetchone()
+        if not data:
+            raise HTTPException(status_code=404, detail='Building map does not exist')
+        
+        return BuildingMap(**dict(data))
+
     finally:
         conn.close()
 
@@ -735,8 +848,8 @@ def create_venue(venue : VenueCreate):
     try:
         cursor = conn.cursor()
 
-        cursor.execute('INSERT INTO venue (building_id, venue_name, capacity) VALUES (?, ?, ?)',
-        (venue.building_id, venue.venue_name, venue.capacity))
+        cursor.execute('INSERT INTO venue (building_id, venue_name, capacity, floor) VALUES (?, ?, ?, ?)',
+        (venue.building_id, venue.venue_name, venue.capacity, venue.floor))
         
         conn.commit()
         
@@ -781,8 +894,8 @@ def update_venue(venue_id : int, venue : VenueBase):
     try:
         cursor = conn.cursor()
         
-        cursor.execute('UPDATE venue SET building_id = ?, venue_name = ?, capacity = ? WHERE venue_id = ?',
-        (venue.building_id, venue.venue_name, venue.capacity, venue_id)
+        cursor.execute('UPDATE venue SET building_id = ?, venue_name = ?, capacity = ?, floor = ? WHERE venue_id = ?',
+        (venue.building_id, venue.venue_name, venue.capacity, venue.floor, venue_id)
         )
         
         if cursor.rowcount == 0:
@@ -887,7 +1000,36 @@ def update_equipment(equip_id: int, equipment: EquipmentBase):
         raise HTTPException(status_code=400, detail='Something went wrong while updating equipment')
     finally:
         conn.close()
-# ==================== MAP ====================
+
+# ==================== ROUTE ====================
+# Soos in models.py breek ROUTE weg van die konvensie van alle ander modelle en CRUD metodes
+
+# Hier is waar al die roete se data gebou word in so manier dat ons kan navigeer op die kaart op menigde vlakke (kampus-en gebou-vlak)
+# Hierdie funksie toets om te bepaal in watse konteks die huidige deel van die roete voorkom deur die data wat ons binne vertices het. Dit return vir ons 'n Tuple wat in Python
+# gebruik kan word om logiese toetse uit te voer binne get_route().
+def vertex_context(vertex):
+    if vertex['level'] == 'campus':
+        return (vertex['level'], vertex['campus_id'])
+    else:
+        return (vertex['level'], vertex['building_id'], vertex['floor'])
+    
+# Die enigste verskil tussen vertex_context() en build_context() is wat hulle elkeen return. Waar vertex_context() 'n Tuple vir ons return wat ons gebruik om te vergelyk binne watse context ons is,
+# return build_context() return 'n Dict met die eintlike data wat ons soek om die path_route te bou
+def build_context(vertex):
+    if vertex['level'] == 'campus':
+        return {
+            'level': vertex['level'], 
+            'campus_id': vertex['campus_id']
+        }
+    else:
+        return {
+            'level': vertex['level'], 
+            'building_id': vertex['building_id'], 
+            'floor': vertex['floor']
+        }
+
+# Hierdie is die funkise wat geroep word om die roete te bou en terug te stuur vir navigasie.
+# Die gebruiker sal stuur in watse lokaal hulle wil begin en in watse lokaal hulle wil eindig. Met dit gaan kyk ons of daardie lokale vertices het binne die databasis.
 @app.get('/route/{campus_id}-{start_venue}-{destination_venue}')
 def get_route(campus_id : int, start_venue : int, destination_venue : int):
     if campus_id <= 0:
@@ -912,16 +1054,33 @@ def get_route(campus_id : int, start_venue : int, destination_venue : int):
     start_from = rows[start_venue]
     destination = rows[destination_venue]
     
+    # Hier is waar ons die roete probeer bou
+    # Die logika loop deur die pad wat ons dijkstra algoritme en gebruik die vertex_ids wat gestoor is binne hom.
+    # Dan stoor ons die context Tuple binne key wat gebruik word om te toets of ons nog binne dieselfde konteks van die roete werk of nie.
+    # As ons in 'n nuwe konteks is dan append ons dit aan group sodat ons al die dele van die roete opbreek volgend vlak en vloer nommer.
     try:
         adjacency, vertices = _map_cache.get_graph(campus_id)
         path_data, distance_data = dijkstra(adjacency, vertices, start_from, destination)
         
-        coordinates = [
-            [vertices[vertex_id]['latitude'], vertices[vertex_id]['longitude']]
-            for vertex_id in path_data
-        ]
+        groups = []
+        current_group = None
+        previous_key = None
+
+        for vertex_id in path_data:
+            vertex = vertices[vertex_id]
+            key = vertex_context(vertex)
+
+            if key != previous_key:
+                current_group = {'context': build_context(vertex), 'coordinates': []}
+                groups.append(current_group)
+                
+            current_group['coordinates'].append(
+                [vertex['latitude'], vertex['longitude']]
+            )
+            previous_key = key
         
-        return Route(path_coordinates=coordinates, distance=distance_data)
+        
+        return Route(path_data=groups, distance=distance_data)
     
     except Exception:
         raise HTTPException(status_code=400, detail='Route could not be determined')

@@ -1,14 +1,24 @@
+// Invoere
 import { useState, useEffect } from "react";
 
+/*
+    Laat die gebruiker 'n kampus, lokaal en 'n optionele tyd kies om na beskikbare lokale te soek. 
+    Haal kampusse en gepaste lokale van die API af, en gee die opsies wat gekies is terug na die ouer-komponent
+*/
 function SearchForm({ onSearch, onTimeChange, selectedCampus, setSelectedCampus, setStartVenue }) {
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
 
+    /*
+        Haal die lys van kampusse van die API af,
+        stel die eerste kampus as die geselekteerde kampus
+    */
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
             .then((response) => response.json())
             .then((data) => {
                 setCampuses(data);
+                //Stel eerste kampus as die verstek waarde
                 if (data.length > 0) {
                     setSelectedCampus(data[0].campus_id);
                 }
@@ -17,6 +27,12 @@ function SearchForm({ onSearch, onTimeChange, selectedCampus, setSelectedCampus,
     }, []);
 
 
+    /*
+        Verwerk soek vorm indiening
+        Keer dat die vorm die blad herlaai, en haal die vormdata
+        Stuur die data na die ouer kompient se onSearch funksie
+        Stel die begin posisie van die pad verwerking na die huidige lokaal gekies
+    */
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -29,6 +45,10 @@ function SearchForm({ onSearch, onTimeChange, selectedCampus, setSelectedCampus,
         setStartVenue(formData.get("lokaal"));
     };
 
+    /*
+        Haal die lokale wat aan die gekose kampus behoort
+        Indien daar geen kampus gekies is nie, is daar nie lokale om te laai nie
+    */
     useEffect(() => {
         if (!selectedCampus) {
             setVenues([]);
@@ -41,12 +61,15 @@ function SearchForm({ onSearch, onTimeChange, selectedCampus, setSelectedCampus,
             .catch((error) => console.error("Failed to fetch venues:", error));
     }, [selectedCampus]);
 
+    // HTML uitvoer
     return (
         <fieldset>
             <form id="soekForm" onSubmit={handleSubmit}>
                 <label htmlFor="kampus">Kampus:</label>
                 <select id="kampus" name="kampusNaam"
                     onChange={(e) => {
+                        //Verander dadelik die geselekteerde kampus,
+                        //sodat die gepaste lokale gelaai word
                         setSelectedCampus(e.target.value);
                     }} required>
                     {campuses.map((campus) => (
@@ -80,4 +103,5 @@ function SearchForm({ onSearch, onTimeChange, selectedCampus, setSelectedCampus,
     );
 }
 
+//Uitvoer van die SearchForm funksie
 export default SearchForm;

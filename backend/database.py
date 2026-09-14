@@ -27,12 +27,15 @@ def create_tables():
         );     
     ''')
     
-    # FACULTY Table
+    # CAMPUS_MAP Table
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS faculty (
-            faculty_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            faculty_name VARCHAR(100) NOT NULL
-        );            
+        CREATE TABLE IF NOT EXISTS campus_map (
+            campus_id INTEGER PRIMARY KEY,
+            image_path TEXT NOT NULL,
+            bounds_lat DECIMAL(9,2) NOT NULL,
+            bounds_lon DECIMAL(9,2) NOT NULL,
+            FOREIGN KEY (campus_id) REFERENCES campus(campus_id)
+        );                
     ''')
     
     # BUILDING Table
@@ -41,10 +44,21 @@ def create_tables():
             building_id INTEGER PRIMARY KEY AUTOINCREMENT,
             campus_id INTEGER NOT NULL,
             building_name VARCHAR(100) NOT NULL,
-            faculty_id INTEGER,
-            FOREIGN KEY (campus_id) REFERENCES campus(campus_id),
-            FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id)
+            FOREIGN KEY (campus_id) REFERENCES campus(campus_id)
         );
+    ''')
+    
+    # BUILDING_MAP Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS building_map (
+            building_id INTEGER NOT NULL,
+            image_path TEXT NOT NULL,
+            floor INTEGER NOT NULL,
+            bounds_lat DECIMAL(9,2) NOT NULL,
+            bounds_lon DECIMAL(9,2) NOT NULL,
+            PRIMARY KEY (building_id, floor),
+            FOREIGN KEY (building_id) REFERENCES building(building_id)
+        );                
     ''')
     
     # VERTEX Table
@@ -55,14 +69,15 @@ def create_tables():
             campus_id INTEGER,
             building_id INTEGER,
             venue_id INTEGER,
+            floor INTEGER,
             latitude DECIMAL(9,6) NOT NULL,
             longitude DECIMAL(9,6) NOT NULL,
             FOREIGN KEY (campus_id) REFERENCES campus(campus_id),
             FOREIGN KEY (building_id) REFERENCES building(building_id),
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id),
             CHECK (
-                (level = 'campus'   AND campus_id IS NOT NULL AND venue_id IS NULL)
-                OR (level = 'building' AND building_id IS NOT NULL)
+                (level = 'campus' AND campus_id IS NOT NULL AND venue_id IS NULL AND floor IS NULL)
+                OR (level = 'building' AND building_id IS NOT NULL AND floor IS NOT NULL)
             )
         );    
     ''')
@@ -88,6 +103,7 @@ def create_tables():
             building_id INTEGER NOT NULL,
             venue_name VARCHAR(100) NOT NULL,
             capacity INT,
+            floor INTEGER NOT NULL,
             FOREIGN KEY (building_id) REFERENCES building(building_id)
         );            
     ''')
@@ -98,7 +114,7 @@ def create_tables():
             equip_id INTEGER PRIMARY KEY AUTOINCREMENT,
             venue_id INTEGER,
             equip_name VARCHAR(100) NOT NULL,
-            equip_qty INT DEFAULT 0,
+            equip_qty INTEGER DEFAULT 0,
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id)
         );                
     ''')
@@ -111,15 +127,15 @@ def create_tables():
             day_of_week TEXT NOT NULL CHECK (day_of_week IN ('MON','TUE','WED','THU','FRI','SAT','SUN')),
             start_time TIME NOT NULL,
             end_time TIME NOT NULL,
-            module_id TEXT,
+            module_code TEXT,
             semester_start DATE NOT NULL,
             semester_end DATE NOT NULL,
             FOREIGN KEY (venue_id) REFERENCES venue(venue_id),
-            FOREIGN KEY (module_id) REFERENCES module(module_id),
             CHECK (end_time > start_time)
         )        
     ''')
     
+    # MODULE Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS module (
             module_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -193,8 +209,7 @@ def create_views():
             t.semester_start,
             t.semester_end,
             t.start_time,
-            t.end_time,
-            t.module_code AS description
+            t.end_time
         FROM timetable t
         JOIN venue v ON v.venue_id = t.venue_id
 
@@ -209,8 +224,7 @@ def create_views():
             NULL AS semester_start,
             NULL AS semester_end,
             b.start_time,
-            b.end_time,
-            'Boeking deur ' || u.fname || ' ' || u.sname AS description
+            b.end_time
         FROM booking b
         JOIN venue v ON v.venue_id = b.venue_id
         JOIN app_user u ON u.user_id = b.user_id;

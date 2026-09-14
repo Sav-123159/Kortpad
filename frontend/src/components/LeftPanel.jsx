@@ -8,6 +8,11 @@ import SearchForm from "./SearchForm";
 import Results from "./Results";
 import Booking from "./Booking";
 
+/*
+    Houer wat die soek vorm, resultate en die besprekings modal bevat.
+    Kan in mekaar in getrek word (collapse) wanneer 'n lokaal gekies word uit resultate
+    Beweeg outomaties af van die soek vorm na die resultate deur 'n animasie
+*/
 export default function LeftPanel({ 
     hasSearched,
     setHasSearched,
@@ -24,24 +29,37 @@ export default function LeftPanel({
     const panelRef = useRef(null);
     const resultsRef = useRef(null);
 
+    //Bepaal of daar 'n nuwe soektog geskuif moet word, sonder om 'n herlaai te veroorsaak
     const shouldScrollToResults = useRef(false);
 
+    //Wys die besprekings modal
     const showModal = () => {
         setShow(true);
     };
 
+    //Maak die besprekings modal toe
     const hideModal = () => {
         setShow(false);
     };
 
+    /*
+        Word deur Search Vorm geroep wanneer 'n nuwe soektog gemaak word
+        Dui aan dat daar weer af geblaai moet word na die nuwe resultate wanneer
+        hulle klaar gelaai is
+    */
     const onSearch = () => {
         shouldScrollToResults.current = true;
         setHasSearched(true);
     };
 
 
+    /*
+        Skuif "glad" na die Resultate opskrif toe binne die linker paneel, indien daar
+        'n nuwe soektog gemaak word. Word deur Results se onLoaded geroep sodra dit
+        klaar gelaai het. Gebruik Motion om die in blaai en stadig stop effek te kry
+    */
     function smoothScrollToResults() {
-        // Only scroll when a new search was submitted
+        //Daar moeet slegs af geblaai word wanneer 'n nuwe soektog ingedien word
         if (!shouldScrollToResults.current) return;
 
         const container = panelRef.current;
@@ -49,12 +67,12 @@ export default function LeftPanel({
 
         if (!container || !target) return;
 
-        // Reset this so Results changing later does not trigger another scroll
+        //herstel die sodat resultate wat later verander nie nog 'n afblaai veroorskaak nie
         shouldScrollToResults.current = false;
 
         const start = container.scrollTop;
 
-        // Scroll to the Results heading
+        //Blaai na die resultate opskrif
         const end = target.offsetTop - 120;
 
         animate(start, end, {
@@ -67,7 +85,10 @@ export default function LeftPanel({
         });
     }
 
+
     return (
+        // Motion vir die af blaai animasie
+        //Begin posisie van animasie
         <motion.section 
             className="LeftPanel" 
             ref={panelRef}
@@ -100,6 +121,8 @@ export default function LeftPanel({
 
             {hasSearched && (
                 <>
+                    {/* Eindpunt wat aan die bokant van die paneel gaan wys wanneer die animasie klaar is.
+                    Hierdie animasie is slegs vir die af blaai effek*/}
                     <motion.div 
                         id="results" 
                         ref={resultsRef}
@@ -119,6 +142,9 @@ export default function LeftPanel({
                         <h2>Resultate</h2>
                     </motion.div>
                     <motion.div
+                        /* Wanneer die resultate in sig kom, gaan hulle eers vaag wees, en soos wat hulle opbeweeg 
+                        gaan hulle meer sigbaar wees. Hierdie gee 'n sagter effek op die animasie om dit minder "hard" te maak
+                        */
                         initial={{
                             opacity: 0,
                             y: 30,
