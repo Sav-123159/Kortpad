@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "./AuthContext";
 
-export default function Hamburger({ aktieweContainer, setAktieweContainer, handleAuthButtonClick }) {
+export default function Hamburger({ aktieweContainer, setAktieweContainer, handleAuthButtonClick, handleEditUserClick }) {
     const [isOpen, setIsOpen] = useState(false);
     const { user, isLoggedIn } = useAuth();
     const isAdmin = isLoggedIn && !!user?.is_admin;
@@ -15,6 +15,11 @@ export default function Hamburger({ aktieweContainer, setAktieweContainer, handl
 
     const handleAuthClick = () => {
         handleAuthButtonClick();
+        setIsOpen(false);
+    };
+
+    const handleEditClick = () => {
+        handleEditUserClick();
         setIsOpen(false);
     };
 
@@ -44,7 +49,7 @@ export default function Hamburger({ aktieweContainer, setAktieweContainer, handl
             </button>
 
             {isOpen && (
-                <div className="hamburger-menu">
+                <div className="hamburger-menu">       
                     {isAdmin && (
                         <button
                             className={aktieweContainer === "StudentContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
@@ -56,6 +61,12 @@ export default function Hamburger({ aktieweContainer, setAktieweContainer, handl
                             className={aktieweContainer === "AdminContainer" ? "Nav_Knoppie Nav_Knoppie--active" : "Nav_Knoppie"}
                             onClick={() => handleNavClick("AdminContainer")}
                         >Admin</button>
+                    )}
+                    {isLoggedIn && !isAdmin && (
+                        <button
+                            className="Nav_Knoppie"
+                            onClick={handleEditClick}
+                        >Wysig Gebruiker</button>
                     )}
                     <button className="Nav_Knoppie" onClick={handleAuthClick}>
                         {isLoggedIn ? "Log Out" : "Log In"}

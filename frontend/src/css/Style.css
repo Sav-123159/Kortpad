@@ -503,7 +503,8 @@ h3 {
 }
 
 /* Login modal, met vorms links en animasie regs */
-.login-container {
+.login-container,
+.edit-container {
     display: flex;
     flex-direction: row;      
     align-items: center;

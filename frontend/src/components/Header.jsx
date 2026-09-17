@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import LogIn from "./LogIn";
 import GeneralPopupModal from "./GeneralPopupModal";
 import Hamburger from "./Hamburger";
+import UserEdit from "./UserEdit";
 import { useAuth } from "./AuthContext";
 
 //Gebruik AuthContext om localstorage te soek vir enige heidige in-getekende gebruiker (user) en hul besonderhede
@@ -18,6 +19,7 @@ import { useAuth } from "./AuthContext";
 export default function Header({ aktieweContainer, setAktieweContainer }) {
     const [show, setShow] = useState(false);
     const [showLogOut, setShowLogOut] = useState(false);
+    const [showUserEdit, setShowUserEdit] = useState(false);
     const { user, isLoggedIn, logout } = useAuth();
     const [popupPrompt, setPopupPrompt] = useState();
     const greetingRef = useRef(null);
@@ -32,6 +34,10 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
         setShow(false);
     };
 
+    const hideUserEdit = () => {
+        setShowUserEdit(false);
+    }
+
     //Wys Logout boodksap as gebruiker klaar ingeteken is, anders wys Login-modal
     const handleAuthButtonClick = () => {
         if (isLoggedIn) {
@@ -42,6 +48,10 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
             showModal();
         }
     };
+
+    const handleEditUserClick = () => {
+        setShowUserEdit(true);
+    }
 
     //Teken gebruiker uit, en gaan terug na student container toe
     const confirmLogout = () => {
@@ -131,6 +141,8 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
 
                 <LogIn show={show} onClose={hideModal} />
 
+                <UserEdit show={showUserEdit} onClose={hideUserEdit} />
+
                 <GeneralPopupModal
                     show={showLogOut}
                     onConfirm={confirmLogout}
@@ -141,6 +153,7 @@ export default function Header({ aktieweContainer, setAktieweContainer }) {
                     aktieweContainer={aktieweContainer}
                     setAktieweContainer={setAktieweContainer}
                     handleAuthButtonClick={handleAuthButtonClick}
+                    handleEditUserClick={handleEditUserClick}
                 />
             </div>
         </header>
