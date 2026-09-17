@@ -449,10 +449,11 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                                         className={
                                             activeDay && day !== activeDay
                                                 ? "disabled-header"
-                                                : ""
+                                                : "active-header"
                                         }
                                     >
-                                        {day}
+                                        <span className="day-full">{day}</span>
+                                        <span className="day-short">{day.charAt(0)}</span>
                                     </th>
                                 ))}
                             </tr>

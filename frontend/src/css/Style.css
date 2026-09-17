@@ -46,12 +46,15 @@
 }
 
 /* Verhoed dat hele baldsy skuif */
-body {
-    overflow: hidden;
-    min-height: 100%;
+body{
+    height: 100%;
     width: auto;
     margin: 0;
     padding: 0;
+}
+
+html{
+    overflow: hidden;
 }
 
 /* Basiese houer styl vir alle fieldsets */
@@ -349,6 +352,7 @@ button.form-button:hover {
 .LeftPanel,
 .LinkerPaneel {
     width: 360px;
+    height: 100vh;
     padding: 20px;
 
     box-sizing: border-box;
@@ -986,5 +990,53 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
         opacity: 1;
         clip-path: inset(0 0 0 0);
         transform: translateY(0);
+    }
+}
+
+/* Mobile View */
+
+@media screen and (max-width: 480px) {
+    .global-intro-overlay {
+        height: 100%;
+    }
+
+    .intro-deco {
+        width: 90%;
+    }
+
+    .intro-deco svg {
+        width: 100%;
+        height: auto;
+    }
+
+    .intro-animation-wrapper {
+        width: 100%;
+    }
+
+    .intro-animated-path {
+        stroke-width: 6;
+    }
+
+    .welkom-text {
+        font-size: 2.5rem;
+    }
+
+    body{
+        overflow-y: hidden;
+    }
+
+    html{
+        height: 100%;
+        overflow: hidden;
+        font-size: 90%;
+    }
+
+    .leftPanel,
+    .LinkerPaneel {
+        min-width: 100%;
+    }
+
+    .mapPaneel {
+        width: 0%;
     }
 }
