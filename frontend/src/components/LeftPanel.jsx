@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 
 import { animate } from "motion";
@@ -8,20 +8,37 @@ import SearchForm from "./SearchForm";
 import Results from "./Results";
 import Booking from "./Booking";
 
+//Kyk of die skerm 'n foon grootte is, verander die linker paneel se breedte na 100% van die skerm
+function useIsMobile(query = "(max-width: 480px)") {
+    const [isMobile, setIsMobile] = useState(
+        () => window.matchMedia(query).matches
+    );
+
+    useEffect(() => {
+        const mql = window.matchMedia(query);
+        const onChange = (e) => setIsMobile(e.matches);
+
+        mql.addEventListener("change", onChange);
+        return () => mql.removeEventListener("change", onChange);
+    }, [query]);
+
+    return isMobile;
+}
+
 /*
     Houer wat die soek vorm, resultate en die besprekings modal bevat.
     Kan in mekaar in getrek word (collapse) wanneer 'n lokaal gekies word uit resultate
     Beweeg outomaties af van die soek vorm na die resultate deur 'n animasie
 */
-export default function LeftPanel({ 
+export default function LeftPanel({
     hasSearched,
     setHasSearched,
-    selectedCampus, 
-    setSelectedCampus, 
-    setStartVenue, 
-    setEndVenue, 
-    collapsed, 
-    setCollapsed 
+    selectedCampus,
+    setSelectedCampus,
+    setStartVenue,
+    setEndVenue,
+    collapsed,
+    setCollapsed
 }) {
     const [selectedTime, setSelectedTime] = useState("");
     const [show, setShow] = useState(false);
@@ -31,6 +48,9 @@ export default function LeftPanel({
 
     //Bepaal of daar 'n nuwe soektog geskuif moet word, sonder om 'n herlaai te veroorsaak
     const shouldScrollToResults = useRef(false);
+
+    const isMobile = useIsMobile();
+    const expandedWidth = isMobile ? "100%" : 360;
 
     //Wys die besprekings modal
     const showModal = () => {
@@ -86,20 +106,22 @@ export default function LeftPanel({
     }
 
 
+
+
     return (
         // Motion vir die af blaai animasie
         //Begin posisie van animasie
-        <motion.section 
-            className="LeftPanel" 
+        <motion.section
+            className="LeftPanel"
             ref={panelRef}
             animate={{
-                width: collapsed ? 0 : 360,
+                width: collapsed ? 0 : expandedWidth,
                 padding: collapsed ? 0 : 20,
             }}
             transition={{
                 duration: 0.4,
                 ease: "easeInOut",
-            }}    
+            }}
         >
 
             <button onClick={showModal}>
@@ -123,8 +145,8 @@ export default function LeftPanel({
                 <>
                     {/* Eindpunt wat aan die bokant van die paneel gaan wys wanneer die animasie klaar is.
                     Hierdie animasie is slegs vir die af blaai effek*/}
-                    <motion.div 
-                        id="results" 
+                    <motion.div
+                        id="results"
                         ref={resultsRef}
                         initial={{
                             opacity: 0,
