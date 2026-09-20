@@ -565,6 +565,10 @@ h3 {
     box-sizing: border-box;
 }
 
+.edit-container button {
+    margin: 5px;
+}
+
 /* Algemene gebruik popup houer */
 .popup-container {
     display: flex;
@@ -815,19 +819,6 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 
     100% {
         transform: rotate(0deg) translateY(0) scale(1);
-    }
-}
-
-@media screen and (max-width: 480px) {
-    .Logo img {
-        width: 10vw;
-        height: auto;
-        border-radius: 10px;
-    }
-
-    body {
-        overflow-y: hidden;
-        height: 100%;
     }
 }
 
@@ -1084,6 +1075,14 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 /* Mobile View */
 
 @media screen and (max-width: 480px) {
+
+    .Logo img {
+        width: 3.0rem;
+        height: 3.0rem;
+        border-radius: 10px;
+    }
+
+
     .global-intro-overlay {
         height: 100%;
     }
@@ -1140,7 +1139,7 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 
         width: 100%;
         max-width: 100%;
-        height:auto;
+        height: auto;
         max-height: 100%;
         padding: 20px;
 
@@ -1149,7 +1148,7 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
     }
 
     .form,
-    .deco{
+    .deco {
         flex: none;
         width: 100%;
     }
@@ -1158,7 +1157,7 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
         gap: 15px;
     }
 
-    .deco{
+    .deco {
         order: -1;
     }
 
@@ -1173,7 +1172,4 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
         height: auto;
     }
 
-    .edit-container button{
-        margin: 5px;
-    }
 }
