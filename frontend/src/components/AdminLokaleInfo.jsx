@@ -11,7 +11,7 @@ import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 export default function AdminLokaleInfo(){
     // Boolean state om die popup oop en toe te maak
     const [isPopupOop, setIsPopupOop] = useState(false);
-    const [isDeleteOop, setIsDeleteOop] = useState(false);
+    // const [isDeleteOop, setIsDeleteOop] = useState(false);
 
     // skikking veranderlike wat die kampusse van die databasis af laai in die veranderlike in
     // Die selectedCampus hou tred met watse kampus die gebruiker kies
@@ -54,24 +54,6 @@ export default function AdminLokaleInfo(){
 
     // Kry die naam van die lokaal gebaseer op sy id en as 'n naam nie gevind word nie, kry ons 'undefined' eerder as 'n error
     const selectedVenueName = venues.find(venue => venue.venue_id === selectedVenue)?.venue_name;
-
-    // Verwyder die lokaal uit die databasis uit
-    // async want ons wag vir die backend
-    // setVenues skikking word nou nuut gelaai met die lokale sonder die lokaal wat nou verwyder is
-    // Maak die delete popup toe en die geselekteerde lokaal is nou null, want hy was verwyder
-    const deleteVenue = async () => {
-        try {
-            await fetch(`http://127.0.0.1:8000/venue/${selectedVenue}`, {
-                method: "DELETE",
-            });
-
-            setVenues(venues.filter(venue => venue.venue_id !== selectedVenue));
-            setIsDeleteOop(false);
-            setSelectedVenue(null);
-        } catch (err) {
-            console.error("Error deleting venue:", err);
-        }
-    };
 
     // Veranderlikes om die lokaal naam te edit
     // editingName hou die ID van die lokaal se naam wat nou geedit word
@@ -178,6 +160,7 @@ export default function AdminLokaleInfo(){
                                         setTempName({ ...tempName, [venue.venue_id]: e.target.value });
                                     }}
                                 />
+                                {/* Editing knoppie */}
                                 <button
                                     className={editingName === venue.venue_id ? "Edit_Aktief" : ""}
                                     onClick={async () => {
@@ -228,24 +211,17 @@ export default function AdminLokaleInfo(){
                                 )}
                             </div>
 
-                            <button
+                            {/* <button
                                 onClick={() => {
                                     setIsDeleteOop(true);
                                     setSelectedVenue(venue.venue_id);
                                 }}
                             >
                                 &#x1F5D1;
-                            </button>
+                            </button> */}
                         </div>
                     ))
                 )}
-                <AdminConfirmPopUp
-                    isConfirmOop={isDeleteOop}
-                    setIsConfirmOop={setIsDeleteOop}
-                    tipe="ConfirmDel"
-                    onConfirm={deleteVenue}
-                    itemName={selectedVenueName}
-                />
             </div>
         </div>           
     )
