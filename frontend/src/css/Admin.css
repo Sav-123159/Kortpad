@@ -239,6 +239,19 @@ h2 {
     min-height: 450px;
 }
 
+.Lokale__lys {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 70%;
+}
+
+.Lokaal__capacity {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
 .loading-overlay {
     position: absolute;
     top: 40%;

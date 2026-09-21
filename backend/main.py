@@ -811,6 +811,28 @@ def get_venue(venue_id : int):
     finally:
         conn.close()
 
+@app.get('/venue/{venue_id}/capacity')
+def get_venue_capacity(venue_id: int):
+    if venue_id <= 0:
+        raise HTTPException(status_code=400, detail='Venue id needs to be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+
+        data = cursor.execute(
+            'SELECT capacity FROM venue WHERE venue_id = ?',
+            (venue_id,)
+        ).fetchone()
+
+        if not data:
+            raise HTTPException(status_code=404, detail='Venue does not exist')
+        
+        return {'capacity': data['capacity']}
+
+    finally:
+        conn.close()
+
 @app.get('/venue/by-campus/{campus_id}')
 def get_venue(campus_id : int):
     _map_cache.get_graph(campus_id)

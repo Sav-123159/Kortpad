@@ -11,7 +11,9 @@ import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 export default function AdminLokaleInfo(){
     // Boolean state om die popup oop en toe te maak
     const [isPopupOop, setIsPopupOop] = useState(false);
-    // const [isDeleteOop, setIsDeleteOop] = useState(false);
+    
+    const [editingCapacity, setEditingCapacity] = useState(null);
+    const [tempCapacity, setTempCapacity] = useState({});
 
     // skikking veranderlike wat die kampusse van die databasis af laai in die veranderlike in
     // Die selectedCampus hou tred met watse kampus die gebruiker kies
@@ -211,14 +213,91 @@ export default function AdminLokaleInfo(){
                                 )}
                             </div>
 
-                            {/* <button
-                                onClick={() => {
-                                    setIsDeleteOop(true);
-                                    setSelectedVenue(venue.venue_id);
-                                }}
-                            >
-                                &#x1F5D1;
-                            </button> */}
+                            {/* Capacity editing hier in */}
+                            <div className="Lokaal__capacity">
+                                <h3>Kapasiteit:</h3>
+
+                                <input
+                                    type="number"
+                                    value={
+                                        editingCapacity === venue.venue_id
+                                            ? tempCapacity[venue.venue_id]
+                                            : venue.capacity ?? 0
+                                    }
+                                    readOnly={editingCapacity !== venue.venue_id}
+                                    onChange={(e) => {
+                                        setTempCapacity({
+                                            ...tempCapacity,
+                                            [venue.venue_id]: e.target.value
+                                        });
+                                    }}
+                                />
+
+                                <button
+                                    className={editingCapacity === venue.venue_id ? "Edit_Aktief" : ""}
+                                    onClick={async () => {
+                                        if (editingCapacity !== venue.venue_id) {
+
+                                            setEditingCapacity(venue.venue_id);
+
+                                            setTempCapacity({
+                                                ...tempCapacity,
+                                                [venue.venue_id]: venue.capacity ?? 0
+                                            });
+
+                                        } else {
+
+                                            try {
+                                                await fetch(`http://127.0.0.1:8000/venue/${venue.venue_id}`, {
+                                                    method: "PUT",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify({
+                                                        building_id: selectedBuilding,
+                                                        venue_name: venue.venue_name,
+                                                        capacity: Number(tempCapacity[venue.venue_id]),
+                                                        floor: venue.floor ?? 0
+                                                    })
+                                                });
+
+                                                setVenues(
+                                                    venues.map((ven) =>
+                                                        ven.venue_id === venue.venue_id
+                                                            ? {
+                                                                ...ven,
+                                                                capacity: Number(tempCapacity[venue.venue_id])
+                                                            }
+                                                            : ven
+                                                    )
+                                                );
+
+                                                setEditingCapacity(null);
+
+                                            } catch (err) {
+                                                console.error("Error updating venue capacity:", err);
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {editingCapacity === venue.venue_id ? "\u2713" : "\u270E"}
+                                </button>
+
+                                {editingCapacity === venue.venue_id && (
+                                    <button
+                                        className="Edit_Aktief"
+                                        onClick={() => {
+                                            setTempCapacity({
+                                                ...tempCapacity,
+                                                [venue.venue_id]: venue.capacity ?? 0
+                                            });
+
+                                            setEditingCapacity(null);
+                                        }}
+                                    >
+                                        &#x2716;
+                                    </button>
+                                )}
+                            </div>
+
                         </div>
                     ))
                 )}
