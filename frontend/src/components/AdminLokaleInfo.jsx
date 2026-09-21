@@ -70,13 +70,13 @@ export default function AdminLokaleInfo(){
             <div className="Lokaal__titel">
                 <h2>Lokale</h2>
 
-                <button onClick={() => setIsPopupOop(true)}>Voeg lokaal by.</button>
+                {/* <button onClick={() => setIsPopupOop(true)}>Voeg lokaal by.</button>
                 <AdminVoegByPopUp 
                     isPopupOop={isPopupOop}
                     setIsPopupOop={setIsPopupOop}
                     tipe="VoegLokaalBy"
                     setVenues={setVenues}
-                />
+                /> */}
             </div>
             &ensp;Lokale gerigistreerd <br/>
             {/* Select drop downs om kampus en die gebou te kies */}
