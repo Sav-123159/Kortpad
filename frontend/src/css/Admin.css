@@ -294,6 +294,11 @@ h2 {
     align-items: center;
 }
 
+.Gebruiker_Inligting > .Gebruiker_Keuse{
+    padding: 20px;
+    text-align: center;
+}
+
 .Gebruiker_Keuse{
     display: flex;
     gap: 10px;
