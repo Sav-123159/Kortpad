@@ -19,10 +19,21 @@ export default function AdminLPaneel({aktieweTab, setAktieweTab}){
                 onClick={() => setAktieweTab("AdminToerusting")}>
                     | Lokaal Toerusting
                 </button>
+
                 <button className={aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
                 onClick={() => setAktieweTab("AdminGebruiker")}>
                     | Gebruikers
                 </button>
+                {
+                    (aktieweTab === "AdminGebruiker" || aktieweTab === "AdminSorteer")&& (
+                        <button className = {aktieweTab === "AdminSorteer" ? "Opsie_Knoppie Sorteer_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie Sorteer_Knoppie"}
+                            onClick={() => setAktieweTab("AdminSorteer")}
+                        >
+                            | Sorteer Algoritmes
+                        </button>
+                    )
+                }
+
                 <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
                 onClick={() => setAktieweTab("AdminRoosters")}>
                     | Klas Roosters

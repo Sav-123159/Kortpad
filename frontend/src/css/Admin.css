@@ -75,8 +75,8 @@ button {
 .Opsies button.Opsie_Knoppie--active {
     background-color: var(--pine);
     transform: translateY(-2px);
-    /* font-size: large; */
 }
+
 
 /* ==================== Regter paneel ==================== */
 .RegterPaneel {
