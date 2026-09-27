@@ -288,17 +288,32 @@ h2 {
     font-size: medium;
 }
 
-.Gebruiker_Keuse {
+.Keuses{
     display: flex;
-    flex-direction: row;
-    gap: 5%;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    justify-content: center;
+.Gebruiker_Keuse{
+    display: flex;
+    gap: 10px;
+    padding: 5px !important;
+    align-items: center;
 }
 
 .Gebruiker_Keuse label {
-    font-size: large;
-    margin: 5px;
+    font-size: medium;
+    margin: 1px;
+}
+
+.Organiseering{
+    width: 75%;
+    height: 70%;
+    background-color: var(--paper);
+    border-radius: var(--default-border-radius);
+    text-align: center;
+    margin: auto;
+    padding: 5px;
 }
 
 .Lokale__kampus select {
@@ -396,7 +411,42 @@ h2 {
     color: var(--ink);
 }
 
-/* ================ Gebruiker Ontwerp ==========================*/
+/* ================ Gebruikers sorteer Ontwerp ========================== */
+div .Sorteer_Blokke{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+
+}
+
+.Algoritme{
+    Width: 100%;
+    gap: 10px;
+    margin: 10px;
+    height: 60vh;
+        
+    background-color: var(--pine);
+    border-radius: var(--default-border-radius);
+
+}
+
+.Algoritme option{
+    color: var(--ink) ;
+}
+
+.Keuses{
+    display: flex;
+    flex-direction: row;
+    background-color: var(--pine);
+    border-radius: var(--default-border-radius);
+    color: var(--paper-deep);
+
+    text-align: center;
+    margin: 8px;
+}
+
+
+/* ================ Gebruikers vertoon Ontwerp ==========================*/
 
 .Gebruiker__item div button,
 .Lokale__equip div button {
