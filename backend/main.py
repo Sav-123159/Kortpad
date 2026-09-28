@@ -428,30 +428,6 @@ def get_campuses():
 
     return campuses
 
-@app.delete('/campus/{campus_id}')
-def delete_campus(campus_id : int):
-    if campus_id <= 0:
-        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-        
-        cursor.execute('DELETE FROM campus WHERE campus_id = ?', (campus_id,))
-        
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail='Campus does not exist')
-        
-        conn.commit()
-        
-        return {'message': f'Campus {campus_id} has been deleted'}
-    
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
-
 # ==================== CAMPUS MAP ====================
 @app.get('/campus-map/{campus_id}')
 def get_campus_map(campus_id : int):
