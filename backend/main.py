@@ -297,41 +297,6 @@ def delete_timetable(timetable_id : int):
     finally:
         conn.close()
 
-@app.put('/timetable/{timetable_id}')
-def update_timetable(timetable_id : int, timetable : TimetableBase):
-    if timetable_id <= 0:
-        raise HTTPException(status_code=400, detail='Timetable id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        cursor.execute('UPDATE timetable SET venue_id = ?, day_of_week = ?, start_time = ?, end_time = ?, module_code = ?, semester_start = ?, semester_end = ? WHERE timetable_id = ?',
-        (
-            timetable.venue_id, 
-            timetable.day_of_week, 
-            timetable.start_time, 
-            timetable.end_time, 
-            timetable.module_code, 
-            timetable.semester_start, 
-            timetable.semester_end, 
-            timetable_id
-        )
-        )
-
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail='Timetable does not exist') 
-        
-        conn.commit()
-
-        return {'message': f'Timetable {timetable_id} has been updated'}
-        
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
-
 # ==================== MODULE ====================
 @app.get('/modules')
 def get_modules():
