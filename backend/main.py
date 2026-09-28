@@ -497,32 +497,6 @@ def delete_building(building_id : int):
     finally:
         conn.close()
 
-@app.put('/building/{building_id}')
-def update_building(building_id : int, building : BuildingBase):
-    if building_id <= 0:
-        raise HTTPException(status_code=400, detail='Building id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        cursor.execute('UPDATE building SET campus_id = ?, building_name = ? WHERE building_id = ?',
-        (building.campus_id, building.building_name, building_id)
-        )
-        
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail='Building does not exist')
-        
-        conn.commit()
-
-        return {'message': f'Building {building_id} has been updated'}
-    
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
-        
 # ==================== BUILDING MAP ====================
 @app.get('/building-map/{campus_id}-{building_id}-{floor}')
 def get_building_map(campus_id : int, building_id : int, floor : int):
