@@ -501,24 +501,6 @@ def get_building_map(campus_id : int, building_id : int, floor : int):
         conn.close()
 
 # ==================== VENUE ====================
-@app.get('/venue/{venue_id}')
-def get_venue(venue_id : int):
-    if venue_id <= 0:
-        raise HTTPException(status_code=400, detail='Venue id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        data = cursor.execute('SELECT * FROM venue WHERE venue_id = ?', (venue_id,)).fetchone()
-        if not data:
-            raise HTTPException(status_code=404, detail='Venue does not exist')
-        
-        return Venue(**dict(data))
-
-    finally:
-        conn.close()
-
 @app.get('/venue/by-campus/{campus_id}')
 def get_venue(campus_id : int):
     _map_cache.get_graph(campus_id)
