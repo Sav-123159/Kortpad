@@ -311,24 +311,6 @@ def get_modules():
     return modules
 
 # ==================== BOOKING ====================
-@app.get('/booking/{booking_id}')
-def get_booking(booking_id : int):
-    if booking_id <= 0:
-        raise HTTPException(status_code=400, detail='Booking id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        data = cursor.execute('SELECT * FROM booking WHERE booking_id = ?', (booking_id,)).fetchone()
-        if not data:
-            raise HTTPException(status_code=404, detail='Booking does not exist')
-        
-        return Booking(**dict(data))
-    
-    finally:
-        conn.close()
-
 @app.get('/booking/by-venue/{venue_id}')
 def get_booking(venue_id : int):
     conn = get_db()
