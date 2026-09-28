@@ -416,24 +416,6 @@ def check_conflict(venue_id: int, booking_date: str, start_time: str, end_time: 
         conn.close()
 
 # ==================== CAMPUS ====================
-@app.get('/campus/{campus_id}')
-def get_campus(campus_id : int):
-    if campus_id <= 0:
-        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        data = cursor.execute('SELECT * FROM campus WHERE campus_id = ?', (campus_id,)).fetchone()
-        if not data:
-            raise HTTPException(status_code=404, detail='Campus does not exist')
-
-        return Campus(**dict(data))
-    
-    finally:
-        conn.close()
-
 @app.get('/campuses')
 def get_campuses():
     conn = get_db()
