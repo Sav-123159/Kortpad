@@ -230,24 +230,6 @@ def update_user(user_id : int, user : UserBase, is_admin : bool):
         conn.close()
 
 # ==================== TIMETABLE ==================== 
-@app.get('/timetable/{timetable_id}')
-def get_timetable(timetable_id : int):
-    if timetable_id <= 0:
-        raise HTTPException(status_code=400, detail='Timetable id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        data = cursor.execute('SELECT * FROM timetable WHERE timetable_id = ?', (timetable_id,)).fetchone()
-        if not data:
-            raise HTTPException(status_code=404, detail='Timetable does not exist')
-        
-        return Timetable(**dict(data))
-
-    finally:
-        conn.close()
-
 @app.get('/timetable/by-venue/{venue_id}')
 def get_timetable(venue_id : int):
     conn = get_db()
