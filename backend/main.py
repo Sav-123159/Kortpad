@@ -354,30 +354,6 @@ def create_booking(booking : BookingCreate):
     finally:
         conn.close()
 
-@app.delete('/booking/{booking_id}')
-def delete_booking(booking_id : int):
-    if booking_id <= 0:
-        raise HTTPException(status_code=400, detail='Booking id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-        
-        cursor.execute('DELETE FROM booking WHERE booking_id = ?', (booking_id,))
-        
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail='Booking does not exist')
-        
-        conn.commit()
-    
-        return {'message': f'Booking {booking_id} has been deleted'}
-    
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
-
 @app.put('/booking/{booking_id}')
 def update_booking(booking_id : int, booking : BookingBase):
     if booking_id <= 0:
