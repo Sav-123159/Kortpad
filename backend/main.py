@@ -323,18 +323,6 @@ def get_booking(venue_id : int):
 
     return bookings
 
-@app.get('/bookings')
-def get_bookings():
-    conn = get_db()
-    cursor = conn.cursor()
-
-    data = cursor.execute('SELECT * FROM booking').fetchall()
-    bookings = [Booking(**dict(d)) for d in data]
-
-    conn.close()
-
-    return bookings
-
 @app.post('/booking')
 def create_booking(booking : BookingCreate):
     conn = get_db()
