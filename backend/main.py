@@ -520,18 +520,6 @@ def get_venue(campus_id : int):
     
     return venues
 
-@app.get('/venues')
-def get_all_venues():
-    conn = get_db()
-    cursor = conn.cursor()
-
-    data = cursor.execute('SELECT * FROM venue').fetchall()
-    venues = [Venue(**dict(d)) for d in data]
-
-    conn.close()
-
-    return venues
-
 @app.post('/venue')
 def create_venue(venue : VenueCreate):
     conn = get_db()
