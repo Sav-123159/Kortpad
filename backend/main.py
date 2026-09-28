@@ -473,30 +473,6 @@ def get_buildings():
 
     return buildings
 
-@app.delete('/building/{building_id}')
-def delete_building(building_id : int):
-    if building_id <= 0:
-        raise HTTPException(status_code=400, detail='Building id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-        
-        cursor.execute('DELETE FROM building WHERE building_id = ?', (building_id,))
-        
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail='Building does not exist')
-        
-        conn.commit()
-        
-        return {'message': f'Building {building_id} has been deleted'}
-    
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
-
 # ==================== BUILDING MAP ====================
 @app.get('/building-map/{campus_id}-{building_id}-{floor}')
 def get_building_map(campus_id : int, building_id : int, floor : int):
