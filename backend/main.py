@@ -242,18 +242,6 @@ def get_timetable(venue_id : int):
 
     return timetables
 
-@app.get('/timetables')
-def get_timetables():
-    conn = get_db()
-    cursor = conn.cursor()
-
-    data = cursor.execute('SELECT * FROM timetable').fetchall()
-    timetables = [Timetable(**dict(d)) for d in data]
-
-    conn.close()
-
-    return timetables
-
 @app.post('/timetable') # ****COMEBACK TO THIS FUNCTION FOR REFACTORING MAYBE
 def create_timetable(timetable : TimetableCreate):
     conn = get_db()
