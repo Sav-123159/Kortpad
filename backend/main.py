@@ -461,24 +461,6 @@ def get_buildings(campus_id : int):
     
     return buildings
 
-@app.get('/building/{building_id}')
-def get_building(building_id : int):
-    if building_id <= 0:
-        raise HTTPException(status_code=400, detail='Building id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        data = cursor.execute('SELECT * FROM building WHERE building_id = ?', (building_id,)).fetchone()
-        if not data:
-            raise HTTPException(status_code=404, detail='Building does not exist')
-        
-        return Building(**dict(data))
-    
-    finally:
-        conn.close()
-
 @app.get('/buildings')
 def get_buildings():
     conn = get_db()
