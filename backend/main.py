@@ -73,24 +73,6 @@ def verify_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 # ==================== USER ====================
-@app.get('/user/{user_id}')
-def get_user(user_id : int):
-    if user_id <= 0:
-        raise HTTPException(status_code=400, detail='User id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        data = cursor.execute('SELECT * FROM app_user WHERE user_id = ?', (user_id,)).fetchone()
-        if not data:
-            raise HTTPException(status_code=404, detail='User does not exist')
-        
-        return User(**dict(data))
-    
-    finally:
-        conn.close()
-
 @app.get('/users')
 def get_users():
     conn = get_db()
