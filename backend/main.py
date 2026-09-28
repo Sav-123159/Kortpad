@@ -428,25 +428,6 @@ def get_campuses():
 
     return campuses
 
-@app.post('/campus')
-def create_campus(campus : CampusCreate):
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        cursor.execute('INSERT INTO campus (campus_name) VALUES (?)',
-        (campus.campus_name,))
-        
-        conn.commit()
-        
-        return Campus(campus_id=cursor.lastrowid, **campus.model_dump())
-    
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Campus needs a campus name')
-    finally:
-        conn.close()
-
 @app.delete('/campus/{campus_id}')
 def delete_campus(campus_id : int):
     if campus_id <= 0:
