@@ -473,25 +473,6 @@ def get_buildings():
 
     return buildings
 
-@app.post('/building')
-def create_building(building : BuildingCreate):
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-
-        cursor.execute('INSERT INTO building (campus_id, building_name) VALUES (?, ?)',
-        (building.campus_id, building.building_name))
-        
-        conn.commit()
-        
-        return Building(building_id=cursor.lastrowid, **building.model_dump())
-
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
-
 @app.delete('/building/{building_id}')
 def delete_building(building_id : int):
     if building_id <= 0:
