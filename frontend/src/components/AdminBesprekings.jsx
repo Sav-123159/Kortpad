@@ -174,6 +174,15 @@ export default function AdminBesprekings() {
 
     const user_id = user.user_id;
 
+    const clearForm = () => {
+        setSelectedCampus("");
+        setSelectedBuilding("");
+        setSelectedVenue("");
+        setDuur("");
+        setDatumTyd("");
+        setCapacity("");
+    }
+
     return (
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
             <h2>Besprekings</h2>
@@ -276,7 +285,7 @@ export default function AdminBesprekings() {
                 selectedCampus={selectedCampus}
                 selectedBuilding={selectedBuilding}
                 selectedVenue={selectedVenue}
-                onConfirm={() => hanteerConfirm(selectedVenue, duur, datumTyd, user_id)}
+                onConfirm={async () => {await hanteerConfirm(selectedVenue, duur, datumTyd, user_id); clearForm();}}
             />
 
         </div>

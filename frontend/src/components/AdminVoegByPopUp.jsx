@@ -6,114 +6,6 @@ import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp";
 import PopupAnimation from "./PopupAnimation";
 
-// Funksie om die lokaal by te voeg
-function AddLokaal({setIsPopupOop, campuses, selectedCampus, setSelectedCampus, buildings, selectedBuilding, setSelectedBuilding, setVenues}){
-    // Hou die kapasiteit en vloer van die nuwe lokaal
-    const [capacity, setCapacity] = useState(0);
-    const [floor, setFloor] = useState(0);
-
-    // hierdie deel hanteer die eintlike byvoeg van die lokaal in die databasis
-    // nadat die lokaal bygevoeg is, gaan haal ek weer al die lokale in die gebou om die skikking met die nuwe lokaal ingesluit te laai
-    const hanteerAdd = async () => {
-        try {
-            const res = await fetch("http://127.0.0.1:8000/venue", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"}, 
-            body: JSON.stringify({
-                building_id: parseInt(selectedBuilding),
-                venue_name: lokaalNaam,
-                capacity: parseInt(capacity),
-                floor: parseInt(floor)
-            }),
-            });
-            
-            const res2 = await fetch(`http://127.0.0.1:8000/venues/by-building/${selectedBuilding}`);
-            const allVenues = await res2.json();
-            
-            setVenues(allVenues);
-            setIsPopupOop(false);
-        } catch (err) {
-            console.error("Error adding venue:", err);
-        }
-    };
-
-    // Boolean waarde vir die popup en die lokaal se naam wat bygevoeg gaan word
-    const [isConfirmOop, setIsConfirmOop] = useState(false);
-    const [lokaalNaam, setLokaalNaam] = useState("");
-
-    // Die popup vorm word hieronder geskep
-    return(
-        <>
-            {/* Fieldset groepeer al die inputs van die vorm */}
-            {/* Kampus word gekies en gekose waarde word in selectedCampus gestoor */}
-            {/* map() word weer gebruik om die kampusse en geboue met hulle id as die key, as options te laai om van te kies */}
-            {/* die onChange stoor die gebruiker se invoer vir die lokaal naam en die setLokalNaam verander die state */}
-            {/* Wanneer die voeg by knoppie gedruk word kom daar eers 'n confirmation popup in */}
-            {/* Die confirm komponent word geroep met onCOnfirm{hanteerAdd}, so as gebruiker bevestig dan moet hanteerAdd uitgevoer word om die lokaal by te voeg */}
-            <fieldset className="VoegBy">
-                <h3>Voeg 'n lokaal by: </h3>
-
-                <label htmlFor="kampus">Kampus: </label>
-                <select
-                    name="kampus"
-                    value={selectedCampus}
-                    onChange={(e) => setSelectedCampus(e.target.value)}
-                >
-                    <option value="">Kies 'n kampus</option>
-
-                    {campuses.map((campus) => (
-                        <option
-                            key={campus.campus_id}
-                            value={campus.campus_id}
-                        >
-                            {campus.campus_name}
-                        </option>
-                    ))}
-                </select> <br />
-
-                <label htmlFor="building">Gebou: </label>
-                <select
-                    name="building"
-                    value={selectedBuilding}
-                    onChange={(e) => setSelectedBuilding(e.target.value)}
-                >
-                    <option value="">Kies 'n gebou</option>
-
-                    {buildings.map((building) => (
-                        <option
-                            key={building.building_id}
-                            value={building.building_id}
-                        >
-                            {building.building_name}
-                        </option>
-                    ))}
-                </select> <br />
-
-                <label htmlFor="venue_name">Lokaal Naam:</label>
-                <input type="text" id="venue_name" name="venue_name" value={lokaalNaam}
-                    onChange={(e) => setLokaalNaam(e.target.value)}/> <br />
-
-                <label htmlFor="capacity">Kapasiteit: </label>
-                <input type="number" id="capacity" name="capacity" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)}/> <br />
-
-                <label htmlFor="floor">Kies vloer nommer: </label>
-                <input type="number" id="floor" name="floor" min={0} value={floor} onChange={(e) => setFloor(e.target.value)} /> <br />
-                
-                <button type="button" onClick={() => setIsConfirmOop(true)}>Voeg By.</button> 
-                <AdminConfirmPopUp 
-                    setIsPopupOop={setIsPopupOop}
-                    isConfirmOop = {isConfirmOop}
-                    setIsConfirmOop = {setIsConfirmOop}
-                    lokaalNaam={lokaalNaam}
-                    tipe = "ConfirmAdd"
-                    onConfirm={hanteerAdd}
-                />
-
-            </fieldset>
-        </>
-    )
-}
-
 // Hierdie funksie werk baie soos die AddLokaal funksie, net toerusting i.p.v n lokaal
 function AddToerusting({ setIsPopupOop, lokaalNaam, venueId, setEquipment }) {
     // Veranderlikes om die nuwe toerusting waardes te stoor
@@ -355,18 +247,6 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
             {/* As iemand binne die vorm klik moet hy nie toe maak nie */}
             <PopupAnimation as="div" ref={modalRef}>
                 <form className="voegby_vorm" onClick={(e)=> e.stopPropagation()}>
-                    {tipe === "VoegLokaalBy" && (
-                        <AddLokaal
-                            setIsPopupOop={setIsPopupOop}
-                            campuses={campuses}
-                            selectedCampus={selectedCampus}
-                            setSelectedCampus={setSelectedCampus}
-                            buildings={buildings}
-                            selectedBuilding={selectedBuilding}
-                            setSelectedBuilding={setSelectedBuilding}
-                            setVenues={setVenues}
-                        />
-                    )}
                     {tipe === "VoegToerustingBy" && 
                         <AddToerusting 
                             setIsPopupOop={setIsPopupOop} 

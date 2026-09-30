@@ -31,19 +31,16 @@ button {
     margin: 0;
     display: flex;
     flex-direction: row;
+    height: calc(100vh - 120px);
 }
 
 /* ==================== Linker paneel ==================== */
-.LinkerPaneel {
-    height: 100vh;
-}
 
 .LinkerPaneel div {
     color: var(--ink);
     font-size: 25px;
     font-weight: bold;
     font-family: var(--button-font);
-
     padding: 10px;
 }
 
@@ -75,8 +72,8 @@ button {
 .Opsies button.Opsie_Knoppie--active {
     background-color: var(--pine);
     transform: translateY(-2px);
-    /* font-size: large; */
 }
+
 
 /* ==================== Regter paneel ==================== */
 .RegterPaneel {
@@ -239,6 +236,19 @@ h2 {
     min-height: 450px;
 }
 
+.Lokale__lys {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 65%;
+}
+
+.Lokaal__capacity {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
 .loading-overlay {
     position: absolute;
     top: 40%;
@@ -259,7 +269,8 @@ h2 {
 }
 
 .Lokale__kampus,
-.Gebruiker_Keuse {
+.Gebruiker_Keuse, 
+.Sorteer_Keuse {
     background-color: var(--pine);
     color: var(--paper);
 
@@ -275,17 +286,40 @@ h2 {
     font-size: medium;
 }
 
+.Gebruiker_Inligting > .Gebruiker_Keuse,
+.Sorteer_Gebruiker > .Sorteer_Keuse,
+.Lokale__Inligting > .Lokale__kampus,
+.Toerusting__Inligting > .Lokale__kampus,
+.Roosters__Inligting > .Lokale__kampus{
+    padding: 15px;
+}
+
 .Gebruiker_Keuse {
     display: flex;
-    flex-direction: row;
-    gap: 5%;
-
+    gap: 200px;
     justify-content: center;
 }
 
-.Gebruiker_Keuse label {
-    font-size: large;
-    margin: 5px;
+.Sorteer_Keuse{
+    display: flex;
+    gap: 20px;
+    justify-content: center; 
+}
+
+.Gebruiker_Keuse label,
+.Sorteer_Keuse label {
+    font-size: medium;
+    margin: 1px;
+}
+
+.Organiseering{
+    width: 75%;
+    height: 70%;
+    background-color: var(--paper);
+    border-radius: var(--default-border-radius);
+    text-align: center;
+    margin: auto;
+    padding: 5px;
 }
 
 .Lokale__kampus select {
@@ -383,7 +417,41 @@ h2 {
     color: var(--ink);
 }
 
-/* ================ Gebruiker Ontwerp ==========================*/
+/* ================ Gebruikers sorteer Ontwerp ========================== */
+div .Sorteer_Blokke{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+
+}
+
+.Algoritme{
+    Width: 100%;
+    gap: 10px;
+    margin: 10px;
+    height: 60vh;
+        
+    background-color: var(--pine);
+    border-radius: var(--default-border-radius);
+
+}
+
+.Algoritme option{
+    color: var(--ink) ;
+}
+
+.Keuses{
+    display: flex;
+    flex-direction: row;
+    background-color: var(--pine);
+    border-radius: var(--default-border-radius);
+    color: var(--paper-deep);
+
+    align-items: center;
+    margin: 8px;
+}
+
+/* ================ Gebruikers vertoon Ontwerp ==========================*/
 
 .Gebruiker__item div button,
 .Lokale__equip div button {
