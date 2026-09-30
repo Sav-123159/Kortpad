@@ -15,13 +15,13 @@
 }
 
 /* Skuifbalk nie sigbaar totdat muis oor dit beweeg */
-*{
+* {
     scrollbar-gutter: stable;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
 }
 
-*:hover{
+*:hover {
     scrollbar-color: #909090 transparent;
 }
 
@@ -47,11 +47,14 @@
 
 /* Verhoed dat hele baldsy skuif */
 body {
-    overflow: hidden;
-    min-height: 100%;
+    height: 100%;
     width: auto;
     margin: 0;
     padding: 0;
+}
+
+html {
+    overflow: hidden;
 }
 
 /* Basiese houer styl vir alle fieldsets */
@@ -116,7 +119,7 @@ button:hover {
     width: 100%;
     padding: 10px 0;
     display: flex;
-    flex-direction: row;      
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
 }
@@ -128,8 +131,8 @@ button:hover {
 }
 
 .Logo img {
-    width: 110px;
-    height: 100px;
+    width: 5vw;
+    height: auto;
     display: block;
     object-fit: cover;
 
@@ -145,8 +148,131 @@ button:hover {
     padding: 3px;
 }
 
+.hamburger {
+    width: 2.2rem;
+    height: 2.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 3px;
+    cursor: pointer;
+}
+
+.hamburger:hover {
+    background: none;
+    box-shadow: none;
+    transform: none;
+}
+
+.hamburger-icon {
+    display: block;
+    overflow: visible;
+}
+
+/* svg = g, html = div */
+.hamburger-icon g {
+    fill: none;
+    stroke: var(--pine-dark);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    transform-origin: 12px 12px;
+    transition: opacity 0.25s ease, transform 0.3s ease, stroke 0.25s ease;
+}
+
+.hamburger:hover .hamburger-icon g {
+    stroke: var(--pine);
+}
+
+/* account teken-wys as dit nie geklik is nie */
+.icon-account {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+/* Hamburger teken wys nie as knoppie nie geklik is nie */
+.icon-burger {
+    opacity: 0;
+    transform: scale(0.6) rotate(-45deg);
+}
+
+/* Account teken-wys nie as dit geklik is nie */
+.hamburger--open .icon-account {
+    opacity: 0;
+    transform: scale(0.6) rotate(45deg);
+}
+
+/* Hamburger teken wys as knoppie geklik is */
+.hamburger--open .icon-burger {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+/* Dropdown wrapper + panel */
+.hamburger-wrapper {
+    position: relative;
+}
+
+.hamburger-menu {
+    position: absolute;
+    top: 3rem;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+
+    background-color: var(--paper);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+    padding: 8px;
+
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+    /* matches the .greeting:hover shadow weight already in your CSS */
+    z-index: 999;
+
+    animation: dropdownIn 0.2s ease;
+}
+
+@keyframes dropdownIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Options inside the dropdown reuse your existing Nav_Knoppie look, 
+   just full-width and stacked so they read as a menu, not a row */
+.hamburger-menu .Nav_Knoppie {
+    width: 100%;
+    text-align: left;
+    box-sizing: border-box;
+    background-color: var(--paper);
+    border-radius: 10px;
+}
+
+.hamburger-menu .Nav_Knoppie:hover {
+    background-color: var(--paper-deep);
+    color: var(--ink);
+}
+
+.hamburger-menu .Nav_Knoppie--active {
+    background-color: var(--paper-deep);
+    transform: none;
+    /* no lift inside a stacked menu, looks odd there */
+}
+
 /* Groet-knoppie langs die logo */
-.greeting{
+.greeting {
     background-color: var(--paper);
     color: var(--ink);
     border: var(--default-border);
@@ -165,7 +291,7 @@ button:hover {
 
 .greeting:hover {
     background-color: var(--paper-deep);
-    box-shadow:  0 6px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* Roep die waai animasie wanneer is-waving klas bygevoeg word */
@@ -227,6 +353,7 @@ button.form-button:hover {
 .LeftPanel,
 .LinkerPaneel {
     width: 360px;
+    height: 100vh;
     padding: 20px;
 
     box-sizing: border-box;
@@ -268,10 +395,29 @@ button.form-button:hover {
         route-flow 0.9s linear infinite 1.4s;
 }
 
-@keyframes draw-route { to { stroke-dashoffset: 0; } }
-@keyframes fade-out    { to { opacity: 0; } }
-@keyframes fade-in     { to { opacity: 1; } }
-@keyframes route-flow  { to { stroke-dashoffset: -26; } }
+@keyframes draw-route {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes route-flow {
+    to {
+        stroke-dashoffset: -26;
+    }
+}
 
 .RoutePager {
     background: var(--paper);
@@ -304,10 +450,29 @@ button.form-button:hover {
         route-flow 0.9s linear infinite 1.4s;
 }
 
-@keyframes draw-route { to { stroke-dashoffset: 0; } }
-@keyframes fade-out    { to { opacity: 0; } }
-@keyframes fade-in     { to { opacity: 1; } }
-@keyframes route-flow  { to { stroke-dashoffset: -26; } }
+@keyframes draw-route {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes route-flow {
+    to {
+        stroke-dashoffset: -26;
+    }
+}
 
 .RoutePager {
     background: var(--paper);
@@ -381,9 +546,10 @@ h3 {
 }
 
 /* Login modal, met vorms links en animasie regs */
-.login-container {
+.login-container,
+.edit-container {
     display: flex;
-    flex-direction: row;      
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: 60px;
@@ -402,7 +568,7 @@ h3 {
 /* Algemene gebruik popup houer */
 .popup-container {
     display: flex;
-    flex-direction: row;      
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: 60px;
@@ -489,12 +655,14 @@ img.login-logo {
         transform: scale(1);
         fill: var(--pine-dark);
     }
+
     /* Verkleur en groei van 16%-20% */
     16%,
     20% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
+
     /* Terug na normaal by 22% */
     22% {
         transform: scale(1);
@@ -503,6 +671,7 @@ img.login-logo {
 }
 
 @keyframes pulse2 {
+
     /* Bly stil tot 24% */
     0%,
     24%,
@@ -510,12 +679,14 @@ img.login-logo {
         transform: scale(1);
         fill: var(--pine-dark);
     }
+
     /* Verkleur en groei van 26%-30% */
     26%,
     30% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
+
     /* Terug na normaal by 32% */
     32% {
         transform: scale(1);
@@ -524,6 +695,7 @@ img.login-logo {
 }
 
 @keyframes pulse3 {
+
     /* Bly stil tot 34% */
     0%,
     34%,
@@ -531,12 +703,14 @@ img.login-logo {
         transform: scale(1);
         fill: var(--pine-dark);
     }
+
     /* Verkleur en groei van 36%-40% */
     36%,
     40% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
+
     /* Terug na normaal by 42% */
     42% {
         transform: scale(1);
@@ -545,6 +719,7 @@ img.login-logo {
 }
 
 @keyframes pulse4 {
+
     /* Bly stil tot 44% */
     0%,
     44%,
@@ -552,12 +727,14 @@ img.login-logo {
         transform: scale(1);
         fill: var(--pine-dark);
     }
+
     /* Verkleur en groei van 46%-50% */
     46%,
     50% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
+
     /* Terug na normaal by 52% */
     52% {
         transform: scale(1);
@@ -612,13 +789,46 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 
 /* Waai animasie vir die groet knoppie, draai en skaal 'n paar keer in albei rigtings soos wat 'n hand sou waai */
 @keyframes Wave {
-    0%   { transform: rotate(0deg)   translateY(0)    scale(1); }
-    15%  { transform: rotate(-9deg)  translateY(-8px)  scale(1.03); }
-    30%  { transform: rotate(8deg)   translateY(-10px) scale(1.04); }
-    45%  { transform: rotate(-7deg)  translateY(-7px)  scale(1.02); }
-    60%  { transform: rotate(5deg)   translateY(-4px)  scale(1.01); }
-    75%  { transform: rotate(-2deg)  translateY(-1px)  scale(1); }
-    100% { transform: rotate(0deg)   translateY(0)     scale(1); }
+    0% {
+        transform: rotate(0deg) translateY(0) scale(1);
+    }
+
+    15% {
+        transform: rotate(-9deg) translateY(-8px) scale(1.03);
+    }
+
+    30% {
+        transform: rotate(8deg) translateY(-10px) scale(1.04);
+    }
+
+    45% {
+        transform: rotate(-7deg) translateY(-7px) scale(1.02);
+    }
+
+    60% {
+        transform: rotate(5deg) translateY(-4px) scale(1.01);
+    }
+
+    75% {
+        transform: rotate(-2deg) translateY(-1px) scale(1);
+    }
+
+    100% {
+        transform: rotate(0deg) translateY(0) scale(1);
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .Logo img {
+        width: 10vw;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    body {
+        overflow-y: hidden;
+        height: 100%;
+    }
 }
 
 /* Vol skerm intro overlay wat op die program-begin wys en na die animasie verdwyn */
@@ -705,12 +915,16 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 }
 
 @keyframes introPulse1 {
-    0%, 10%, 100% {
+
+    0%,
+    10%,
+    100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
 
-    12%, 16% {
+    12%,
+    16% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
@@ -722,12 +936,16 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 }
 
 @keyframes introPulse2 {
-    0%, 20%, 100% {
+
+    0%,
+    20%,
+    100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
 
-    22%, 26% {
+    22%,
+    26% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
@@ -739,12 +957,16 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 }
 
 @keyframes introPulse3 {
-    0%, 30%, 100% {
+
+    0%,
+    30%,
+    100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
 
-    32%, 36% {
+    32%,
+    36% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
@@ -756,12 +978,16 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 }
 
 @keyframes introPulse4 {
-    0%, 40%, 100% {
+
+    0%,
+    40%,
+    100% {
         transform: scale(1);
         fill: var(--pine-dark);
     }
 
-    42%, 46% {
+    42%,
+    46% {
         transform: scale(1.35);
         fill: #5fcf7d;
     }
@@ -785,7 +1011,8 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 
 @keyframes introDrawPath {
 
-    0%, 48% {
+    0%,
+    48% {
         stroke-dashoffset: 340;
         opacity: 0;
     }
@@ -828,7 +1055,8 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 
 @keyframes introShowWelkom {
 
-    0%, 48% {
+    0%,
+    48% {
         opacity: 0;
         clip-path: inset(0 100% 0 0);
         transform: translateY(10px);
@@ -850,5 +1078,102 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
         opacity: 1;
         clip-path: inset(0 0 0 0);
         transform: translateY(0);
+    }
+}
+
+/* Mobile View */
+
+@media screen and (max-width: 480px) {
+    .global-intro-overlay {
+        height: 100%;
+    }
+
+    .intro-deco {
+        width: 90%;
+    }
+
+    .intro-deco svg {
+        width: 100%;
+        height: auto;
+    }
+
+    .intro-animation-wrapper {
+        width: 100%;
+    }
+
+    .intro-animated-path {
+        stroke-width: 6;
+    }
+
+    .welkom-text {
+        font-size: 2.5rem;
+    }
+
+    body {
+        overflow-y: hidden;
+    }
+
+    html {
+        height: 100%;
+        overflow: hidden;
+        font-size: 90%;
+    }
+
+    .Container {
+        height: calc(100dvh - 20px - 10vw);
+        /* header padding + logo height */
+    }
+
+    .login-page,
+    .popup-page {
+        height: 100dvh;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    .login-container,
+    .edit-container {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        gap: 16px;
+
+        width: 100%;
+        max-width: 100%;
+        height:auto;
+        max-height: 100%;
+        padding: 20px;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .form,
+    .deco{
+        flex: none;
+        width: 100%;
+    }
+
+    .form {
+        gap: 15px;
+    }
+
+    .deco{
+        order: -1;
+    }
+
+    .deco svg {
+        width: 100%;
+        max-width: 140px;
+    }
+
+    img.login-logo {
+        width: 100%;
+        max-width: 220px;
+        height: auto;
+    }
+
+    .edit-container button{
+        margin: 5px;
     }
 }

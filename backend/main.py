@@ -7,6 +7,8 @@ from database import init_db, get_db
 from graph import GraphCache
 from dijkstra import dijkstra
 import bcrypt
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 app = FastAPI()
 
@@ -70,7 +72,6 @@ def verify_password(password: str, hashed_password: str) -> bool:
     #   -> Die resultaat word met mekaar dan vergelyk en gee [true|false]
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-
 # ==================== USER ====================
 @app.get('/user/{user_id}')
 def get_user(user_id : int):
@@ -109,16 +110,20 @@ def create_user(user : UserCreate, auth : Auth):
     conn = get_db()
     try:
         cursor = conn.cursor()
-        
-        #User
-        cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, 0)',
-        (user.fname, user.sname, user.email))
 
-        user_id = cursor.lastrowid
+        with ThreadPoolExecutor() as executor:
+            #Auth
+            #Hash die password voor hy in die databasis gestoor word
+            hash_future = executor.submit(encrypt_password, auth.password)
+            
+            #User
+            cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, 0)',
+            (user.fname, user.sname, user.email))
+            user_id = cursor.lastrowid
 
-        #Auth
-        #Hash die password voor hy in die databasis gestoor word
-        hashed_password = encrypt_password(auth.password)
+            #Join Auth se resultaat nadat User se resultaat geproseseer het
+            hashed_password = hash_future.result()
+
         cursor.execute('INSERT INTO auth (user_id, password, email) VALUES (?, ?, ?)',
         (user_id, hashed_password, user.email))
         
@@ -138,15 +143,20 @@ def create_user(user : AdminUserCreate, auth : Auth):
     conn = get_db()
     try:
         cursor = conn.cursor()
+
+        with ThreadPoolExecutor() as executor:
+            #Auth
+            hash_future = executor.submit(encrypt_password, auth.password)
+
         
-        #User
-        cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, ?)',
-        (user.fname, user.sname, user.email, user.is_admin))
+            #User
+            cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, ?)',
+            (user.fname, user.sname, user.email, user.is_admin))
+            user_id = cursor.lastrowid
 
-        user_id = cursor.lastrowid
-
-        #Auth
-        hashed_password = encrypt_password(auth.password)
+            #Join Auth
+            hashed_password = hash_future.result()
+        
         cursor.execute('INSERT INTO auth (user_id, password, email) VALUES (?, ?, ?)',
         (user_id, hashed_password, user.email))
         
@@ -170,11 +180,20 @@ def login(login : Login):
         cursor.execute('SELECT password FROM auth WHERE email = ?', (login.email,))
         row = cursor.fetchone()
 
-        if row is None or not verify_password(login.password, row[0]):
-            raise HTTPException(status_code=401, detail='Wrong password') 
+        with ThreadPoolExecutor() as executor:
+            verify_future = executor.submit(verify_password, login.password, row[0])
 
-        data = cursor.execute('SELECT * FROM app_user WHERE email = ?', (login.email,)).fetchone()
-        return User(**dict(data))
+            if row is None:
+                raise HTTPException(status_code=401, detail='Wrong password')
+
+            is_valid = verify_future.result()
+
+        if is_valid:
+            data = cursor.execute('SELECT * FROM app_user WHERE email = ?', (login.email,)).fetchone()
+            return User(**dict(data))
+        else:
+            raise HTTPException(status_code=401, detail='Wrong password')
+        
     finally:
         conn.close()
 

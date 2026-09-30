@@ -52,8 +52,9 @@
 /* Maak die leaflet-kaart die  houer volledig vol */
 .MapPaneel .leaflet-container{
     width:100%;
-    height:100%;
+    height:auto;
 }
+
 
 /* Vol-skerm verdofte agtergrond agter die besprekings modal */
 .booking-page {
@@ -85,8 +86,6 @@
     background: var(--paper);
     border: var(--default-border);
     border-radius: var(--default-border-radius);
-
-    overflow: auto;
 }
 
 /* Linkerkant van die bespreking modal */
@@ -170,6 +169,10 @@
     color: var(--ink);
 }
 
+.day-short {
+    display: none;
+}
+
 /* Bespreking sel toestande */
 .available {
     background: white;
@@ -218,3 +221,56 @@
     cursor: pointer;
 }
 
+/* Mobile View */
+@media screen and (max-width: 480px) {
+    .booking-modal {
+        width: 80%;
+        display: grid;
+        grid-template-rows:auto 1fr;
+        grid-template-areas: "Calendar"
+                             "Booking";
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .booking-sidebar {
+        gap: 8px;
+        grid-area: Booking;
+    }
+
+    .booking-grid {
+        grid-area: Calendar;
+
+    }
+
+    .occupied, 
+    .disabled, 
+    .selected, 
+    .available {
+        width: 20px;
+        height: 20px;
+        font-size: 0%;
+    }
+
+    .time-label, .disabled-header, .active-header, th {
+        width: 20px;
+        height: 20px;
+        font-size: 70%;
+    }
+
+    .booking-selection {
+        padding: 8px;
+    }
+
+    .booking-actions {
+        margin-top: auto;
+    }
+
+    .day-full {
+        display: none;
+    }
+
+    .day-short {
+        display: inline;
+    }
+}
