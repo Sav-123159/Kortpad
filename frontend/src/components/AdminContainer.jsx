@@ -6,6 +6,7 @@ import AdminToerusting from "./AdminToerusting.jsx";
 import AdminRoosters from "./AdminRoosters.jsx";
 import AdminBesprekings from "./AdminBesprekings.jsx";
 import AdminGebruiker from "./AdminGebruiker.jsx";
+import AdminSorteer from "./AdminSorteer.jsx";
 import '../css/Admin.css';
 import "../css/Style.css";
 
@@ -31,6 +32,7 @@ function AdminContainer() {
                     {aktieweTab === "AdminGebruiker" && <AdminGebruiker/>}
                     {aktieweTab === "AdminRoosters" && <AdminRoosters />}
                     {aktieweTab === "AdminBesprekings" && <AdminBesprekings />}
+                    {aktieweTab === "AdminSorteer" && <AdminSorteer/>}
                 </div>
             </div>
         </div>
