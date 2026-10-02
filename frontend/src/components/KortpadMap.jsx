@@ -7,7 +7,7 @@ import {
     Popup,
     useMap
 } from 'react-leaflet';
-import L, { CRS } from 'leaflet';
+import L, { CRS, latLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Hierdie handler word gebruik om die map mooi te animate wanneer die LeftPanel collapse
@@ -33,6 +33,35 @@ function MapSizeHandler({ collapsed }) {
             clearTimeout(timeout);
         };
     }, [collapsed, map]);
+
+    return null;
+}
+
+function FitRouteBounds({ coordinates, collapsed }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!coordinates || coordinates.length === 0) return;
+
+        const bounds = coordinates.reduce(
+            (acc, [lat, lon]) => [
+                [Math.min(acc[0][0], lat), Math.min(acc[0][1], lon)],
+                [Math.max(acc[1][0], lat), Math.max(acc[1][1], lon)],
+            ],
+            [[Infinity, Infinity], [-Infinity, -Infinity]]
+        );
+
+        const timeout = setTimeout(() => {
+            map.flyToBounds(bounds, { 
+                padding: [40, 40],
+                maxZoom: 0.8, 
+                animate: true, 
+                duration: 0.6 
+            });
+        }, 460);
+
+        return () => clearTimeout(timeout);
+    }, [coordinates, collapsed, map]);
 
     return null;
 }
@@ -252,6 +281,7 @@ function KortpadMap({ selectedCampus, startVenue, endVenue, pageIndex, setPageCo
                 style={{ height: "100vh", width: "100%" }}
             >
                 <MapSizeHandler collapsed={collapsed} />
+                <FitRouteBounds coordinates={active?.coordinates} />
 
                 <ImageOverlay
                     url={`/maps${activeMap.image_path}`}
