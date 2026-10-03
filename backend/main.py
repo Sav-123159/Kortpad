@@ -9,6 +9,7 @@ from dijkstra import dijkstra
 import bcrypt
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from itertools import islice
 
 app = FastAPI()
 
@@ -101,6 +102,86 @@ def get_users():
 
     conn.close()
     return users
+
+@app.get('/users/mergesort/{field}/{sort_order}/{steps}')
+def get_users_merge_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names:
+            raise HTTPException(status_code=400, detail='Field does not exist')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def merge(left : list, right : list) -> list:
+            nonlocal steps, is_sorted
+            result = []
+            left_index = 0
+            right_index = 0
+
+            while (left_index < len(left)) and (right_index < len(right)):
+                if steps == 0:
+                    is_sorted = False
+                    return result + left[left_index:] + right[right_index:]
+
+                if steps > 0:
+                    steps -= 1
+                
+                left_value = left[left_index][field]
+                right_value = right[right_index][field]
+
+                if sort_order:
+                    if left_value <= right_value:
+                        result.append(left[left_index])
+                        left_index += 1
+                    else:
+                        result.append(right[right_index])
+                        right_index += 1
+                else:
+                    if left_value >= right_value:
+                        result.append(left[left_index])
+                        left_index += 1
+                    else:
+                        result.append(right[right_index])
+                        right_index += 1
+
+            result.extend(left[left_index:])
+            result.extend(right[right_index:])
+            return result
+
+        def merge_sort(mergedata : list) -> list:
+            if(len(mergedata) <= 1):
+                return mergedata
+
+            splice = len(mergedata)//2
+            left = mergedata[:splice]
+            right = mergedata[splice:]
+
+            left = merge_sort(left)
+            right = merge_sort(right)
+
+            return merge(left, right)
+
+        sorted_users = merge_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
 
 #Gebruikers se informasie word in twee verdeel
 #   User (app_user) -> naam, van, epos, is_admin
