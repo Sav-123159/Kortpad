@@ -261,6 +261,78 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
     finally:
         conn.close()
 
+@app.get('/users/insertionsort/{field}/{sort_order}/{steps}')
+def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names:
+            raise HTTPException(status_code=400, detail='Field does not exist')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def insertion_sort(insertiondata : list) -> list:
+            nonlocal steps, is_sorted
+            result = insertiondata.copy()
+            right_index = 1
+
+            while right_index < len(result):
+                left_index = right_index - 1
+                temp_field = result[right_index]
+                temp_value = result[right_index][field]
+
+                if steps == 0:
+                    is_sorted = False
+                    return result
+                
+                if sort_order:
+                    while left_index >= 0 and result[left_index][field] > temp_value:
+                        result[left_index+1] = result[left_index]
+                        left_index -= 1
+
+                        if steps == 0:
+                            is_sorted = False
+                            return result
+                        
+                        if steps > 0:
+                            steps -= 1
+                else:
+                    while left_index >= 0 and result[left_index][field] < temp_value:
+                        result[left_index+1] = result[left_index]
+                        left_index -= 1
+
+                        if steps == 0:
+                            is_sorted = False
+                            return result
+                        
+                        if steps > 0:
+                            steps -= 1
+
+                result[left_index+1] = temp_field
+                right_index += 1
+
+            return result
+
+        sorted_users = insertion_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
 #Gebruikers se informasie word in twee verdeel
 #   User (app_user) -> naam, van, epos, is_admin
 #   Auth (auth) -> wagwoord, epos
