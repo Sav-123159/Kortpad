@@ -296,6 +296,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                 if sort_order:
                     while left_index >= 0 and result[left_index][field] > temp_value:
                         result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
                         left_index -= 1
 
                         if steps == 0:
@@ -307,6 +308,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                 else:
                     while left_index >= 0 and result[left_index][field] < temp_value:
                         result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
                         left_index -= 1
 
                         if steps == 0:
@@ -368,6 +370,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                 if sort_order:
                     while left_index >= 0 and result[left_index][field] > temp_value:
                         result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
                         left_index -= 1
 
                         if steps == 0:
@@ -379,6 +382,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                 else:
                     while left_index >= 0 and result[left_index][field] < temp_value:
                         result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
                         left_index -= 1
 
                         if steps == 0:
@@ -394,6 +398,145 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
             return result
 
         sorted_users = insertion_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/heapsort/{field}/{sort_order}/{steps}')
+def get_users_heap_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names:
+            raise HTTPException(status_code=400, detail='Field does not exist')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def max_heapify(heapdata : list, index : int, size : int) -> list:
+            nonlocal steps, is_sorted
+            result = heapdata.copy()
+            left_index = (index*2) + 1
+            right_index = (index*2) + 2
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            if right_index < size:
+                if result[index][field] < max(result[left_index][field], result[right_index][field]):
+                    if result[left_index][field] >= result [right_index][field]:
+                        if steps > 0:
+                            steps -= 1
+                        temp = result[index]
+                        result[index] = result[left_index]
+                        result[left_index] = temp
+                        return max_heapify(result, left_index, size)
+                    else:
+                        if steps > 0:
+                            steps -= 1
+                        temp = result[index]
+                        result[index] = result[right_index]
+                        result[right_index] = temp
+                        return max_heapify(result, right_index, size)
+
+            elif left_index == size - 1:
+                if result[index][field] < result[left_index][field]:
+                    if steps > 0:
+                        steps -= 1
+                    temp = result[index]
+                    result[index] = result[left_index]
+                    result[left_index] = temp
+                    return result
+            return result
+
+        def min_heapify(heapdata : list, index : int, size : int) -> list:
+            nonlocal steps, is_sorted
+            result = heapdata.copy()
+            left_index = (index*2) + 1
+            right_index = (index*2) + 2
+
+            if steps == 0:
+                is_sorted = False
+                return result         
+
+            if right_index < size:
+                if result[index][field] > min(result[left_index][field], result[right_index][field]):
+                    if result[left_index][field] <= result [right_index][field]:
+                        if steps > 0:
+                            steps -= 1
+                        temp = result[index]
+                        result[index] = result[left_index]
+                        result[left_index] = temp
+                        return min_heapify(result, left_index, size)
+                    else:
+                        if steps > 0:
+                            steps -= 1
+                        temp = result[index]
+                        result[index] = result[right_index]
+                        result[right_index] = temp
+                        return min_heapify(result, right_index, size)
+
+            elif left_index == size - 1:
+                if result[index][field] > result[left_index][field]:
+                    if steps > 0:
+                        steps -= 1
+                    temp = result[index]
+                    result[index] = result[left_index]
+                    result[left_index] = temp
+                    return result
+            return result
+
+        def heap_sort(heapdata : list) -> list:
+            nonlocal steps, is_sorted
+            result = heapdata.copy()
+
+            for index in range((len(result)//2)-1, -1, -1):
+                if steps == 0:
+                    is_sorted = False
+                    return result
+                
+                if steps > 0:
+                    steps -= 1
+
+                if sort_order:
+                    result = max_heapify(result, index, len(result))
+                else:
+                    result = min_heapify(result, index, len(result))
+
+            for index in range((len(result)-1),0,-1):
+                if steps == 0:
+                    is_sorted = False
+                    return result
+
+                if steps > 0:
+                    steps -= 1
+                
+                temp = result[index]
+                result[index] = result[0]
+                result[0] = temp
+
+                if sort_order:
+                    result = max_heapify(result, 0, index)
+                else:
+                    result = min_heapify(result, 0, index)
+            return result
+
+        sorted_users = heap_sort(data)
         
         return{
             "users" : sorted_users,
