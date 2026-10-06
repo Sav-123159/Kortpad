@@ -30,11 +30,11 @@ function AdminContainer() {
                 />
                 <div className={MobieleLPaneel ? "RegterPaneel RegterPaneel--hide" : "RegterPaneel"}>
                     {/* Wys net die komponent by die geselekteerde tab hoort */}
-                    {aktieweTab === "AdminLokaleInfo" && <AdminLokaleInfo />}
-                    {aktieweTab === "AdminToerusting" && <AdminToerusting />}
-                    {aktieweTab === "AdminGebruiker" && <AdminGebruiker/>}
-                    {aktieweTab === "AdminRoosters" && <AdminRoosters />}
-                    {aktieweTab === "AdminBesprekings" && <AdminBesprekings />}
+                    {aktieweTab === "AdminLokaleInfo" && (<AdminLokaleInfo setMobieleLPaneel={setMobieleLPaneel}/>)}
+                    {aktieweTab === "AdminToerusting" && (<AdminToerusting setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminGebruiker" && (<AdminGebruiker setMobieleLPaneel={setMobieleLPaneel} />) }
+                    {aktieweTab === "AdminRoosters" && (<AdminRoosters setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminBesprekings" && (<AdminBesprekings setMobieleLPaneel={setMobieleLPaneel} />)}
                 </div>
             </div>
         </div>

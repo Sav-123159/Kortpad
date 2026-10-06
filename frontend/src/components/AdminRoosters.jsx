@@ -3,7 +3,7 @@ import "../css/Admin.css";
 import React, { useState, useEffect } from "react";
 import GeneralPopupModal from "./GeneralPopupModal";
 
-export default function AdminRoosters() {
+export default function AdminRoosters({setMobieleLPaneel}) {
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
     const [timetables, setTimetables] = useState([]);
@@ -312,6 +312,14 @@ export default function AdminRoosters() {
 
     return (
         <div className="Roosters__Inligting" data-for-tab="Roosters">
+            <div className="MobileHeader">
+                <button className="Hamburger" onClick={() => setMobieleLPaneel(true)}>
+                    ☰
+                </button>
+
+                <h3>Roosters</h3>
+            </div>
+
             <h2>Roosters</h2>
             &ensp;Semester roosters vir Lokale
             <div className="Lokale__kampus">

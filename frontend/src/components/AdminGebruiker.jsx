@@ -6,7 +6,7 @@ import AdminVoegByPopUp from "../components/AdminVoegByPopUp.jsx";
 import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 
 // Administratiewe gebruikers bestuur, voeg by, verwyder en wysig
-export default function AdminGebruiker() {
+export default function AdminGebruiker({setMobieleLPaneel}) {
     // Veranderlikes
     const [isPopupOop, setIsPopupOop] = useState(false);
     const [isDeleteOop, setIsDeleteOop] = useState(false);
@@ -142,7 +142,13 @@ export default function AdminGebruiker() {
 
     return (
         <div className="Info Gebruiker_Inligting" data-for-tab="Gebruiker">
+            <div className="MobileHeader">
+                <button className="Hamburger" onClick={() => setMobieleLPaneel(true)}>
+                    ☰
+                </button>
 
+                <h3>Gebruikers</h3>
+            </div>
             <div className="Gebruiker_Title">
                 <h2>Gebruikers</h2>
 

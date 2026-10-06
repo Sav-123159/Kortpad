@@ -127,7 +127,7 @@ async function hanteerConfirm(selectedVenue, duur, datumTyd, user_id) {
 }
 
 // hierdie funksie is waar die vorm is om n bespreking te skep
-export default function AdminBesprekings() {
+export default function AdminBesprekings({ setMobieleLPaneel }) {
     const [isConfirmOop, setIsConfirmOop] = useState(false);
 
     const [campuses, setCampuses] = useState([]);
@@ -177,11 +177,15 @@ export default function AdminBesprekings() {
 
     return (
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
-            <button className="Hamburger" onClick={() => setMenuOop(true)}>
-                ☰
-            </button>
+            <div className="MobileHeader">
+                <button className="Hamburger" onClick={() => setMobieleLPaneel(true)}>
+                    ☰
+                </button>
+
+                <h3>Besprekings</h3>
+            </div>
             <h2>Besprekings</h2>
-            &ensp;Besprekings kan hier gemaak word om ander besprekings te oorskryf.
+            &ensp;Besprekings kan hier gemaak of oorskryf word.
             <form onSubmit={(e) => { e.preventDefault(); setIsConfirmOop(true); }}>
                 <fieldset>
                     <label htmlFor="kampus">Kampus: </label>

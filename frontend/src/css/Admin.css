@@ -670,6 +670,11 @@ td {
     transform: scale(1.05);
 }
 
+.MobileHeader,
+.Hamburger{
+    display: none;
+}
+
 /* ---------------- Mobile View --------------- */
 @media screen and (max-width: 480px){
     .LinkerPaneel{
@@ -687,5 +692,30 @@ td {
 
     .RegterPaneel--hide{
         display: none;
+    }
+
+    .MobileHeader{
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        margin-bottom: 2px;
+        background-color: var(--paper) !important;
+        justify-content: left !important;
+        margin-top: 0 !important;
+    }
+
+    .Hamburger{
+        display: block;
+        width: 15vw;
+        font-size: large;
+        padding: 2px;
+        border: none;
+    }
+
+    .MobileHeader > h3{
+        font-weight: bold;
+        font-size: medium;  
+        color: var(--pine-dark);
+        align-content: center;        
     }
 }
