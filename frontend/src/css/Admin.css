@@ -16,7 +16,6 @@
 * {
     margin: 0;
     padding: 0;
-    /* s */
 }
 
 /* Default ontwerp van elke knoppie */
@@ -669,4 +668,24 @@ td {
     outline: none;
     border-color: var(--pine);
     transform: scale(1.05);
+}
+
+/* ---------------- Mobile View --------------- */
+@media screen and (max-width: 480px){
+    .LinkerPaneel{
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .LinkerPaneel--oop{
+        display: block;
+    }
+
+    .LinkerPaneel--toe{
+        display: none;
+    }
+
+    .RegterPaneel--hide{
+        display: none;
+    }
 }

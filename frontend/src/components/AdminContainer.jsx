@@ -15,6 +15,8 @@ function AdminContainer() {
     const [aktieweTab, setAktieweTab] = useState("AdminLokaleInfo");
     // Roep die komponent afhangend van die onclick event wat aktieweTab se waarde deur stuur in AdminLPaneel
 
+    //Mobile view sodat die linker paneel toemaak indien n tab gekies word
+    const[MobieleLPaneel, setMobieleLPaneel] = useState(true);
     // Html uitvoer
     return(
         <div className="app">
@@ -23,8 +25,10 @@ function AdminContainer() {
                 <AdminLPaneel
                     aktieweTab={aktieweTab}
                     setAktieweTab={setAktieweTab}
+                    MobieleLPaneel={MobieleLPaneel}
+                    setMobieleLPaneel = {setMobieleLPaneel}
                 />
-                <div className="RegterPaneel">
+                <div className={MobieleLPaneel ? "RegterPaneel RegterPaneel--hide" : "RegterPaneel"}>
                     {/* Wys net die komponent by die geselekteerde tab hoort */}
                     {aktieweTab === "AdminLokaleInfo" && <AdminLokaleInfo />}
                     {aktieweTab === "AdminToerusting" && <AdminToerusting />}

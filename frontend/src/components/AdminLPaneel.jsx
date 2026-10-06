@@ -1,9 +1,9 @@
 import "../css/Admin.css";
 
-export default function AdminLPaneel({aktieweTab, setAktieweTab}){
+export default function AdminLPaneel({aktieweTab, setAktieweTab, setMobieleLPaneel, MobieleLPaneel}){
     return(
         // Die linkerpaneel wat die verskillende opsies vir die admin gee
-        <section className="LinkerPaneel">
+        <section className={MobieleLPaneel ? "LinkerPaneel LinkerPaneel--oop" : "LinkerPaneel LinkerPaneel--toe"}>
             <div>
                 Administrasie <br/>
                 paneel
@@ -11,24 +11,24 @@ export default function AdminLPaneel({aktieweTab, setAktieweTab}){
             {/* onClick -> wanneer die knoppies geklik word, dan kry setAktieweTab die waarde van die knoppie wat gedruk is */}
             {/* Die waarde word deur gestuur na AdminContainer wat die regte komponent roep en render */}
             <div className="Opsies">
-                <button className={aktieweTab === "AdminLokaleInfo" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminLokaleInfo")} >
+                <button className={!MobieleLPaneel && aktieweTab === "AdminLokaleInfo" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminLokaleInfo"); setMobieleLPaneel(false);}} >
                     | Lokale
                 </button>
-                <button className={aktieweTab === "AdminToerusting" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminToerusting")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminToerusting" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminToerusting"); setMobieleLPaneel(false);}}>
                     | Lokaal Toerusting
                 </button>
-                <button className={aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminGebruiker")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminGebruiker"); setMobieleLPaneel(false);}}>
                     | Gebruikers
                 </button>
-                <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminRoosters")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminRoosters"); setMobieleLPaneel(false);}}>
                     | Klas Roosters
                 </button>
-                <button className={aktieweTab === "AdminBesprekings" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminBesprekings")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminBesprekings" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminBesprekings"); setMobieleLPaneel(false);}}>
                     | Besprekings
                 </button>
             </div>

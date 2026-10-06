@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 import { useAuth } from "./AuthContext.jsx";
+import AdminContainer from "./AdminContainer.jsx";
 
 // Formateer die datum laat ek hom kan stoor/gebruik
 // Die offsetDate maak dat ek die korrekte tyd kry vir as ek dit na ISO formaat omskakel
@@ -176,6 +177,9 @@ export default function AdminBesprekings() {
 
     return (
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
+            <button className="Hamburger" onClick={() => setMenuOop(true)}>
+                ☰
+            </button>
             <h2>Besprekings</h2>
             &ensp;Besprekings kan hier gemaak word om ander besprekings te oorskryf.
             <form onSubmit={(e) => { e.preventDefault(); setIsConfirmOop(true); }}>
