@@ -106,15 +106,18 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             .then((data) => setTimetables(data))
             .catch((error) => console.error(error));
 
-        loadBookings(selectedVenue);
-
-    }, [selectedVenue]);
+        if (date !== "") {
+            loadBookings(selectedVenue, date);
+        } else {
+            setBookings([]);
+        }
+    }, [selectedVenue, date]);
 
     // Laai besprekings vir die geselekteerde lokaal
-    async function loadBookings(venueId) {
+    async function loadBookings(venueId, bookingDate) {
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/booking/by-venue/${venueId}`
+                `http://127.0.0.1:8000/booking/by-venue/${venueId}?booking_date=${bookingDate}`
             );
 
             if (!response.ok) {
@@ -298,7 +301,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             alert("Bespreking suksesvol!");
 
             // Herlaai besprekings na 'n suksesvolle bespreking
-            await loadBookings(selectedVenue);
+            await loadBookings(selectedVenue, date);
             resetForm();
 
             if (onConfirm) {
@@ -469,18 +472,40 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
                                         const slot = `${day}-${time}`;
 
                                         // Die tydgleuf is deur die rooster beset of 'n bestaande bespreking is op daai tyd
-                                        const occupied = (timetables.some(
-                                            (timetable) =>
-                                                timetable.day_of_week === day &&
-                                                timetable.start_time <= time &&
-                                                timetable.end_time > time
-                                        )) || (day == activeDay && date !== "" &&
+                                        // *Die tyd in die tabel en die API moet dieselfde formaat hê*
+
+                                        // Kyk of die tydgleuf beset is deur die rooster
+                                        const timetableOccupied = timetables.some(
+                                            (timetable) => {
+                                                const startTime = timetable.start_time.slice(0, 5);
+                                                const endTime = timetable.end_time.slice(0, 5);
+
+                                                return (
+                                                    timetable.day_of_week === day &&
+                                                    startTime <= time &&
+                                                    endTime > time
+                                                );
+                                            }
+                                        );
+                                        // Kyk of die tydgleuf beset is deur 'n bestaande bespreking
+                                        const bookingOccupied =
+                                            day === activeDay &&
+                                            date !== "" &&
                                             bookings.some(
-                                                (booking) =>
-                                                    booking.booking_date === date &&
-                                                    booking.start_time <= time &&
-                                                    booking.end_time > time
-                                            ));
+                                                (booking) => {
+                                                    const startTime = booking.start_time.slice(0, 5);
+                                                    const endTime = booking.end_time.slice(0, 5);
+
+                                                    return (
+                                                        booking.booking_date === date &&
+                                                        startTime <= time &&
+                                                        endTime > time
+                                                    );
+                                                }
+                                            );
+
+                                        // Die tydgleuf is beset as dit deur die rooster of 'n bestaande bespreking beset is
+                                        const occupied = timetableOccupied || bookingOccupied;
 
                                         const selected = selectedSlots.includes(slot);
 
