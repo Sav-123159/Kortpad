@@ -718,4 +718,89 @@ td {
         color: var(--pine-dark);
         align-content: center;        
     }
+
+    .RegterPaneel {
+        width: 100%;
+        height: 100vh;
+        padding: 15px;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+
+    /* Drop downs en die keuses vir vertoning van data */
+    .loading-overlay{
+        display: none;
+    }
+
+    .Lokale__kampus {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .Lokale__kampus h3 {
+        display: flex;
+        margin-bottom: 5px;
+    }
+
+    .Lokale__kampus select {
+        width: 100%;
+        box-sizing: border-box;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    /* Buttons */
+    .Lokaal__titel button, 
+    .Toerusting__title button, 
+    .Gebruiker_Title button{
+        left: 60%;
+    }
+
+    .Lokale__lys , 
+    .Lokale__equip {
+        display: flex;
+        flex-direction: row !important;
+        width: 70vw;
+        margin: auto;
+        margin-bottom: 10px;
+    }
+
+    .Gebruiker__item {
+        display: flex;
+        flex-direction: row !important;
+        width: 80vw;
+        margin: auto;
+        margin-bottom: 10px;
+    }
+
+    .Gebruiker__item div button {
+        display: none;
+    }
+
+    .Gebruiker__item label{
+        width: 45%;
+    }
+
+    .Lokale__equip label{
+        width: 25%;
+    }
+
+    .Gebruiker__item div button, 
+    .Lokale__equip div button{
+        margin-left: 5px;
+    }
+
+    .Lokale__lys input{
+        margin-right: 5px;
+    }
+
+    .Gebruiker_Keuse label{
+        font-size: medium;
+    }
+
+    .Gebruiker__item input{
+        width: 10vw !important;
+        font-size: medium;
+    }
 }
