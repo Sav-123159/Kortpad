@@ -355,7 +355,7 @@ button.form-button:hover {
     width: 360px;
     height: 100vh;
     padding: 20px;
-
+    height: calc(100vh - 120px);
     box-sizing: border-box;
 
     display: flex;
@@ -363,7 +363,7 @@ button.form-button:hover {
 
     align-items: center;
     gap: 20px;
-    overflow-y: auto;
+    overflow-y: scroll;
     overflow-x: hidden;
     background: var(--paper-deep);
 }
@@ -822,6 +822,19 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
     }
 }
 
+@media screen and (max-width: 480px) {
+    .Logo img {
+        width: 10vw;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    body {
+        overflow-y: hidden;
+        height: 100%;
+    }
+}
+
 /* Vol skerm intro overlay wat op die program-begin wys en na die animasie verdwyn */
 .global-intro-overlay {
     position: fixed;
@@ -1148,7 +1161,7 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
     }
 
     .form,
-    .deco {
+    .deco{
         flex: none;
         width: 100%;
     }
@@ -1157,7 +1170,7 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
         gap: 15px;
     }
 
-    .deco {
+    .deco{
         order: -1;
     }
 
@@ -1172,4 +1185,7 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
         height: auto;
     }
 
+    .edit-container button{
+        margin: 5px;
+    }
 }

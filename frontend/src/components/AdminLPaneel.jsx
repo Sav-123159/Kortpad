@@ -19,12 +19,23 @@ export default function AdminLPaneel({aktieweTab, setAktieweTab, setMobieleLPane
                 onClick={() => {setAktieweTab("AdminToerusting"); setMobieleLPaneel(false);}}>
                     | Lokaal Toerusting
                 </button>
-                <button className={!MobieleLPaneel && aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => {setAktieweTab("AdminGebruiker"); setMobieleLPaneel(false);}}>
+
+                <button className={aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => setAktieweTab("AdminGebruiker")}>
                     | Gebruikers
                 </button>
-                <button className={!MobieleLPaneel && aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => {setAktieweTab("AdminRoosters"); setMobieleLPaneel(false);}}>
+                {
+                    (aktieweTab === "AdminGebruiker" || aktieweTab === "AdminSorteer")&& (
+                        <button className = {aktieweTab === "AdminSorteer" ? "Opsie_Knoppie Sorteer_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie Sorteer_Knoppie"}
+                            onClick={() => setAktieweTab("AdminSorteer")}
+                        >
+                            | Sorteer Algoritmes
+                        </button>
+                    )
+                }
+
+                <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => setAktieweTab("AdminRoosters")}>
                     | Klas Roosters
                 </button>
                 <button className={!MobieleLPaneel && aktieweTab === "AdminBesprekings" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 

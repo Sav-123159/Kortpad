@@ -6,7 +6,11 @@ from models import *
 from database import init_db, get_db
 from graph import GraphCache
 from dijkstra import dijkstra
+from datetime import date, time, datetime
+from booking_tree import BookingCache
 import bcrypt
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 app = FastAPI()
 
@@ -30,6 +34,9 @@ init_db()
 # 'n Cache wat kampus kaarte stoor elke keer wat die Frontend 'n versoek maak vir 'n kaart,
 # kan die bediener eers kyk of die kaart klaar gelaai is binne die cache om prestasie te spaar op komplekse data struktuur skeppings 
 _map_cache = GraphCache()
+
+# 'n Cache wat bookings stoor elke keer wat die Frontend 'n versoek maak vir bookings,
+_booking_cache = BookingCache()
 
 # ==================== API ====================
 # Daar bestaan basiese API CRUD metodes vir alle data wat modelle voor bestaan, soos:
@@ -70,7 +77,6 @@ def verify_password(password: str, hashed_password: str) -> bool:
     #   -> Die resultaat word met mekaar dan vergelyk en gee [true|false]
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
-
 # ==================== USER ====================
 @app.get('/user/{user_id}')
 def get_user(user_id : int):
@@ -109,16 +115,20 @@ def create_user(user : UserCreate, auth : Auth):
     conn = get_db()
     try:
         cursor = conn.cursor()
-        
-        #User
-        cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, 0)',
-        (user.fname, user.sname, user.email))
 
-        user_id = cursor.lastrowid
+        with ThreadPoolExecutor() as executor:
+            #Auth
+            #Hash die password voor hy in die databasis gestoor word
+            hash_future = executor.submit(encrypt_password, auth.password)
+            
+            #User
+            cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, 0)',
+            (user.fname, user.sname, user.email))
+            user_id = cursor.lastrowid
 
-        #Auth
-        #Hash die password voor hy in die databasis gestoor word
-        hashed_password = encrypt_password(auth.password)
+            #Join Auth se resultaat nadat User se resultaat geproseseer het
+            hashed_password = hash_future.result()
+
         cursor.execute('INSERT INTO auth (user_id, password, email) VALUES (?, ?, ?)',
         (user_id, hashed_password, user.email))
         
@@ -138,15 +148,20 @@ def create_user(user : AdminUserCreate, auth : Auth):
     conn = get_db()
     try:
         cursor = conn.cursor()
+
+        with ThreadPoolExecutor() as executor:
+            #Auth
+            hash_future = executor.submit(encrypt_password, auth.password)
+
         
-        #User
-        cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, ?)',
-        (user.fname, user.sname, user.email, user.is_admin))
+            #User
+            cursor.execute('INSERT INTO app_user (fname, sname, email, is_admin) VALUES (?, ?, ?, ?)',
+            (user.fname, user.sname, user.email, user.is_admin))
+            user_id = cursor.lastrowid
 
-        user_id = cursor.lastrowid
-
-        #Auth
-        hashed_password = encrypt_password(auth.password)
+            #Join Auth
+            hashed_password = hash_future.result()
+        
         cursor.execute('INSERT INTO auth (user_id, password, email) VALUES (?, ?, ?)',
         (user_id, hashed_password, user.email))
         
@@ -170,11 +185,20 @@ def login(login : Login):
         cursor.execute('SELECT password FROM auth WHERE email = ?', (login.email,))
         row = cursor.fetchone()
 
-        if row is None or not verify_password(login.password, row[0]):
-            raise HTTPException(status_code=401, detail='Wrong password') 
+        with ThreadPoolExecutor() as executor:
+            verify_future = executor.submit(verify_password, login.password, row[0])
 
-        data = cursor.execute('SELECT * FROM app_user WHERE email = ?', (login.email,)).fetchone()
-        return User(**dict(data))
+            if row is None:
+                raise HTTPException(status_code=401, detail='Wrong password')
+
+            is_valid = verify_future.result()
+
+        if is_valid:
+            data = cursor.execute('SELECT * FROM app_user WHERE email = ?', (login.email,)).fetchone()
+            return User(**dict(data))
+        else:
+            raise HTTPException(status_code=401, detail='Wrong password')
+        
     finally:
         conn.close()
 
@@ -393,8 +417,13 @@ def get_booking(booking_id : int):
     finally:
         conn.close()
 
+# Sonder ?booking_date= gee dit alle besprekings van die lokaal (soos voorheen).
+# Met ?booking_date=2026-09-21 kom die antwoord uit die Rooi-Swart Boom (reeks-navraag).
 @app.get('/booking/by-venue/{venue_id}')
-def get_booking(venue_id : int):
+def get_bookings_by_venue(venue_id : int, booking_date : date | None = None):
+    if booking_date is not None:
+        return _booking_cache.bookings_on(venue_id, booking_date)
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -417,121 +446,150 @@ def get_bookings():
 
     return bookings
 
+# Kyk eers in die boom of enige uur-gleuf alreeds beset is, dan eers INSERT.
+# Die lock hou "kyk" en "voeg in" saam sodat twee gebruikers nie dieselfde gleuf kan kry nie.
 @app.post('/booking')
 def create_booking(booking : BookingCreate):
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
+    # Kombineer die datum en tyd in 'n enkele datetime vir die boom se botsing navraag
+    start = datetime.combine(booking.booking_date, booking.start_time)
+    end = datetime.combine(booking.booking_date, booking.end_time)
 
-        cursor.execute(
-            '''INSERT INTO booking
-                (venue_id, user_id, start_time, end_time, booking_date)
-                VALUES (?, ?, ?, ?, ?)
-                RETURNING booking_id, booking_created_at''',
-            (
-                booking.venue_id,
-                booking.user_id,
-                booking.start_time.isoformat(),
-                booking.end_time.isoformat(),
-                booking.booking_date.isoformat(),
+    # lock die boom sodat twee gebruikers nie dieselfde tyd kan bespreek nie
+    with _booking_cache.lock:
+        if _booking_cache.find_conflicts(booking.venue_id, start, end):
+            raise HTTPException(status_code=409, detail='Venue is already booked for that time')
+
+        conn = get_db()
+        try:
+            cursor = conn.cursor()
+
+            cursor.execute(
+                '''INSERT INTO booking
+                    (venue_id, user_id, start_time, end_time, booking_date)
+                    VALUES (?, ?, ?, ?, ?)
+                    RETURNING booking_id, booking_created_at''',
+                (
+                    booking.venue_id,
+                    booking.user_id,
+                    booking.start_time.isoformat(),
+                    booking.end_time.isoformat(),
+                    booking.booking_date.isoformat(),
+                )
             )
-        )
-        
-        row = cursor.fetchone()
-        conn.commit()
 
-        return Booking(booking_id=row[0], booking_created_at=row[1], **booking.model_dump())
+            row = cursor.fetchone()
+            conn.commit()
 
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
+        except IntegrityError:
+            conn.rollback()
+            raise HTTPException(status_code=400, detail='Something went wrong')
+        finally:
+            conn.close()
 
+        # Voeg die nuwe bespreking by die boom sodat dit onmiddellik beskikbaar is vir navrae sonder om weer die databasis te raadpleeg.
+        new_booking = Booking(booking_id=row[0], booking_created_at=row[1], **booking.model_dump())
+        _booking_cache.add(new_booking)
+
+        return new_booking
+
+# Na 'n DELETE moet die boom van daardie lokaal herbou word (invalidate).
+# Die lock hou die databasis-wysiging en die invalidate saam.
 @app.delete('/booking/{booking_id}')
 def delete_booking(booking_id : int):
     if booking_id <= 0:
         raise HTTPException(status_code=400, detail='Booking id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
-        
-        cursor.execute('DELETE FROM booking WHERE booking_id = ?', (booking_id,))
-        
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail='Booking does not exist')
-        
-        conn.commit()
-    
-        return {'message': f'Booking {booking_id} has been deleted'}
-    
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
 
+    with _booking_cache.lock:
+        conn = get_db()
+        try:
+            cursor = conn.cursor()
+
+            row = cursor.execute('SELECT venue_id FROM booking WHERE booking_id = ?', (booking_id,)).fetchone()
+            
+            if row is None:
+                raise HTTPException(status_code=404, detail='Booking does not exist')
+
+            cursor.execute('DELETE FROM booking WHERE booking_id = ?', (booking_id,))
+            conn.commit()
+
+            # Herbou die boom van daardie lokaal sodat dit onmiddellik beskikbaar is vir navrae sonder om weer die databasis te raadpleeg.
+            # Die row['venue_id'] is die lokaal van die bespreking wat verwyder is.
+            # Die boom word herbou deur die invalidate() metode van BookingCache aan te roep.
+            _booking_cache.invalidate(row['venue_id'])
+
+            return {'message': f'Booking {booking_id} has been deleted'}
+
+        except IntegrityError:
+            conn.rollback()
+            raise HTTPException(status_code=400, detail='Something went wrong')
+        finally:
+            conn.close()
+
+# PUT kyk BEWUS nie vir botsings nie: die admin bladsy gebruik dit om 'n bespreking se tyd te oorskryf.
+# Die bespreking kon van lokaal verander het, dus word albei se bome herbou.
 @app.put('/booking/{booking_id}')
 def update_booking(booking_id : int, booking : BookingBase):
     if booking_id <= 0:
         raise HTTPException(status_code=400, detail='Booking id needs to be greater than 0')
-    
-    conn = get_db()
-    try:
-        cursor = conn.cursor()
 
-        cursor.execute(
-            'UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ? WHERE booking_id = ?',
-            (
-                booking.venue_id,
-                booking.user_id,
-                booking.start_time.isoformat(),
-                booking.end_time.isoformat(),
-                booking.booking_date.isoformat(),
-                booking_id
+    with _booking_cache.lock:
+        conn = get_db()
+        try:
+            cursor = conn.cursor()
+
+            # Kry die ou lokaal van die bespreking wat opgedateer word, sodat ons die boom van daardie lokaal kan herbou.
+            old = cursor.execute('SELECT venue_id FROM booking WHERE booking_id = ?', (booking_id,)).fetchone()
+            # As die bespreking nie bestaan nie, gooi 'n 404 fout.
+            if old is None:
+                raise HTTPException(status_code=404, detail='Booking does not exist')
+
+            cursor.execute(
+                'UPDATE booking SET venue_id = ?, user_id = ?, start_time = ?, end_time = ?, booking_date = ? WHERE booking_id = ?',
+                (
+                    booking.venue_id,
+                    booking.user_id,
+                    booking.start_time.isoformat(),
+                    booking.end_time.isoformat(),
+                    booking.booking_date.isoformat(),
+                    booking_id
+                )
             )
-        )
-        
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail='Booking does not exist')
-        
-        conn.commit()
-        
-        return {'message': f'Booking {booking_id} has been updated'}
+            conn.commit()
 
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
+            # Herbou die boom van die ou lokaal en die nuwe lokaal sodat dit onmiddellik beskikbaar is vir navrae sonder om weer die databasis te raadpleeg.
+            # Die ou lokaal is die row['venue_id'] van die bespreking wat opgedateer is, en die nuwe lokaal is booking.venue_id.
+            _booking_cache.invalidate(old['venue_id'])
+            _booking_cache.invalidate(booking.venue_id)
 
-# Kyk vir botsings met nuwe Admin booking (gee true of false terug :))
+            return {'message': f'Booking {booking_id} has been updated'}
+
+        except IntegrityError:
+            conn.rollback()
+            raise HTTPException(status_code=400, detail='Something went wrong')
+        finally:
+            conn.close()
+
+# Kyk vir botsings met 'n nuwe Admin booking (gee {"conflict": false} of {"conflict": true, "bookings": [...]})
+# FastAPI skakel die "YYYY-MM-DD" en "HH:MM:SS" query strings self om na date en time.
+# 11:30 as einde word 12:00 (uur-gleuwe), en die lys is gesorteer op tyd.
 @app.get('/booking/check-conflict/{venue_id}')
 def check_conflict(venue_id: int, booking_date: str, start_time: str, end_time: str):
-    conn = get_db()
     try:
-        cursor = conn.cursor()
+        day = date.fromisoformat(booking_date)
+        start = datetime.combine(day, time.fromisoformat(start_time))
+        end = datetime.combine(day, time.fromisoformat(end_time))
+    except ValueError:
+        raise HTTPException(status_code=400, detail='Invalid date or time format')
 
-        data = cursor.execute(
-            '''SELECT * FROM booking 
-               WHERE venue_id = ? 
-               AND booking_date = ?
-               AND NOT (end_time <= ? OR start_time >= ?)''',
-            (venue_id, booking_date, start_time, end_time)
-        ).fetchall()
+    if end <= start:
+        raise HTTPException(status_code=400, detail='End time must be after start time')
 
-        if not data:
-            return {"conflict": False}
+    clashes = _booking_cache.find_conflicts(venue_id, start, end)
 
-        bookings = [Booking(**dict(d)) for d in data]
-        return {"conflict": True, "bookings": bookings}
+    if not clashes:
+        return {"conflict": False}
 
-    except IntegrityError:
-        conn.rollback()
-        raise HTTPException(status_code=400, detail='Something went wrong')
-    finally:
-        conn.close()
+    return {"conflict": True, "bookings": clashes}
 
 # ==================== CAMPUS ====================
 @app.get('/campus/{campus_id}')
@@ -807,6 +865,28 @@ def get_venue(venue_id : int):
             raise HTTPException(status_code=404, detail='Venue does not exist')
         
         return Venue(**dict(data))
+
+    finally:
+        conn.close()
+
+@app.get('/venue/{venue_id}/capacity')
+def get_venue_capacity(venue_id: int):
+    if venue_id <= 0:
+        raise HTTPException(status_code=400, detail='Venue id needs to be greater than 0')
+    
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+
+        data = cursor.execute(
+            'SELECT capacity FROM venue WHERE venue_id = ?',
+            (venue_id,)
+        ).fetchone()
+
+        if not data:
+            raise HTTPException(status_code=404, detail='Venue does not exist')
+        
+        return {'capacity': data['capacity']}
 
     finally:
         conn.close()

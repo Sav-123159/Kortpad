@@ -175,6 +175,15 @@ export default function AdminBesprekings({ setMobieleLPaneel }) {
 
     const user_id = user.user_id;
 
+    const clearForm = () => {
+        setSelectedCampus("");
+        setSelectedBuilding("");
+        setSelectedVenue("");
+        setDuur("");
+        setDatumTyd("");
+        setCapacity("");
+    }
+
     return (
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
             <div className="MobileHeader">
@@ -284,7 +293,7 @@ export default function AdminBesprekings({ setMobieleLPaneel }) {
                 selectedCampus={selectedCampus}
                 selectedBuilding={selectedBuilding}
                 selectedVenue={selectedVenue}
-                onConfirm={() => hanteerConfirm(selectedVenue, duur, datumTyd, user_id)}
+                onConfirm={async () => {await hanteerConfirm(selectedVenue, duur, datumTyd, user_id); clearForm();}}
             />
 
         </div>
