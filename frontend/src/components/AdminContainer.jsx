@@ -6,6 +6,7 @@ import AdminToerusting from "./AdminToerusting.jsx";
 import AdminRoosters from "./AdminRoosters.jsx";
 import AdminBesprekings from "./AdminBesprekings.jsx";
 import AdminGebruiker from "./AdminGebruiker.jsx";
+import AdminSorteer from "./AdminSorteer.jsx";
 import '../css/Admin.css';
 import "../css/Style.css";
 
@@ -37,6 +38,7 @@ function AdminContainer() {
                     {aktieweTab === "AdminLokaleInfo" && (<AdminLokaleInfo setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminToerusting" && (<AdminToerusting  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminGebruiker" && (<AdminGebruiker  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />) }
+                    {aktieweTab === "AdminSorteer" && (<AdminSorteer  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminRoosters" && (<AdminRoosters  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminBesprekings" && (<AdminBesprekings  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                 </div>

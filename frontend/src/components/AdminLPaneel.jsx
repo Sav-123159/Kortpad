@@ -46,8 +46,16 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
                     onClick={() => { setAktieweTab("AdminGebruiker"); setCollapsed(true); setMobieleLPaneel(false); }} >
                     | Gebruikers
                 </button>
-                <button className={!MobieleLPaneel && aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie"}
-                    onClick={() => { setAktieweTab("AdminRoosters"); setCollapsed(true); setMobieleLPaneel(false); }} >
+                {(aktieweTab === "AdminGebruiker" || aktieweTab === "AdminSorteer") && (
+                        <button className = {aktieweTab === "AdminSorteer" ? "Opsie_Knoppie Sorteer_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie Sorteer_Knoppie"}
+                            onClick={() => { setAktieweTab("AdminSorteer"); setCollapsed(true); setMobieleLPaneel(false); }}
+                        >
+                            | Sorteer Algoritmes
+                        </button>)
+                }
+
+                <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminRoosters"); setCollapsed(true); setMobieleLPaneel(false);}}>
                     | Klas Roosters
                 </button>
                 <button className={!MobieleLPaneel && aktieweTab === "AdminBesprekings" ? "Opsie_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie"}

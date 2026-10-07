@@ -11,7 +11,9 @@ import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 export default function AdminLokaleInfo({setCollapsed, collapsed, setMobieleLPaneel}){
     // Boolean state om die popup oop en toe te maak
     const [isPopupOop, setIsPopupOop] = useState(false);
-    const [isDeleteOop, setIsDeleteOop] = useState(false);
+    
+    const [editingCapacity, setEditingCapacity] = useState(null);
+    const [tempCapacity, setTempCapacity] = useState({});
 
     // skikking veranderlike wat die kampusse van die databasis af laai in die veranderlike in
     // Die selectedCampus hou tred met watse kampus die gebruiker kies
@@ -55,24 +57,6 @@ export default function AdminLokaleInfo({setCollapsed, collapsed, setMobieleLPan
     // Kry die naam van die lokaal gebaseer op sy id en as 'n naam nie gevind word nie, kry ons 'undefined' eerder as 'n error
     const selectedVenueName = venues.find(venue => venue.venue_id === selectedVenue)?.venue_name;
 
-    // Verwyder die lokaal uit die databasis uit
-    // async want ons wag vir die backend
-    // setVenues skikking word nou nuut gelaai met die lokale sonder die lokaal wat nou verwyder is
-    // Maak die delete popup toe en die geselekteerde lokaal is nou null, want hy was verwyder
-    const deleteVenue = async () => {
-        try {
-            await fetch(`http://127.0.0.1:8000/venue/${selectedVenue}`, {
-                method: "DELETE",
-            });
-
-            setVenues(venues.filter(venue => venue.venue_id !== selectedVenue));
-            setIsDeleteOop(false);
-            setSelectedVenue(null);
-        } catch (err) {
-            console.error("Error deleting venue:", err);
-        }
-    };
-
     // Veranderlikes om die lokaal naam te edit
     // editingName hou die ID van die lokaal se naam wat nou geedit word
     // tempName hou die tydelike naam terwyl die gebruiker dit intik
@@ -98,14 +82,6 @@ export default function AdminLokaleInfo({setCollapsed, collapsed, setMobieleLPan
             {/* Stuur data na die AdminVoegByPopUp deur props te gebruik */}
             <div className="Lokaal__titel">           
                 <h2>Lokale</h2>
-
-                <button onClick={() => setIsPopupOop(true)}>Voeg lokaal by.</button>
-                <AdminVoegByPopUp 
-                    isPopupOop={isPopupOop}
-                    setIsPopupOop={setIsPopupOop}
-                    tipe="VoegLokaalBy"
-                    setVenues={setVenues}
-                />
             </div>
             &ensp;Lokale gerigistreerd <br/>
             {/* Select drop downs om kampus en die gebou te kies */}
@@ -189,6 +165,7 @@ export default function AdminLokaleInfo({setCollapsed, collapsed, setMobieleLPan
                                         setTempName({ ...tempName, [venue.venue_id]: e.target.value });
                                     }}
                                 />
+                                {/* Editing knoppie */}
                                 <button
                                     className={editingName === venue.venue_id ? "Edit_Aktief" : ""}
                                     onClick={async () => {
@@ -239,24 +216,94 @@ export default function AdminLokaleInfo({setCollapsed, collapsed, setMobieleLPan
                                 )}
                             </div>
 
-                            <button
-                                onClick={() => {
-                                    setIsDeleteOop(true);
-                                    setSelectedVenue(venue.venue_id);
-                                }}
-                            >
-                                &#x1F5D1;
-                            </button>
+                            {/* Capacity editing hier in */}
+                            <div className="Lokaal__capacity">
+                                <h3>Kapasiteit:</h3>
+
+                                <input
+                                    type="number"
+                                    value={
+                                        editingCapacity === venue.venue_id
+                                            ? tempCapacity[venue.venue_id]
+                                            : venue.capacity ?? 0
+                                    }
+                                    readOnly={editingCapacity !== venue.venue_id}
+                                    onChange={(e) => {
+                                        setTempCapacity({
+                                            ...tempCapacity,
+                                            [venue.venue_id]: e.target.value
+                                        });
+                                    }}
+                                />
+
+                                <button
+                                    className={editingCapacity === venue.venue_id ? "Edit_Aktief" : ""}
+                                    onClick={async () => {
+                                        if (editingCapacity !== venue.venue_id) {
+
+                                            setEditingCapacity(venue.venue_id);
+
+                                            setTempCapacity({
+                                                ...tempCapacity,
+                                                [venue.venue_id]: venue.capacity ?? 0
+                                            });
+
+                                        } else {
+
+                                            try {
+                                                await fetch(`http://127.0.0.1:8000/venue/${venue.venue_id}`, {
+                                                    method: "PUT",
+                                                    headers: { "Content-Type": "application/json" },
+                                                    body: JSON.stringify({
+                                                        building_id: selectedBuilding,
+                                                        venue_name: venue.venue_name,
+                                                        capacity: Number(tempCapacity[venue.venue_id]),
+                                                        floor: venue.floor ?? 0
+                                                    })
+                                                });
+
+                                                setVenues(
+                                                    venues.map((ven) =>
+                                                        ven.venue_id === venue.venue_id
+                                                            ? {
+                                                                ...ven,
+                                                                capacity: Number(tempCapacity[venue.venue_id])
+                                                            }
+                                                            : ven
+                                                    )
+                                                );
+
+                                                setEditingCapacity(null);
+
+                                            } catch (err) {
+                                                console.error("Error updating venue capacity:", err);
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {editingCapacity === venue.venue_id ? "\u2713" : "\u270E"}
+                                </button>
+
+                                {editingCapacity === venue.venue_id && (
+                                    <button
+                                        className="Edit_Aktief"
+                                        onClick={() => {
+                                            setTempCapacity({
+                                                ...tempCapacity,
+                                                [venue.venue_id]: venue.capacity ?? 0
+                                            });
+
+                                            setEditingCapacity(null);
+                                        }}
+                                    >
+                                        &#x2716;
+                                    </button>
+                                )}
+                            </div>
+
                         </div>
                     ))
                 )}
-                <AdminConfirmPopUp
-                    isConfirmOop={isDeleteOop}
-                    setIsConfirmOop={setIsDeleteOop}
-                    tipe="ConfirmDel"
-                    onConfirm={deleteVenue}
-                    itemName={selectedVenueName}
-                />
             </div>
         </div>           
     )
