@@ -851,10 +851,14 @@ td {
     .Lokale__lys , 
     .Lokale__equip {
         display: flex;
-        flex-direction: row !important;
         width: 70vw;
         margin: auto;
         margin-bottom: 10px;
+    }
+
+    .Lokale__lys{
+        flex-direction: column !important;
+        width: 80vw;
     }
 
     .Gebruiker__item {
@@ -884,6 +888,7 @@ td {
 
     .Lokale__lys input{
         margin-right: 5px;
+        width: 125px !important;
     }
 
     .Gebruiker_Keuse label{
@@ -893,5 +898,9 @@ td {
     .Gebruiker__item input{
         width: 10vw !important;
         font-size: medium;
+    }
+
+    .Gebruiker_Keuse{
+        gap: 20px !important;
     }
 }

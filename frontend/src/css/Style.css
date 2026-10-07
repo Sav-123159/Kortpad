@@ -355,7 +355,7 @@ button.form-button:hover {
     width: 360px;
     height: 100vh;
     padding: 20px;
-    height: calc(100vh - 120px);
+    height: calc(100vh - 90px);
     box-sizing: border-box;
 
     display: flex;

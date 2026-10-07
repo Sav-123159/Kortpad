@@ -20,8 +20,8 @@ export default function AdminLPaneel({aktieweTab, setAktieweTab, setMobieleLPane
                     | Lokaal Toerusting
                 </button>
 
-                <button className={aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminGebruiker")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminGebruiker"); setMobieleLPaneel(false);}}>
                     | Gebruikers
                 </button>
                 {
@@ -34,8 +34,8 @@ export default function AdminLPaneel({aktieweTab, setAktieweTab, setMobieleLPane
                     )
                 }
 
-                <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminRoosters")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => {setAktieweTab("AdminRoosters"); setMobieleLPaneel(false);}}>
                     | Klas Roosters
                 </button>
                 <button className={!MobieleLPaneel && aktieweTab === "AdminBesprekings" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
