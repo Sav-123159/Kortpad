@@ -579,7 +579,7 @@ td {
 }
 
 /* ======================= Besprekings ======================== */
-.Besprekings__Inligting > div{
+.Besprekings__Inligting>div {
     background-color: var(--pine);
     border-radius: var(--default-border-radius);
     margin-top: 10px;
@@ -671,30 +671,30 @@ td {
 }
 
 .MobileHeader,
-.Hamburger{
+.Hamburger {
     display: none;
 }
 
 /* ---------------- Mobile View --------------- */
-@media screen and (max-width: 480px){
-    .LinkerPaneel{
+@media screen and (max-width: 480px) {
+    .LinkerPaneel {
         width: 100vw;
         height: 100vh;
     }
 
-    .LinkerPaneel--oop{
+    .LinkerPaneel--oop {
         display: block;
     }
 
-    .LinkerPaneel--toe{
+    .LinkerPaneel--toe {
         display: none;
     }
 
-    .RegterPaneel--hide{
+    .RegterPaneel--hide {
         display: none;
     }
 
-    .MobileHeader{
+    .MobileHeader {
         display: flex;
         flex-direction: row;
         gap: 10px;
@@ -704,7 +704,7 @@ td {
         margin-top: 0 !important;
     }
 
-    .Hamburger{
+    .Hamburger {
         display: block;
         width: 15vw;
         font-size: large;
@@ -712,10 +712,33 @@ td {
         border: none;
     }
 
-    .MobileHeader > h3{
+    .MobileHeader>h3 {
         font-weight: bold;
-        font-size: medium;  
+        font-size: medium;
         color: var(--pine-dark);
-        align-content: center;        
+        align-content: center;
+    }
+
+    .timetable-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows:auto auto;
+        grid-template-areas: "Timetable"
+                             "SidePanel";
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .day-full {
+        display: none;
+    }
+
+    .day-short {
+        display: inline;
+    }
+
+    .side-panel {
+        overflow-y: scroll;
+        max-height: 85%;
     }
 }
