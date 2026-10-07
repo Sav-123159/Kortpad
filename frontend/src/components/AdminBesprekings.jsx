@@ -127,13 +127,41 @@ async function hanteerConfirm(selectedVenue, duur, datumTyd, user_id) {
 }
 
 // hierdie funksie is waar die vorm is om n bespreking te skep
-export default function AdminBesprekings({ setMobieleLPaneel }) {
+export default function AdminBesprekings({ setCollapsed, collapsed, setMobieleLPaneel }) {
     const [isConfirmOop, setIsConfirmOop] = useState(false);
 
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
 
-    const {user} = useAuth();
+    const { user } = useAuth();
+
+    function MapSizeHandler({ collapsed }) {
+        const map = useMap();
+
+        useEffect(() => {
+            let animationFrame;
+
+            const updateMap = () => {
+                map.invalidateSize({ animate: false });
+                animationFrame = requestAnimationFrame(updateMap);
+            };
+
+            animationFrame = requestAnimationFrame(updateMap);
+
+            const timeout = setTimeout(() => {
+                cancelAnimationFrame(animationFrame);
+            }, 450);
+
+            return () => {
+                cancelAnimationFrame(animationFrame);
+                clearTimeout(timeout);
+            };
+        }, [collapsed, map]);
+
+        return null;
+    }
+
+
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
             .then(res => res.json())
@@ -178,9 +206,11 @@ export default function AdminBesprekings({ setMobieleLPaneel }) {
     return (
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
             <div className="MobileHeader">
-                <button className="Hamburger" onClick={() => setMobieleLPaneel(true)}>
-                    ☰
-                </button>
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => { setCollapsed(false); setMobieleLPaneel(true); }}>
+                        ☰
+                    </button>
+                )}
 
                 <h3>Besprekings</h3>
             </div>

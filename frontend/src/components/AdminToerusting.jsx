@@ -10,7 +10,7 @@ import { createRoot } from 'react-dom/client';
 
 
 // Kan hierdie komponent vanuit ander lêers invoer bv. vir die AdminContainer
-export default function AdminToerusting( {setMobieleLPaneel} ){
+export default function AdminToerusting( {setCollapsed, collapsed, setMobieleLPaneel} ){
     // Boolean state om die popup oop en toe te maak
     const [isPopupOop, setIsPopupOop] = useState(false);
     const [isDeleteOop, setIsDeleteOop] = useState(false);
@@ -109,9 +109,12 @@ export default function AdminToerusting( {setMobieleLPaneel} ){
 
         <div className="Info Toerusting__Inligting" data-for-tab="Toerusting">
             <div className="MobileHeader">
-                <button className="Hamburger" onClick={() => setMobieleLPaneel(true)}>
-                    ☰
-                </button>
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => {  setCollapsed(false); 
+                    setMobieleLPaneel(true)}}>
+                        ☰
+                    </button>
+                )}
 
                 <h3>Toerusting</h3>
             </div>

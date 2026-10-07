@@ -16,7 +16,8 @@ function AdminContainer() {
     // Roep die komponent afhangend van die onclick event wat aktieweTab se waarde deur stuur in AdminLPaneel
 
     //Mobile view sodat die linker paneel toemaak indien n tab gekies word
-    const[MobieleLPaneel, setMobieleLPaneel] = useState(true);
+    const [MobieleLPaneel, setMobieleLPaneel] = useState(true);
+    const [collapsed, setCollapsed] = useState(false);
     // Html uitvoer
     return(
         <div className="app">
@@ -26,15 +27,18 @@ function AdminContainer() {
                     aktieweTab={aktieweTab}
                     setAktieweTab={setAktieweTab}
                     MobieleLPaneel={MobieleLPaneel}
-                    setMobieleLPaneel = {setMobieleLPaneel}
+                    setMobieleLPaneel={setMobieleLPaneel}
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+
                 />
                 <div className={MobieleLPaneel ? "RegterPaneel RegterPaneel--hide" : "RegterPaneel"}>
                     {/* Wys net die komponent by die geselekteerde tab hoort */}
-                    {aktieweTab === "AdminLokaleInfo" && (<AdminLokaleInfo setMobieleLPaneel={setMobieleLPaneel}/>)}
-                    {aktieweTab === "AdminToerusting" && (<AdminToerusting setMobieleLPaneel={setMobieleLPaneel} />)}
-                    {aktieweTab === "AdminGebruiker" && (<AdminGebruiker setMobieleLPaneel={setMobieleLPaneel} />) }
-                    {aktieweTab === "AdminRoosters" && (<AdminRoosters setMobieleLPaneel={setMobieleLPaneel} />)}
-                    {aktieweTab === "AdminBesprekings" && (<AdminBesprekings setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminLokaleInfo" && (<AdminLokaleInfo setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminToerusting" && (<AdminToerusting  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminGebruiker" && (<AdminGebruiker  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />) }
+                    {aktieweTab === "AdminRoosters" && (<AdminRoosters  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminBesprekings" && (<AdminBesprekings  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                 </div>
             </div>
         </div>

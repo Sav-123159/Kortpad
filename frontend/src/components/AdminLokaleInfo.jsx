@@ -8,7 +8,7 @@ import AdminVoegByPopUp from "../components/AdminVoegByPopUp.jsx";
 import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 
 // Kan hierdie komponent vanuit ander lêers invoer bv. vir die AdminContainer
-export default function AdminLokaleInfo({setMobieleLPaneel}){
+export default function AdminLokaleInfo({setCollapsed, collapsed, setMobieleLPaneel}){
     // Boolean state om die popup oop en toe te maak
     const [isPopupOop, setIsPopupOop] = useState(false);
     const [isDeleteOop, setIsDeleteOop] = useState(false);
@@ -84,9 +84,12 @@ export default function AdminLokaleInfo({setMobieleLPaneel}){
 
         <div className="Info Lokale__Inligting" data-for-tab="Lokale">
             <div className="MobileHeader">
-                <button className="Hamburger" onClick={() => setMobieleLPaneel(true)}>
-                    ☰
-                </button>
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => { setCollapsed(false); 
+                        setMobieleLPaneel(true); }}>
+                        ☰
+                    </button>
+                )}
 
                 <h3>Lokale</h3>
             </div>
