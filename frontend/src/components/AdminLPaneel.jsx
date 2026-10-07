@@ -21,12 +21,17 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
 
     return (
         // Die linkerpaneel wat die verskillende opsies vir die admin gee
-        <motion.section className= {MobieleLPaneel ? "LinkerPaneel LinkerPaneel--oop" : "LinkerPaneel LinkerPaneel--toe"}
+        <motion.section
+            className="LinkerPaneel"
             animate={{
                 width: collapsed ? 0 : expandedWidth,
                 padding: collapsed ? 0 : 20,
             }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}>
+            transition={{
+                duration: 0.4,
+                ease: "easeInOut"
+            }}
+        >
             <div>
                 Administrasie <br />
                 paneel
@@ -47,15 +52,15 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
                     | Gebruikers
                 </button>
                 {(aktieweTab === "AdminGebruiker" || aktieweTab === "AdminSorteer") && (
-                        <button className = {aktieweTab === "AdminSorteer" ? "Opsie_Knoppie Sorteer_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie Sorteer_Knoppie"}
-                            onClick={() => { setAktieweTab("AdminSorteer"); setCollapsed(true); setMobieleLPaneel(false); }}
-                        >
-                            | Sorteer Algoritmes
-                        </button>)
+                    <button className={aktieweTab === "AdminSorteer" ? "Opsie_Knoppie Sorteer_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie Sorteer_Knoppie"}
+                        onClick={() => { setAktieweTab("AdminSorteer"); setCollapsed(true); setMobieleLPaneel(false); }}
+                    >
+                        | Sorteer Algoritmes
+                    </button>)
                 }
 
-                <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => {setAktieweTab("AdminRoosters"); setCollapsed(true); setMobieleLPaneel(false);}}>
+                <button className={aktieweTab === "AdminRoosters" ? "Opsie_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie"}
+                    onClick={() => { setAktieweTab("AdminRoosters"); setCollapsed(true); setMobieleLPaneel(false); }}>
                     | Klas Roosters
                 </button>
                 <button className={!MobieleLPaneel && aktieweTab === "AdminBesprekings" ? "Opsie_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie"}
