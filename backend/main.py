@@ -455,6 +455,7 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
         cursor = conn.cursor()
         data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
         is_sorted = True
+        compare = []
 
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
         field_names = [column[1] for column in columns]
@@ -466,7 +467,7 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
             raise HTTPException(status_code=400, detail='Invalid steps')
 
         def max_heapify(heapdata : list, index : int, size : int) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = heapdata.copy()
             left_index = (index*2) + 1
             right_index = (index*2) + 2
@@ -477,33 +478,54 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
 
             if right_index < size:
                 if result[index][field] < max(result[left_index][field], result[right_index][field]):
-                    if result[left_index][field] >= result [right_index][field]:
-                        if steps > 0:
-                            steps -= 1
+                    if result[left_index][field] >= result [right_index][field]:                        
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         temp = result[index]
                         result[index] = result[left_index]
                         result[left_index] = temp
-                        return max_heapify(result, left_index, size)
-                    else:
+
                         if steps > 0:
                             steps -= 1
+
+                        return max_heapify(result, left_index, size)
+                    else:
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+
                         temp = result[index]
                         result[index] = result[right_index]
                         result[right_index] = temp
-                        return max_heapify(result, right_index, size)
 
+                        if steps > 0:
+                            steps -= 1
+
+                        return max_heapify(result, right_index, size)
             elif left_index == size - 1:
                 if result[index][field] < result[left_index][field]:
-                    if steps > 0:
-                        steps -= 1
+
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+
                     temp = result[index]
                     result[index] = result[left_index]
                     result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
                     return result
             return result
 
         def min_heapify(heapdata : list, index : int, size : int) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = heapdata.copy()
             left_index = (index*2) + 1
             right_index = (index*2) + 2
@@ -515,32 +537,56 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
             if right_index < size:
                 if result[index][field] > min(result[left_index][field], result[right_index][field]):
                     if result[left_index][field] <= result [right_index][field]:
-                        if steps > 0:
-                            steps -= 1
+                                                
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         temp = result[index]
                         result[index] = result[left_index]
                         result[left_index] = temp
-                        return min_heapify(result, left_index, size)
-                    else:
+
                         if steps > 0:
                             steps -= 1
+
+                        return min_heapify(result, left_index, size)
+                    else:
+                        
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+                        
                         temp = result[index]
                         result[index] = result[right_index]
                         result[right_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
                         return min_heapify(result, right_index, size)
 
             elif left_index == size - 1:
                 if result[index][field] > result[left_index][field]:
-                    if steps > 0:
-                        steps -= 1
+                                        
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+                    
                     temp = result[index]
                     result[index] = result[left_index]
                     result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
                     return result
             return result
 
         def heap_sort(heapdata : list) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = heapdata.copy()
 
             for index in range((len(result)//2)-1, -1, -1):
@@ -548,9 +594,6 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
                     is_sorted = False
                     return result
                 
-                if steps > 0:
-                    steps -= 1
-
                 if sort_order:
                     result = max_heapify(result, index, len(result))
                 else:
@@ -560,13 +603,18 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
                 if steps == 0:
                     is_sorted = False
                     return result
-
-                if steps > 0:
-                    steps -= 1
                 
+                compare = [
+                    result[index]["user_id"],
+                    result[0]["user_id"]
+                ]
+
                 temp = result[index]
                 result[index] = result[0]
                 result[0] = temp
+
+                if steps > 0:
+                    steps -= 1
 
                 if sort_order:
                     result = max_heapify(result, 0, index)
@@ -578,7 +626,8 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
         
         return{
             "users" : sorted_users,
-            "sorted" : is_sorted
+            "sorted" : is_sorted,
+            "compare" : compare
         }
     except Exception:
         conn.rollback()
@@ -594,6 +643,7 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
         cursor = conn.cursor()
         data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
         is_sorted = True
+        compare = []
 
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
         field_names = [column[1] for column in columns]
@@ -605,7 +655,7 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
             raise HTTPException(status_code=400, detail='Invalid steps')
 
         def max_heapify(heapdata : list, index : int, size : int) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = heapdata.copy()
             left_index = (index*2) + 1
             right_index = (index*2) + 2
@@ -617,32 +667,56 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
             if right_index < size:
                 if result[index][field] < max(result[left_index][field], result[right_index][field]):
                     if result[left_index][field] >= result [right_index][field]:
-                        if steps > 0:
-                            steps -= 1
+                                                
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         temp = result[index]
                         result[index] = result[left_index]
                         result[left_index] = temp
-                        return max_heapify(result, left_index, size)
-                    else:
+
                         if steps > 0:
                             steps -= 1
+
+                        return max_heapify(result, left_index, size)
+                    else:
+                                                
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+
                         temp = result[index]
                         result[index] = result[right_index]
                         result[right_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
                         return max_heapify(result, right_index, size)
 
             elif left_index == size - 1:
                 if result[index][field] < result[left_index][field]:
-                    if steps > 0:
-                        steps -= 1
+                                        
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+                    
                     temp = result[index]
                     result[index] = result[left_index]
                     result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
                     return result
             return result
 
         def min_heapify(heapdata : list, index : int, size : int) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = heapdata.copy()
             left_index = (index*2) + 1
             right_index = (index*2) + 2
@@ -654,32 +728,56 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
             if right_index < size:
                 if result[index][field] > min(result[left_index][field], result[right_index][field]):
                     if result[left_index][field] <= result [right_index][field]:
-                        if steps > 0:
-                            steps -= 1
+                                               
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         temp = result[index]
                         result[index] = result[left_index]
                         result[left_index] = temp
-                        return min_heapify(result, left_index, size)
-                    else:
+
                         if steps > 0:
                             steps -= 1
+
+                        return min_heapify(result, left_index, size)
+                    else:
+                                                
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+                        
                         temp = result[index]
                         result[index] = result[right_index]
                         result[right_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
                         return min_heapify(result, right_index, size)
 
             elif left_index == size - 1:
                 if result[index][field] > result[left_index][field]:
-                    if steps > 0:
-                        steps -= 1
+                                        
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+                    
                     temp = result[index]
                     result[index] = result[left_index]
                     result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
                     return result
             return result
 
         def heap_sort(heapdata : list) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = heapdata.copy()
 
             for index in range((len(result)//2)-1, -1, -1):
@@ -687,9 +785,6 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
                     is_sorted = False
                     return result
                 
-                if steps > 0:
-                    steps -= 1
-
                 if sort_order:
                     result = max_heapify(result, index, len(result))
                 else:
@@ -699,13 +794,18 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
                 if steps == 0:
                     is_sorted = False
                     return result
+               
+                compare = [
+                    result[index]["user_id"],
+                    result[0]["user_id"]
+                ]
 
-                if steps > 0:
-                    steps -= 1
-                
                 temp = result[index]
                 result[index] = result[0]
                 result[0] = temp
+
+                if steps > 0:
+                    steps -= 1
 
                 if sort_order:
                     result = max_heapify(result, 0, index)
@@ -717,7 +817,8 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
         
         return{
             "users" : sorted_users,
-            "sorted" : is_sorted
+            "sorted" : is_sorted,
+            "compare" : compare
         }
     except Exception:
         conn.rollback()

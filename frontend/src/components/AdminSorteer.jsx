@@ -51,7 +51,7 @@ export default function AdminSorteer(){
 
     // --------------------------- Merge Linker algoritme ----------------------------
     useEffect(() => {
-        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort") && algoritmeRegs !== "") {
+        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort") && algoritmeRegs !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
@@ -72,7 +72,9 @@ export default function AdminSorteer(){
         const sortOrder = volgorde === "Asc";
         const endpoint = algoritmeLinks === "Insertion Sort"
             ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
-            : (tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+            : algoritmeLinks === "Heap Sort" 
+                ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort")
+                :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         return fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`)
             .then((Response) => Response.json())
@@ -127,7 +129,7 @@ export default function AdminSorteer(){
 
     // ------------------------------------- Merge Regter algoritme ------------------------------------
     useEffect(() => {
-        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort") && algoritmeLinks !== "") {
+        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort") && algoritmeLinks !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
@@ -149,7 +151,9 @@ export default function AdminSorteer(){
 
         const endpoint = algoritmeRegs === "Insertion Sort"
         ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
-        : (tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+        : algoritmeRegs === "Heap Sort"
+            ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort") 
+            : (tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         return fetch(
             `http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`

@@ -416,7 +416,7 @@ div .Sorteer_Blokke{
 .Algoritme{
     Width: 90%;
     margin: auto;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     height: fit-content;
     background-color: var(--pine);
     border-radius: var(--default-border-radius);
@@ -436,11 +436,12 @@ div .Sorteer_Blokke{
 
     align-items: center;
     margin: 8px;
+    margin-bottom: 30px;
 }
 
 .Organiseering{
     width: 90%;
-    height: 15vh;
+    height: 10vh;
     background-color: var(--paper);
     border-radius: var(--default-border-radius);
     text-align: center;
