@@ -2,6 +2,7 @@ from sqlite3 import IntegrityError
 from click import group
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from httptools import HttpParserCallbackError
 from models import *
 from database import init_db, get_db
 from graph import GraphCache
@@ -11,6 +12,7 @@ from booking_tree import BookingCache
 import bcrypt
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from mst import prim
 
 app = FastAPI()
 
@@ -1164,3 +1166,27 @@ def get_route(campus_id : int, start_venue : int, destination_venue : int):
     
     except Exception:
         raise HTTPException(status_code=400, detail='Route could not be determined')
+
+# ==================== PRIM ALGORITHM ====================
+@app.get('/mst/{campus_id}')
+def get_mst(campus_id : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT vertex_id, latitude, longitude FROM vertex
+        WHERE level = 'campus' AND campus_id = ?
+    ''', (campus_id,))
+    coords = {row['vertex_id']: (row['latitude'], row['longitude']) for row in cursor.fetchall()}
+    conn.close()    
+
+    edges = prim(campus_id)
+    return [
+        {
+            'vertex_a': a, 'vertex_b': b, 'weight': w,
+            'from': coords[a], 'to': coords[b]
+        }
+        for a, b, w in edges
+    ]

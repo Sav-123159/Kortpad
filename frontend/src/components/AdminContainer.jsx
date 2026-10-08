@@ -7,6 +7,7 @@ import AdminRoosters from "./AdminRoosters.jsx";
 import AdminBesprekings from "./AdminBesprekings.jsx";
 import AdminGebruiker from "./AdminGebruiker.jsx";
 import AdminSorteer from "./AdminSorteer.jsx";
+import AdminMST from "./AdminMST.jsx";
 import '../css/Admin.css';
 import "../css/Style.css";
 
