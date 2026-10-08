@@ -42,6 +42,10 @@ export default function AdminLPaneel({aktieweTab, setAktieweTab}){
                 onClick={() => setAktieweTab("AdminBesprekings")}>
                     | Besprekings
                 </button>
+                <button className={aktieweTab === "AdminMST" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
+                onClick={() => setAktieweTab("AdminMST")}>
+                    | Minimum Spanboom
+                </button>
             </div>
         </section>
     )
