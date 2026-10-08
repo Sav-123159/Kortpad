@@ -283,6 +283,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
         cursor = conn.cursor()
         data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
         is_sorted = True
+        compare = []
 
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
         field_names = [column[1] for column in columns]
@@ -294,7 +295,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
             raise HTTPException(status_code=400, detail='Invalid steps')
 
         def insertion_sort(insertiondata : list) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = insertiondata.copy()
             right_index = 1
 
@@ -309,6 +310,11 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                 
                 if sort_order:
                     while left_index >= 0 and result[left_index][field] > temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         result[left_index+1] = result[left_index]
                         result[left_index] = temp_field
                         left_index -= 1
@@ -321,6 +327,11 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                             steps -= 1
                 else:
                     while left_index >= 0 and result[left_index][field] < temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         result[left_index+1] = result[left_index]
                         result[left_index] = temp_field
                         left_index -= 1
@@ -341,7 +352,8 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
         
         return{
             "users" : sorted_users,
-            "sorted" : is_sorted
+            "sorted" : is_sorted,
+            "compare" : compare
         }
     except Exception:
         conn.rollback()
@@ -357,6 +369,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
         cursor = conn.cursor()
         data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
         is_sorted = True
+        compare = []
 
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
         field_names = [column[1] for column in columns]
@@ -368,7 +381,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
             raise HTTPException(status_code=400, detail='Invalid steps')
 
         def insertion_sort(insertiondata : list) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = insertiondata.copy()
             right_index = 1
 
@@ -383,6 +396,11 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                 
                 if sort_order:
                     while left_index >= 0 and result[left_index][field] > temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         result[left_index+1] = result[left_index]
                         result[left_index] = temp_field
                         left_index -= 1
@@ -395,6 +413,11 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
                             steps -= 1
                 else:
                     while left_index >= 0 and result[left_index][field] < temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
                         result[left_index+1] = result[left_index]
                         result[left_index] = temp_field
                         left_index -= 1
@@ -415,7 +438,8 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
         
         return{
             "users" : sorted_users,
-            "sorted" : is_sorted
+            "sorted" : is_sorted,
+            "compare" : compare
         }
     except Exception:
         conn.rollback()

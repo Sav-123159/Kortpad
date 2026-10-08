@@ -51,11 +51,11 @@ export default function AdminSorteer(){
 
     // --------------------------- Merge Linker algoritme ----------------------------
     useEffect(() => {
-        if (algoritmeLinks === "Merge Sort" && algoritmeRegs !== "") {
+        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort") && algoritmeRegs !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
-                mergeStapLinks(stap).then((sorted) => {
+                sorteerStapLinks(stap).then((sorted) => {
                     if (!sorted) {
                         stap++;
                         setTimeout(volgendeStap, 2500);
@@ -67,10 +67,12 @@ export default function AdminSorteer(){
         }
     }, [algoritmeLinks, algoritmeRegs]);
 
-    const mergeStapLinks = (stap) => {
+    const sorteerStapLinks = (stap) => {
         const veld = volgens === "Naam" ? "fname" : "sname";
         const sortOrder = volgorde === "Asc";
-        const endpoint = tipe === "admin" ? "users/mergesort/admin" : "users/mergesort";
+        const endpoint = algoritmeLinks === "Insertion Sort"
+            ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
+            : (tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         return fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`)
             .then((Response) => Response.json())
@@ -125,11 +127,11 @@ export default function AdminSorteer(){
 
     // ------------------------------------- Merge Regter algoritme ------------------------------------
     useEffect(() => {
-        if (algoritmeRegs === "Merge Sort" && algoritmeLinks !== "") {
+        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort") && algoritmeLinks !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
-                mergeStapRegs(stap).then((sorted) => {
+                sorteerStapRegs(stap).then((sorted) => {
                     if (!sorted) {
                         stap++;
                         setTimeout(volgendeStap, 2500);
@@ -141,11 +143,13 @@ export default function AdminSorteer(){
         }
     }, [algoritmeRegs]);
 
-    const mergeStapRegs = (stap) => {
+    const sorteerStapRegs = (stap) => {
         const veld = volgens === "Naam" ? "fname" : "sname";
         const sortOrder = volgorde === "Asc";
 
-        const endpoint = tipe === "admin" ? "users/mergesort/admin" : "users/mergesort";
+        const endpoint = algoritmeRegs === "Insertion Sort"
+        ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
+        : (tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         return fetch(
             `http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`
