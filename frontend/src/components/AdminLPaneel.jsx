@@ -48,12 +48,18 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
                     | Lokaal Toerusting
                 </button>
                 <button className={!MobieleLPaneel && aktieweTab === "AdminGebruiker" ? "Opsie_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie"}
-                    onClick={() => { setAktieweTab("AdminGebruiker"); setCollapsed(true); setMobieleLPaneel(false); }} >
+                    onClick={() => { setAktieweTab("AdminGebruiker"); 
+                        if(isMobile){
+                            setCollapsed(true); 
+                            setMobieleLPaneel(false);
+                        } 
+                    }} >
                     | Gebruikers
                 </button>
-                {(aktieweTab === "AdminGebruiker" || aktieweTab === "AdminSorteer") && (
+
+                {(!isMobile && (aktieweTab === "AdminGebruiker" || aktieweTab === "AdminSorteer")) && (
                     <button className={aktieweTab === "AdminSorteer" ? "Opsie_Knoppie Sorteer_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie Sorteer_Knoppie"}
-                        onClick={() => { setAktieweTab("AdminSorteer"); setCollapsed(true); setMobieleLPaneel(false); }}
+                        onClick={() => { setAktieweTab("AdminSorteer");}}
                     >
                         | Sorteer Algoritmes
                     </button>)
