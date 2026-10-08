@@ -51,7 +51,7 @@ export default function AdminSorteer(){
 
     // --------------------------- Merge Linker algoritme ----------------------------
     useEffect(() => {
-        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort") && algoritmeRegs !== "") {
+        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort" || algoritmeLinks === "Quick Sort") && algoritmeRegs !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
@@ -74,7 +74,9 @@ export default function AdminSorteer(){
             ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
             : algoritmeLinks === "Heap Sort" 
                 ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort")
-                :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+                : algoritmeLinks === "Quick Sort"
+                    ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
+                    :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         return fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`)
             .then((Response) => Response.json())
@@ -129,7 +131,7 @@ export default function AdminSorteer(){
 
     // ------------------------------------- Merge Regter algoritme ------------------------------------
     useEffect(() => {
-        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort") && algoritmeLinks !== "") {
+        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort" || algoritmeRegs === "Quick Sort") && algoritmeLinks !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
@@ -153,7 +155,9 @@ export default function AdminSorteer(){
         ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
         : algoritmeRegs === "Heap Sort"
             ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort") 
-            : (tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+            : algoritmeRegs === "Quick Sort"
+                ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
+                :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         return fetch(
             `http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`
@@ -307,6 +311,7 @@ export default function AdminSorteer(){
                             <option value="bubblesort">Bubble Sort</option>
                             <option value="Insertion Sort">Insertion Sort</option>
                             <option value="Heap Sort">Heap Sort</option>
+                            <option value="Quick Sort">Quick Sort</option>
                             <option value="Merge Sort">Merge Sort</option>
                         </select>
                     </div>
@@ -328,6 +333,7 @@ export default function AdminSorteer(){
                             <option value="bubblesort">Bubble Sort</option>
                             <option value="Insertion Sort">Insertion Sort</option>
                             <option value="Heap Sort">Heap Sort</option>
+                            <option value="Quick Sort">Quick Sort</option>
                             <option value="Merge Sort">Merge Sort</option>
                         </select>
                     </div>

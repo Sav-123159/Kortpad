@@ -663,7 +663,7 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
             return result
 
         def heap_sort(heapdata : list) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = heapdata.copy()
 
             for index in range((len(result)//2)-1, -1, -1):
