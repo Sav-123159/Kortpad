@@ -111,6 +111,7 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
         cursor = conn.cursor()
         data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
         is_sorted = True
+        compare = []
 
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
         field_names = [column[1] for column in columns]
@@ -122,7 +123,7 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
             raise HTTPException(status_code=400, detail='Invalid steps')
 
         def merge(left : list, right : list) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = []
             left_index = 0
             right_index = 0
@@ -137,6 +138,11 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
                 
                 left_value = left[left_index][field]
                 right_value = right[right_index][field]
+
+                compare = [
+                    left[left_index]["user_id"],
+                    right[right_index]["user_id"]
+                ]
 
                 if sort_order:
                     if left_value <= right_value:
@@ -174,7 +180,8 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
         
         return{
             "users" : sorted_users,
-            "sorted" : is_sorted
+            "sorted" : is_sorted,
+            "compare" : compare
         }
     except Exception:
         conn.rollback()
@@ -190,6 +197,7 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
         cursor = conn.cursor()
         data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
         is_sorted = True
+        compare = []
 
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
         field_names = [column[1] for column in columns]
@@ -201,7 +209,7 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
             raise HTTPException(status_code=400, detail='Invalid steps')
 
         def merge(left : list, right : list) -> list:
-            nonlocal steps, is_sorted
+            nonlocal steps, is_sorted, compare
             result = []
             left_index = 0
             right_index = 0
@@ -216,6 +224,11 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
                 
                 left_value = left[left_index][field]
                 right_value = right[right_index][field]
+
+                compare = [
+                    left[left_index]["user_id"],
+                    right[right_index]["user_id"]
+                ]
 
                 if sort_order:
                     if left_value <= right_value:
@@ -253,7 +266,8 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
         
         return{
             "users" : sorted_users,
-            "sorted" : is_sorted
+            "sorted" : is_sorted,
+            "compare" : compare
         }
     except Exception:
         conn.rollback()

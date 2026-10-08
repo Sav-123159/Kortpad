@@ -80,7 +80,7 @@ button {
     background-color: var(--paper);
     color: var(--ink);
 
-    height: 100vh;
+    height: calc(100vh - 110px);;
     width: 100%;
     padding: 10px;
 
@@ -312,16 +312,6 @@ h2 {
     margin: 1px;
 }
 
-.Organiseering{
-    width: 75%;
-    height: 70%;
-    background-color: var(--paper);
-    border-radius: var(--default-border-radius);
-    text-align: center;
-    margin: auto;
-    padding: 5px;
-}
-
 .Lokale__kampus select {
     border-radius: var(--default-border-radius);
     padding: 5px;
@@ -420,20 +410,17 @@ h2 {
 /* ================ Gebruikers sorteer Ontwerp ========================== */
 div .Sorteer_Blokke{
     display: flex;
-    flex-direction: row;
-    gap: 10px;
-
+    flex-direction: column;
 }
 
 .Algoritme{
-    Width: 100%;
-    gap: 10px;
-    margin: 10px;
-    height: 60vh;
-        
+    Width: 90%;
+    margin: auto;
+    margin-bottom: 10px;
+    height: fit-content;
     background-color: var(--pine);
     border-radius: var(--default-border-radius);
-
+    padding-bottom: 20px;
 }
 
 .Algoritme option{
@@ -449,6 +436,39 @@ div .Sorteer_Blokke{
 
     align-items: center;
     margin: 8px;
+}
+
+.Organiseering{
+    width: 90%;
+    height: 15vh;
+    background-color: var(--paper);
+    border-radius: var(--default-border-radius);
+    text-align: center;
+    margin: auto;
+    padding: 10px;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+.Organiseering div{
+    background-color: var(--pine-dark);
+    color: var(--paper);
+
+    border-radius: var(--default-border-radius);
+    border: none;
+    width: fit-content;
+    height: fit-content;
+    margin: 5px;
+    padding: 10px;
+
+    transition: transform 0.8s ease;
+}
+
+.Vergelyk{
+    background-color: var(--pine) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ================ Gebruikers vertoon Ontwerp ==========================*/
