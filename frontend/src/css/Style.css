@@ -1138,14 +1138,16 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
     }
 
     .login-page,
-    .popup-page {
+    .popup-page,
+    .Popup_Houer {
         height: 100dvh;
         padding: 10px;
         box-sizing: border-box;
     }
 
     .login-container,
-    .edit-container {
+    .edit-container,
+    .popup-container{
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
