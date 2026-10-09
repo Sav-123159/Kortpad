@@ -70,7 +70,7 @@ export default function AdminSorteer(){
     // --------------------------- Sorteer Linker algoritme ----------------------------
     useEffect(() => {
         const runId = ++linksRunRef.current;
-        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort" || algoritmeLinks === "Quick Sort") && algoritmeRegs !== "") {
+        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort" || algoritmeLinks === "Quick Sort" || algoritmeLinks === "Bubble Sort") && algoritmeRegs !== "") {
             let stap = 1;
 
             linksBeginTydRef.current = Date.now();
@@ -113,11 +113,14 @@ export default function AdminSorteer(){
                 ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort")
                 : algoritmeLinks === "Quick Sort"
                     ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
-                    :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+                    : algoritmeLinks === "Bubble Sort"
+                        ? (tipe === "admin" ? "users/bubblesort/admin" : "users/bubblesort")
+                        :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         const Response = await fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`);
 
         const Data = await Response.json();
+        console.log("In Admin", stap, Data);
 
         if (runId !== linksRunRef.current) return true;
                 
@@ -171,7 +174,7 @@ export default function AdminSorteer(){
     // ------------------------------------- Sorteer Regter algoritme ------------------------------------
     useEffect(() => {
         const runId = ++ regsRunRef.current;
-        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort" || algoritmeRegs === "Quick Sort") && algoritmeLinks !== "") {
+        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort" || algoritmeRegs === "Quick Sort" || algoritmeRegs === "Bubble Sort") && algoritmeLinks !== "") {
             let stap = 1;
 
             RegsBeginTydRef.current = Date.now();
@@ -215,7 +218,9 @@ export default function AdminSorteer(){
             ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort") 
             : algoritmeRegs === "Quick Sort"
                 ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
-                :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+                : algoritmeRegs === "Bubble Sort"
+                    ? (tipe === "admin" ? "users/bubblesort/admin" : "users/bubblesort")
+                    :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
         const Response = await fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`);
 
@@ -401,7 +406,7 @@ export default function AdminSorteer(){
                             onChange={(e) => setAlgoritmeLinks(e.target.value)}
                         >
                             <option value="">Kies algoritme</option>
-                            <option value="bubblesort">Bubble Sort</option>
+                            <option value="Bubble Sort">Bubble Sort</option>
                             <option value="Insertion Sort">Insertion Sort</option>
                             <option value="Heap Sort">Heap Sort</option>
                             <option value="Quick Sort">Quick Sort</option>
@@ -428,7 +433,7 @@ export default function AdminSorteer(){
                             onChange={(e) =>setAlgoritmeRegs(e.target.value)}
                         >
                             <option value="">Kies algoritme</option>
-                            <option value="bubblesort">Bubble Sort</option>
+                            <option value="Bubble Sort">Bubble Sort</option>
                             <option value="Insertion Sort">Insertion Sort</option>
                             <option value="Heap Sort">Heap Sort</option>
                             <option value="Quick Sort">Quick Sort</option>
