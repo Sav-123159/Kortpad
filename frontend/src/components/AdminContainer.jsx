@@ -42,6 +42,7 @@ function AdminContainer() {
                     {aktieweTab === "AdminSorteer" && (<AdminSorteer  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminRoosters" && (<AdminRoosters  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminBesprekings" && (<AdminBesprekings  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminMST" && (<AdminMST  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                 </div>
             </div>
         </div>

@@ -19,13 +19,21 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
     const isMobile = useIsMobile();
     const expandedWidth = isMobile ? "100%" : 360;
 
+    const isCollapsed = collapsed && isMobile;
+
+    const kiesTab = (tab) => {
+        setAktieweTab(tab);
+        setMobieleLPaneel(false);
+        if (isMobile) setCollapsed(true);
+    }
+
     return (
         // Die linkerpaneel wat die verskillende opsies vir die admin gee
         <motion.section
             className="LinkerPaneel"
             animate={{
-                width: collapsed ? 0 : expandedWidth,
-                padding: collapsed ? 0 : 20,
+                width: isCollapsed ? 0 : expandedWidth,
+                padding: isCollapsed ? 0 : 20,
             }}
             transition={{
                 duration: 0.4,
@@ -73,8 +81,13 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
                     onClick={() => { setAktieweTab("AdminBesprekings"); setCollapsed(true); setMobieleLPaneel(false); }} >
                     | Besprekings
                 </button>
-                <button className={aktieweTab === "AdminMST" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"} 
-                onClick={() => setAktieweTab("AdminMST")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminMST" ? "Opsie_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie"}
+                    onClick={() => { setAktieweTab("AdminMST"); 
+                        if(isMobile){
+                            setCollapsed(true); 
+                            setMobieleLPaneel(false);
+                        } 
+                    }} >
                     | Minimum Spanboom
                 </button>
             </div>
