@@ -11,6 +11,13 @@ export default function AdminSorteer(){
     const linksRef = useRef(null);
     const regsRef = useRef(null);
 
+    // Vir die herstel funksionaliteit
+    const linksTimerRef = useRef(null);
+    const regsTimerRef = useRef(null);
+
+    const linksRunRef = useRef(0);
+    const regsRunRef = useRef(0);
+
     // Begin van die animasie useEffects 
     useEffect(() => { haalGebruikers();}, [tipe]);
 
@@ -51,23 +58,29 @@ export default function AdminSorteer(){
 
     // --------------------------- Merge Linker algoritme ----------------------------
     useEffect(() => {
+        const runId = ++linksRunRef.current;
         if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort" || algoritmeLinks === "Quick Sort") && algoritmeRegs !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
-                sorteerStapLinks(stap).then((sorted) => {
+                sorteerStapLinks(stap, runId).then((sorted) => {
+                    if(runId !== linksRunRef.current) return;
+                    
                     if (!sorted) {
                         stap++;
-                        setTimeout(volgendeStap, 2500);
+                        linksTimerRef.current = setTimeout(volgendeStap, 2500);
                     }
                 });
             };
 
             volgendeStap();
         }
+
+        return () => { clearTimeout(linksTimerRef.current);};
+
     }, [algoritmeLinks, algoritmeRegs]);
 
-    const sorteerStapLinks = (stap) => {
+    const sorteerStapLinks = async (stap, runId) => {
         const veld = volgens === "Naam" ? "fname" : "sname";
         const sortOrder = volgorde === "Asc";
         const endpoint = algoritmeLinks === "Insertion Sort"
@@ -78,76 +91,85 @@ export default function AdminSorteer(){
                     ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
                     :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
-        return fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`)
-            .then((Response) => Response.json())
-            .then((Data) => {
-                // Kry die huidige posisies van die elemente wat nou vergelyk word
-                const eerste = linksRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
-                const tweede = linksRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
+        const Response = await fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`);
 
-                // getBoudingClientReact gee vir my waar die blokkies op die skerm is vir die animasie
-                const eerstePosisie = eerste.getBoundingClientRect();
-                const tweedePosisie = tweede.getBoundingClientRect();
+        const Data = await Response.json();
 
-                setVergelykLinks(Data.compare);
+        if (runId !== linksRunRef.current) return true;
+                
+            // Kry die huidige posisies van die elemente wat nou vergelyk word
+            const eerste = linksRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
+            const tweede = linksRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
 
-                // Lry die posisies van die elemente na die verandering
-                setTimeout(() => {
-                    setGebruikersLinks(Data.users);
+            // getBoudingClientReact gee vir my waar die blokkies op die skerm is vir die animasie
+            const eerstePosisie = eerste.getBoundingClientRect();
+            const tweedePosisie = tweede.getBoundingClientRect();
+
+            setVergelykLinks(Data.compare);
+
+            // Lry die posisies van die elemente na die verandering
+            setTimeout(() => {
+                setGebruikersLinks(Data.users);
+                requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            const nuweEerste = linksRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
+                        const nuweEerste = linksRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
 
-                            const nuweTweede = linksRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
+                        const nuweTweede = linksRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
 
-                            const nuweEerstePosisie = nuweEerste.getBoundingClientRect();
-                            const nuweTweedePosisie = nuweTweede.getBoundingClientRect();
-                            
-                            // Bereken gebaseer op waar hy was, waantoe moet hy skuif in px
-                            const eersteBeweging = eerstePosisie.left - nuweEerstePosisie.left;
-                            const tweedeBeweging = tweedePosisie.left - nuweTweedePosisie.left;
+                        const nuweEerstePosisie = nuweEerste.getBoundingClientRect();
+                        const nuweTweedePosisie = nuweTweede.getBoundingClientRect();
                         
-                            // Sit hulle onmiddellik op hulle ou posisie
-                            nuweEerste.style.transition = "none";
-                            nuweTweede.style.transition = "none";
+                        // Bereken gebaseer op waar hy was, waantoe moet hy skuif in px
+                        const eersteBeweging = eerstePosisie.left - nuweEerstePosisie.left;
+                        const tweedeBeweging = tweedePosisie.left - nuweTweedePosisie.left;
+                    
+                        // Sit hulle onmiddellik op hulle ou posisie
+                        nuweEerste.style.transition = "none";
+                        nuweTweede.style.transition = "none";
 
-                            nuweEerste.style.transform = `translateX(${eersteBeweging}px)`;
-                            nuweTweede.style.transform = `translateX(${tweedeBeweging}px)`;
+                        nuweEerste.style.transform = `translateX(${eersteBeweging}px)`;
+                        nuweTweede.style.transform = `translateX(${tweedeBeweging}px)`;
 
-                            // Laat hulle daarna na hulle nuwe posisie beweeg
-                            requestAnimationFrame(() => {
-                                nuweEerste.style.transition = "transform 1.5s ease";
-                                nuweTweede.style.transition = "transform 1.5s ease";
+                        // Laat hulle daarna na hulle nuwe posisie beweeg
+                        requestAnimationFrame(() => {
+                            nuweEerste.style.transition = "transform 1.5s ease";
+                            nuweTweede.style.transition = "transform 1.5s ease";
 
-                                nuweEerste.style.transform = "translateX(0)";
-                                nuweTweede.style.transform = "translateX(0)";
-                            });
+                            nuweEerste.style.transform = "translateX(0)";
+                            nuweTweede.style.transform = "translateX(0)";
                         });
                     });
-                }, 800);
-                return Data.sorted;
-            });
+                });
+            }, 800);
+        return Data.sorted;       
     };
 
     // ------------------------------------- Merge Regter algoritme ------------------------------------
     useEffect(() => {
+        const runId = ++ regsRunRef.current;
+
         if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort" || algoritmeRegs === "Quick Sort") && algoritmeLinks !== "") {
             let stap = 1;
 
             const volgendeStap = () => {
-                sorteerStapRegs(stap).then((sorted) => {
+                sorteerStapRegs(stap, runId).then((sorted) => {
+                    if(runId !== regsRunRef.current) return;
+                    
                     if (!sorted) {
                         stap++;
-                        setTimeout(volgendeStap, 2500);
+                        regsTimerRef.current = setTimeout(volgendeStap, 2500);
                     }
                 });
             };
 
             volgendeStap();
         }
-    }, [algoritmeRegs]);
 
-    const sorteerStapRegs = (stap) => {
+        return () => {clearTimeout(regsTimerRef.current);};
+
+    }, [algoritmeRegs, algoritmeLinks]);
+
+    const sorteerStapRegs = async (stap, runId) => {
         const veld = volgens === "Naam" ? "fname" : "sname";
         const sortOrder = volgorde === "Asc";
 
@@ -159,62 +181,78 @@ export default function AdminSorteer(){
                 ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
                 :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
 
-        return fetch(
-            `http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`
-        )
-            .then((Response) => Response.json())
-            .then((Data) => {
-                const eerste = regsRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
-                const tweede = regsRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
+        const Response = await fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`);
 
-                const eerstePosisie = eerste.getBoundingClientRect();
-                const tweedePosisie = tweede.getBoundingClientRect();
+        const Data = await Response.json();
 
-                setVergelykRegs(Data.compare);
+        if (runId !== regsRunRef.current) return true;
+            const eerste = regsRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
+            const tweede = regsRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
 
-                setTimeout(() => {
-                    setGebruikersRegs(Data.users);
+            const eerstePosisie = eerste.getBoundingClientRect();
+            const tweedePosisie = tweede.getBoundingClientRect();
 
+            setVergelykRegs(Data.compare);
+
+            setTimeout(() => {
+                setGebruikersRegs(Data.users);
+
+                requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
+                        const nuweEerste = regsRef.current.querySelector(
+                            `[data-user-id="${Data.compare[0]}"]`
+                        );
+
+                        const nuweTweede = regsRef.current.querySelector(
+                            `[data-user-id="${Data.compare[1]}"]`
+                        );
+
+                        const nuweEerstePosisie = nuweEerste.getBoundingClientRect();
+                        const nuweTweedePosisie = nuweTweede.getBoundingClientRect();
+
+                        const eersteBeweging =
+                            eerstePosisie.left - nuweEerstePosisie.left;
+
+                        const tweedeBeweging =
+                            tweedePosisie.left - nuweTweedePosisie.left;
+
+                        nuweEerste.style.transition = "none";
+                        nuweTweede.style.transition = "none";
+
+                        nuweEerste.style.transform =`translateX(${eersteBeweging}px)`;
+
+                        nuweTweede.style.transform =`translateX(${tweedeBeweging}px)`;
+
                         requestAnimationFrame(() => {
-                            const nuweEerste = regsRef.current.querySelector(
-                                `[data-user-id="${Data.compare[0]}"]`
-                            );
+                            nuweEerste.style.transition = "transform 1.5s ease";
+                            nuweTweede.style.transition = "transform 1.5s ease";
 
-                            const nuweTweede = regsRef.current.querySelector(
-                                `[data-user-id="${Data.compare[1]}"]`
-                            );
-
-                            const nuweEerstePosisie = nuweEerste.getBoundingClientRect();
-                            const nuweTweedePosisie = nuweTweede.getBoundingClientRect();
-
-                            const eersteBeweging =
-                                eerstePosisie.left - nuweEerstePosisie.left;
-
-                            const tweedeBeweging =
-                                tweedePosisie.left - nuweTweedePosisie.left;
-
-                            nuweEerste.style.transition = "none";
-                            nuweTweede.style.transition = "none";
-
-                            nuweEerste.style.transform =`translateX(${eersteBeweging}px)`;
-
-                            nuweTweede.style.transform =`translateX(${tweedeBeweging}px)`;
-
-                            requestAnimationFrame(() => {
-                                nuweEerste.style.transition = "transform 1.5s ease";
-                                nuweTweede.style.transition = "transform 1.5s ease";
-
-                                nuweEerste.style.transform = "translateX(0)";
-                                nuweTweede.style.transform = "translateX(0)";
-                            });
+                            nuweEerste.style.transform = "translateX(0)";
+                            nuweTweede.style.transform = "translateX(0)";
                         });
                     });
-                }, 800);
+                });
+            }, 800);
 
-                return Data.sorted;
-            });
+        return Data.sorted;
     };
+
+    // Herstel funksie sodat jy meer as 1 algoritme kan toets
+    const herstel = () => {
+        clearTimeout(linksTimerRef.current);
+        clearTimeout(regsTimerRef.current);
+
+        linksRunRef.current++
+        regsRunRef.current++
+
+        setAlgoritmeLinks("");
+        setAlgoritmeRegs("");
+
+        setVergelykLinks([]);
+        setVergelykRegs([]);
+
+        haalGebruikers();
+    }
 
 
     return(
@@ -243,16 +281,6 @@ export default function AdminSorteer(){
                             onChange={() => setTipe("admin")}
                         />
                         Admins
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="gebruikerTipe"
-                            value= "almal"
-                            checked={tipe === "almal"}
-                            onChange={() => setTipe("almal")}
-                        />
-                        Almal
                     </label>
                 </div>
                 <div className="Sorteer_Keuse">
@@ -299,6 +327,7 @@ export default function AdminSorteer(){
                         Volgens Van
                     </label>
                 </div>
+                <button onClick={herstel}>Herstel</button>
             </div>
             <div className="Sorteer_Blokke">
                 <div className="Algoritme">
