@@ -226,7 +226,8 @@
     .booking-modal {
         width: 80%;
         display: grid;
-        grid-template-rows:auto 1fr;
+        grid-template-columns: 1fr;
+        grid-template-rows:auto auto;
         grid-template-areas: "Calendar"
                              "Booking";
         overflow-y: auto;
