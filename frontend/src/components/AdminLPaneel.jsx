@@ -90,8 +90,13 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
                     }} >
                     | Minimum Spanboom
                 </button>
-                <button className={aktieweTab === "AdminEvacuation" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"}
-                onClick={() => setAktieweTab("AdminEvacuation")}>
+                <button className={!MobieleLPaneel && aktieweTab === "AdminEvacuation" ? "Opsie_Knoppie Opsie_Knoppie--active" : "Opsie_Knoppie"}
+                onClick={() => {setAktieweTab("AdminEvacuation");
+                    if(isMobile){
+                        setCollapsed(true); 
+                        setMobieleLPaneel(false);
+                    }
+                }}>
                     | Ontruimingsvloei
                 </button>
             </div>
