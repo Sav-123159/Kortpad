@@ -4,6 +4,7 @@ import { MapContainer, ImageOverlay, Polyline, CircleMarker, Tooltip, useMap } f
 import { CRS } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import "../css/Admin.css";
+import "../css/Style.css";
 
 // Pas die kaart aan wanneer die admin paneel se grootte verander.
 function FitCampusMap({ bounds }) {
@@ -197,7 +198,7 @@ export default function AdminMST({ setCollapsed, collapsed, setMobieleLPaneel })
             {map && <p>{vertexCount} hoekpunte; {edges.length} rande; totale gewig: {edges.reduce((sum, edge) => sum + edge.weight, 0).toFixed(2)}.
                 {vertexCount > 0 && edges.length < vertexCount - 1 && ` Die grafiek is ontkoppel: ${vertexCount - edges.length} komponente (minimum spanwoud).`}
             </p>}
-            <div className="GraphControls">
+            <div className="GraphControls GraphControls--mst">
                 <button
                     disabled={!edges.length}
                     onClick={() => {

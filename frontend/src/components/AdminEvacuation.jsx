@@ -4,6 +4,7 @@ import { MapContainer, ImageOverlay, Polyline, CircleMarker, Tooltip } from 'rea
 import { CRS } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import "../css/Admin.css";
+import "../css/Style.css";
 
 async function fetchData(url, signal) {
     const response = await fetch(`http://127.0.0.1:8000${url}`, { signal });
@@ -12,7 +13,7 @@ async function fetchData(url, signal) {
     return data;
 }
 
-export default function AdminEvacuation() {
+export default function AdminEvacuation({ setCollapsed, collapsed, setMobieleLPaneel }) {
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
     const [map, setMap] = useState(null);
@@ -87,29 +88,41 @@ export default function AdminEvacuation() {
 
     return (
         <div className="Info GraphInfo">
+            <div className="MobileHeader">
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => {  
+                    setCollapsed(false); 
+                    setMobieleLPaneel(true)}}>
+                        ☰
+                    </button>
+                )}
+
+                <h3>Evacuatie</h3>
+            </div>
+
             <div className="Lokaal__titel">
                 <div>
                     <h2>Maksimum Ontruimingsvloei</h2>
                     <p>Klik eers A en dan B op die kaart, of gebruik die keuselyste. Groen: A; rooi: B.</p>
                 </div>
 
-                <button onClick={() => { selectVertex('', 'start'); setEnd(''); }}>Herstel punte</button> 
+                <button className="Herstel" onClick={() => { selectVertex('', 'start'); setEnd(''); }}>Herstel punte</button> 
             </div>
             <div className="GraphControls">
-                <label>Kampus
-                    <select value={selectedCampus} onChange={e => selectCampus(e.target.value)}>
-                        <option value="">Kies kampus</option>
-                        {campuses.map(campus => <option key={campus.campus_id} value={campus.campus_id}>{campus.campus_name}</option>)}
-                    </select>
-                </label>
-                {[['start', 'Hoekpunt A', start], ['end', 'Hoekpunt B', end]].map(([point, label, value]) => (
-                    <label key={point}>{label}
-                        <select value={value} disabled={!vertices.length} onChange={e => selectVertex(e.target.value, point)}>
-                            <option value="">Kies hoekpunt</option>
-                            {vertices.map(vertex => <option key={vertex.vertex_id} value={vertex.vertex_id}>Hoekpunt {vertex.vertex_id}</option>)}
-                        </select>
-                    </label>
-                ))}
+                        <label>Kampus</label>
+                            <select value={selectedCampus} onChange={e => selectCampus(e.target.value)}>
+                                <option value="">Kies kampus</option>
+                                {campuses.map(campus => <option key={campus.campus_id} value={campus.campus_id}>{campus.campus_name}</option>)}
+                            </select>
+        
+                        {[['start', 'Hoekpunt A', start], ['end', 'Hoekpunt B', end]].map(([point, label, value]) => (
+                            <label key={point}>{label}
+                                <select value={value} disabled={!vertices.length} onChange={e => selectVertex(e.target.value, point)}>
+                                    <option value="">Kies hoekpunt</option>
+                                    {vertices.map(vertex => <option key={vertex.vertex_id} value={vertex.vertex_id}>Hoekpunt {vertex.vertex_id}</option>)}
+                                </select>
+                            </label>
+                        ))}
                 
             </div>
             

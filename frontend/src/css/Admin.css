@@ -795,7 +795,7 @@ td {
 }
 
 /* ==================== Grafiek algoritmes ==================== */
-.GraphInfo { 
+.GraphInfo {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -803,7 +803,7 @@ td {
 
 .GraphControls {
     display: flex;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     align-items: end;
     gap: 15px;
     background-color: var(--pine);
@@ -815,24 +815,33 @@ td {
     margin: auto;
 }
 
-.GraphControls label { 
+.GraphControls label {
     display: flex;
     flex-direction: row;
     gap: 5px;
 }
 
-.GraphControls select{ 
+.GraphControls select {
     padding: 2px;
     font: inherit;
 }
 
-.Lokaal__titel button { 
+.Lokaal__titel button {
     padding: 8px;
     font: inherit;
     width: 10vw;
 }
 
-.GraphMap { 
+.Lokaal__titel button.Herstel {
+    position: static;
+    right: auto;
+    width: auto;
+    align-self: flex-start;
+    margin-left: auto;
+}
+
+
+.GraphMap {
     height: 550px;
     min-height: 350px;
     width: 100%;
@@ -840,20 +849,19 @@ td {
 }
 
 /* ======================== Spanboom styling ====================== */
-.GraphInfo .Lokale__kampus{
+.Lokale__kampus {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 
-    width: 60vw;
     margin: auto;
 }
 
-.GraphInfo .Lokale__kampus h3{
+.GraphInfo .Lokale__kampus h3 {
     color: var(--paper);
 }
 
-.GraphInfo .Lokale__kampus div{
+.GraphInfo .Lokale__kampus div {
     display: flex;
     flex-direction: row;
     gap: 30px;
@@ -861,11 +869,7 @@ td {
     margin-right: 30px;
 }
 
-.GraphInfo .Lokale__kampus select{
-    width: 10vw;
-}
-
-.GraphInfo .Lokale__kampus p{
+.GraphInfo .Lokale__kampus p {
     background-color: var(--paper);
     color: var(--ink);
     border-radius: var(--default-border-radius);
@@ -976,6 +980,13 @@ td {
         margin-bottom: 15px;
     }
 
+    .Lokaal__titel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+
     /* Buttons */
     .Lokaal__titel button,
     .Toerusting__title button,
@@ -1063,6 +1074,34 @@ td {
         flex-shrink: 0;
         margin-left: 0;
         padding: 6px;
+    }
+
+    .GraphControls--mst {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 8px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .GraphControls select {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .GraphControls:not(.GraphControls--mst) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: stretch;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .GraphControls:not(.GraphControls--mst) label {
+        flex-direction: column;
+        min-width: 0;
     }
 
 }
