@@ -14,6 +14,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from mst import prim
 from edmond_karp import edmond_karp, load_campus_graph
+from itertools import islice
 
 app = FastAPI()
 
@@ -109,6 +110,1182 @@ def get_users():
 
     conn.close()
     return users
+
+@app.get('/users/mergesort/{field}/{sort_order}/{steps}')
+def get_users_merge_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+        compare = []
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400, detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def merge(left : list, right : list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = []
+            left_index = 0
+            right_index = 0
+
+            while (left_index < len(left)) and (right_index < len(right)):
+                if steps == 0:
+                    is_sorted = False
+                    return result + left[left_index:] + right[right_index:]
+
+                if steps > 0:
+                    steps -= 1
+                
+                left_value = left[left_index][field]
+                right_value = right[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(right_value, str):
+                    right_value = right_value.lower()
+
+                compare = [
+                    left[left_index]["user_id"],
+                    right[right_index]["user_id"]
+                ]
+
+                if sort_order:
+                    if left_value <= right_value:
+                        result.append(left[left_index])
+                        left_index += 1
+                    else:
+                        result.append(right[right_index])
+                        right_index += 1
+                else:
+                    if left_value >= right_value:
+                        result.append(left[left_index])
+                        left_index += 1
+                    else:
+                        result.append(right[right_index])
+                        right_index += 1
+
+            result.extend(left[left_index:])
+            result.extend(right[right_index:])
+            return result
+
+        def merge_sort(mergedata : list) -> list:
+            if(len(mergedata) <= 1):
+                return mergedata
+
+            splice = len(mergedata)//2
+            left = mergedata[:splice]
+            right = mergedata[splice:]
+
+            left = merge_sort(left)
+            right = merge_sort(right)
+
+            return merge(left, right)
+
+        sorted_users = merge_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted,
+            "compare" : compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/mergesort/admin/{field}/{sort_order}/{steps}')
+def get_users_merge_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        is_sorted = True
+        compare = []
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400, detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def merge(left : list, right : list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = []
+            left_index = 0
+            right_index = 0
+
+            while (left_index < len(left)) and (right_index < len(right)):
+                if steps == 0:
+                    is_sorted = False
+                    return result + left[left_index:] + right[right_index:]
+
+                if steps > 0:
+                    steps -= 1
+                
+                left_value = left[left_index][field]
+                right_value = right[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(right_value, str):
+                    right_value = right_value.lower()
+
+                compare = [
+                    left[left_index]["user_id"],
+                    right[right_index]["user_id"]
+                ]
+
+                if sort_order:
+                    if left_value <= right_value:
+                        result.append(left[left_index])
+                        left_index += 1
+                    else:
+                        result.append(right[right_index])
+                        right_index += 1
+                else:
+                    if left_value >= right_value:
+                        result.append(left[left_index])
+                        left_index += 1
+                    else:
+                        result.append(right[right_index])
+                        right_index += 1
+
+            result.extend(left[left_index:])
+            result.extend(right[right_index:])
+            return result
+
+        def merge_sort(mergedata : list) -> list:
+            if(len(mergedata) <= 1):
+                return mergedata
+
+            splice = len(mergedata)//2
+            left = mergedata[:splice]
+            right = mergedata[splice:]
+
+            left = merge_sort(left)
+            right = merge_sort(right)
+
+            return merge(left, right)
+
+        sorted_users = merge_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted,
+            "compare" : compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/insertionsort/{field}/{sort_order}/{steps}')
+def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+        compare = []
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400, detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def insertion_sort(insertiondata : list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = insertiondata.copy()
+            right_index = 1
+
+            while right_index < len(result):
+                left_index = right_index - 1
+                left_value = result[left_index][field]
+                temp_field = result[right_index]
+                temp_value = result[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(temp_value, str):
+                    temp_value = temp_value.lower()
+
+                if steps == 0:
+                    is_sorted = False
+                    return result
+                
+                if sort_order:
+                    while left_index >= 0 and left_value > temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
+                        result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
+                        left_index -= 1
+                        left_value = result[left_index][field]
+
+                        if isinstance(left_value, str):
+                            left_value = left_value.lower()
+
+                        if steps == 0:
+                            is_sorted = False
+                            return result
+                        
+                        if steps > 0:
+                            steps -= 1
+                else:
+                    while left_index >= 0 and left_value < temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
+                        result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
+                        left_index -= 1
+                        left_value = result[left_index][field]
+
+                        if isinstance(left_value, str):
+                            left_value = left_value.lower()
+
+                        if steps == 0:
+                            is_sorted = False
+                            return result
+                        
+                        if steps > 0:
+                            steps -= 1
+
+                result[left_index+1] = temp_field
+                right_index += 1
+
+            return result
+
+        sorted_users = insertion_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted,
+            "compare" : compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/insertionsort/admin/{field}/{sort_order}/{steps}')
+def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        is_sorted = True
+        compare = []
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400, detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def insertion_sort(insertiondata : list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = insertiondata.copy()
+            right_index = 1
+
+            while right_index < len(result):
+                left_index = right_index - 1
+                left_value = result[left_index][field]
+                temp_field = result[right_index]
+                temp_value = result[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(temp_value, str):
+                    temp_value = temp_value.lower()
+
+                if steps == 0:
+                    is_sorted = False
+                    return result
+                
+                if sort_order:
+                    while left_index >= 0 and left_value > temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
+                        result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
+                        left_index -= 1
+                        left_value = result[left_index][field]
+
+                        if isinstance(left_value, str):
+                            left_value = left_value.lower()
+
+                        if steps == 0:
+                            is_sorted = False
+                            return result
+                        
+                        if steps > 0:
+                            steps -= 1
+                else:
+                    while left_index >= 0 and left_value < temp_value:
+                        compare = [
+                            temp_field["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+                        
+                        result[left_index+1] = result[left_index]
+                        result[left_index] = temp_field
+                        left_index -= 1
+                        left_value = result[left_index][field]
+
+                        if isinstance(left_value, str):
+                            left_value = left_value.lower()
+
+                        if steps == 0:
+                            is_sorted = False
+                            return result
+                        
+                        if steps > 0:
+                            steps -= 1
+
+                result[left_index+1] = temp_field
+                right_index += 1
+
+            return result
+
+        sorted_users = insertion_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted,
+            "compare" : compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/heapsort/{field}/{sort_order}/{steps}')
+def get_users_heap_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+        compare = []
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400, detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def max_heapify(heapdata : list, index : int, size : int) -> list:
+            nonlocal steps, is_sorted, compare
+            result = heapdata.copy()
+            left_index = (index*2) + 1
+            right_index = (index*2) + 2
+
+            parent_value = result[index][field]
+
+            if isinstance(parent_value, str):
+                parent_value = parent_value.lower()
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            if right_index < size:
+                left_value = result[left_index][field]
+                right_value = result[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(right_value, str):
+                    right_value = right_value.lower()
+
+                if parent_value < max(left_value, right_value):
+                    if left_value >= right_value:
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[left_index]
+                        result[left_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return max_heapify(result, left_index, size)
+                    else:
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[right_index]
+                        result[right_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return max_heapify(result, right_index, size)
+
+            elif left_index == size - 1:
+                left_value = result[left_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if parent_value < left_value:
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+
+                    temp = result[index]
+                    result[index] = result[left_index]
+                    result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
+                    return result
+            return result
+
+        def min_heapify(heapdata : list, index : int, size : int) -> list:
+            nonlocal steps, is_sorted, compare
+            result = heapdata.copy()
+            left_index = (index*2) + 1
+            right_index = (index*2) + 2
+
+            parent_value = result[index][field]
+
+            if isinstance(parent_value, str):
+                parent_value = parent_value.lower()
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            if right_index < size:
+                left_value = result[left_index][field]
+                right_value = result[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(right_value, str):
+                    right_value = right_value.lower()
+
+                if parent_value > min(left_value, right_value):
+                    if left_value <= right_value:
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[left_index]
+                        result[left_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return min_heapify(result, left_index, size)
+                    else:
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[right_index]
+                        result[right_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return min_heapify(result, right_index, size)
+
+            elif left_index == size - 1:
+                left_value = result[left_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if parent_value > left_value:
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+
+                    temp = result[index]
+                    result[index] = result[left_index]
+                    result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
+                    return result
+            return result
+
+        def heap_sort(heapdata : list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = heapdata.copy()
+
+            for index in range((len(result)//2)-1, -1, -1):
+                if steps == 0:
+                    is_sorted = False
+                    return result
+
+                if sort_order:
+                    result = max_heapify(result, index, len(result))
+                else:
+                    result = min_heapify(result, index, len(result))
+
+            for index in range((len(result)-1),0,-1):
+                if steps == 0:
+                    is_sorted = False
+                    return result
+
+                compare = [
+                    result[index]["user_id"],
+                    result[0]["user_id"]
+                ]
+                
+                temp = result[index]
+                result[index] = result[0]
+                result[0] = temp
+
+                if steps > 0:
+                    steps -= 1
+
+                if sort_order:
+                    result = max_heapify(result, 0, index)
+                else:
+                    result = min_heapify(result, 0, index)
+            return result
+
+        sorted_users = heap_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted,
+            "compare" : compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/heapsort/admin/{field}/{sort_order}/{steps}')
+def get_users_heap_sort(field : str, sort_order : bool, steps : int):
+    conn = get_db()
+    
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        is_sorted = True
+        compare = []
+
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400, detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400, detail='Invalid steps')
+
+        def max_heapify(heapdata : list, index : int, size : int) -> list:
+            nonlocal steps, is_sorted, compare
+            result = heapdata.copy()
+            left_index = (index*2) + 1
+            right_index = (index*2) + 2
+
+            parent_value = result[index][field]
+
+            if isinstance(parent_value, str):
+                parent_value = parent_value.lower()
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            if right_index < size:
+                left_value = result[left_index][field]
+                right_value = result[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(right_value, str):
+                    right_value = right_value.lower()
+
+                if parent_value < max(left_value, right_value):
+                    if left_value >= right_value:
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[left_index]
+                        result[left_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return max_heapify(result, left_index, size)
+                    else:
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[right_index]
+                        result[right_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return max_heapify(result, right_index, size)
+
+            elif left_index == size - 1:
+                left_value = result[left_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if parent_value < left_value:
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+
+                    temp = result[index]
+                    result[index] = result[left_index]
+                    result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
+                    return result
+            return result
+
+        def min_heapify(heapdata : list, index : int, size : int) -> list:
+            nonlocal steps, is_sorted, compare
+            result = heapdata.copy()
+            left_index = (index*2) + 1
+            right_index = (index*2) + 2
+
+            parent_value = result[index][field]
+
+            if isinstance(parent_value, str):
+                parent_value = parent_value.lower()
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            if right_index < size:
+                left_value = result[left_index][field]
+                right_value = result[right_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if isinstance(right_value, str):
+                    right_value = right_value.lower()
+
+                if parent_value > min(left_value, right_value):
+                    if left_value <= right_value:
+                        compare = [
+                            result[index]["user_id"],
+                            result[left_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[left_index]
+                        result[left_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return min_heapify(result, left_index, size)
+                    else:
+                        compare = [
+                            result[index]["user_id"],
+                            result[right_index]["user_id"]
+                        ]
+
+                        temp = result[index]
+                        result[index] = result[right_index]
+                        result[right_index] = temp
+
+                        if steps > 0:
+                            steps -= 1
+
+                        return min_heapify(result, right_index, size)
+
+            elif left_index == size - 1:
+                left_value = result[left_index][field]
+
+                if isinstance(left_value, str):
+                    left_value = left_value.lower()
+
+                if parent_value > left_value:
+                    compare = [
+                        result[index]["user_id"],
+                        result[left_index]["user_id"]
+                    ]
+
+                    temp = result[index]
+                    result[index] = result[left_index]
+                    result[left_index] = temp
+
+                    if steps > 0:
+                        steps -= 1
+
+                    return result
+            return result
+
+        def heap_sort(heapdata : list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = heapdata.copy()
+
+            for index in range((len(result)//2)-1, -1, -1):
+                if steps == 0:
+                    is_sorted = False
+                    return result
+
+                if sort_order:
+                    result = max_heapify(result, index, len(result))
+                else:
+                    result = min_heapify(result, index, len(result))
+
+            for index in range((len(result)-1),0,-1):
+                if steps == 0:
+                    is_sorted = False
+                    return result
+
+                compare = [
+                    result[index]["user_id"],
+                    result[0]["user_id"]
+                ]
+                
+                temp = result[index]
+                result[index] = result[0]
+                result[0] = temp
+
+                if steps > 0:
+                    steps -= 1
+
+                if sort_order:
+                    result = max_heapify(result, 0, index)
+                else:
+                    result = min_heapify(result, 0, index)
+            return result
+
+        sorted_users = heap_sort(data)
+        
+        return{
+            "users" : sorted_users,
+            "sorted" : is_sorted,
+            "compare" : compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/quicksort/{field}/{sort_order}/{steps}')
+def get_users_quick_sort(field: str, sort_order: bool, steps: int):
+    conn = get_db()
+
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+        compare = []
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400,detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400,detail='Invalid steps')
+
+        def quick_sort(quickdata: list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = quickdata.copy()
+
+            if len(result) <= 1:
+                return result
+
+            pivot = result[-1]
+            pivot_value = pivot[field]
+
+            if isinstance(pivot_value, str):
+                pivot_value = pivot_value.lower()
+
+            left = []
+            right = []
+
+            for index in range(len(result) - 1):
+                current = result[index]
+                current_value = current[field]
+
+                if isinstance(current_value, str):
+                    current_value = current_value.lower()
+
+                compare = [current["user_id"],
+                    pivot["user_id"]
+                ]
+
+                if steps == 0:
+                    is_sorted = False
+
+                    return (left + result[index:])
+
+                if sort_order:
+                    if current_value <= pivot_value:
+                        left.append(current)
+                    else:
+                        right.append(current)
+                else:
+                    if current_value >= pivot_value:
+                        left.append(current)
+                    else:
+                        right.append(current)
+
+                if steps > 0:
+                    steps -= 1
+
+                if steps == 0:
+                    is_sorted = False
+                    remaining = result[index + 1:]
+
+                    return (left + right+ remaining)
+
+            if sort_order:
+                result = (quick_sort(left) + [pivot] + quick_sort(right))
+            else:
+                result = (quick_sort(left) + [pivot] + quick_sort(right))
+
+            return result
+
+        if steps == 0:
+            return {
+                "users": data,
+                "sorted": False,
+                "compare": []
+            }
+
+        sorted_users = quick_sort(data)
+
+        return {
+            "users": sorted_users,
+            "sorted": is_sorted,
+            "compare": compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400,detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/quicksort/admin/{field}/{sort_order}/{steps}')
+def get_users_quick_sort(field: str, sort_order: bool, steps: int):
+    conn = get_db()
+
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        is_sorted = True
+        compare = []
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400,detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400,detail='Invalid steps')
+
+        def quick_sort(quickdata: list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = quickdata.copy()
+
+            if len(result) <= 1:
+                return result
+
+            pivot = result[-1]
+            pivot_value = pivot[field]
+
+            if isinstance(pivot_value, str):
+                pivot_value = pivot_value.lower()
+
+            left = []
+            right = []
+
+            for index in range(len(result) - 1):
+                current = result[index]
+                current_value = current[field]
+
+                if isinstance(current_value, str):
+                    current_value = current_value.lower()
+
+                compare = [current["user_id"],
+                    pivot["user_id"]
+                ]
+
+                if steps == 0:
+                    is_sorted = False
+
+                    return (left + result[index:])
+
+                if sort_order:
+                    if current_value <= pivot_value:
+                        left.append(current)
+                    else:
+                        right.append(current)
+                else:
+                    if current_value >= pivot_value:
+                        left.append(current)
+                    else:
+                        right.append(current)
+
+                if steps > 0:
+                    steps -= 1
+
+                if steps == 0:
+                    is_sorted = False
+                    remaining = result[index + 1:]
+
+                    return (left + right+ remaining)
+
+            if sort_order:
+                result = (quick_sort(left) + [pivot] + quick_sort(right))
+            else:
+                result = (quick_sort(left) + [pivot] + quick_sort(right))
+
+            return result
+
+        if steps == 0:
+            return {
+                "users": data,
+                "sorted": False,
+                "compare": []
+            }
+
+        sorted_users = quick_sort(data)
+
+        return {
+            "users": sorted_users,
+            "sorted": is_sorted,
+            "compare": compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400,detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/bubblesort/{field}/{sort_order}/{steps}')
+def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
+    conn = get_db()
+
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        is_sorted = True
+        compare = []
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400,detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400,detail='Invalid steps')
+
+        def bubble_sort(bubbledata: list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = bubbledata.copy()
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            for right_index in range(len(result)-1):
+                for left_index in range(len(result)-right_index-1):
+
+                    compare = [
+                        result[left_index]["user_id"],
+                        result[left_index+1]["user_id"]
+                    ]     
+
+                    if sort_order:
+                        if result[left_index+1][field] < result[left_index][field]:
+                            temp = result[left_index]
+                            result[left_index] = result[left_index+1]
+                            result[left_index+1] = temp
+
+                            if steps > 0:
+                                steps -= 1
+
+                            if steps == 0:
+                                is_sorted = False
+                                return result                        
+                    else:
+                        if result[left_index][field] < result[left_index+1][field]:
+                            temp = result[left_index]
+                            result[left_index] = result[left_index+1]
+                            result[left_index+1] = temp
+
+                            if steps > 0:
+                                steps -= 1
+
+                            if steps == 0:
+                                is_sorted = False
+                                return result
+            return result
+
+        sorted_users = bubble_sort(data)
+
+        return{
+            "users": sorted_users,
+            "sorted": is_sorted,
+            "compare": compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400,detail='Something went wrong')
+    finally:
+        conn.close()
+
+@app.get('/users/bubblesort/admin/{field}/{sort_order}/{steps}')
+def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
+    conn = get_db()
+
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        is_sorted = True
+        compare = []
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400,detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400,detail='Invalid steps')
+
+        def bubble_sort(bubbledata: list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = bubbledata.copy()
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            for right_index in range(len(result)-1):
+                for left_index in range(len(result)-right_index-1):
+
+                    compare = [
+                        result[left_index]["user_id"],
+                        result[left_index+1]["user_id"]
+                    ]     
+
+                    if sort_order:
+                        if result[left_index+1][field] < result[left_index][field]:
+                            temp = result[left_index]
+                            result[left_index] = result[left_index+1]
+                            result[left_index+1] = temp
+
+                            if steps > 0:
+                                steps -= 1
+
+                            if steps == 0:
+                                is_sorted = False
+                                return result                        
+                    else:
+                        if result[left_index][field] < result[left_index+1][field]:
+                            temp = result[left_index]
+                            result[left_index] = result[left_index+1]
+                            result[left_index+1] = temp
+
+                            if steps > 0:
+                                steps -= 1
+
+                            if steps == 0:
+                                is_sorted = False
+                                return result
+            return result
+
+        sorted_users = bubble_sort(data)
+
+        return{
+            "users": sorted_users,
+            "sorted": is_sorted,
+            "compare": compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400,detail='Something went wrong')
+    finally:
+        conn.close()
 
 #Gebruikers se informasie word in twee verdeel
 #   User (app_user) -> naam, van, epos, is_admin
