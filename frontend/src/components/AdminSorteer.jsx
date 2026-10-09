@@ -1,5 +1,5 @@
 import "../css/Admin.css";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel}) {
     const [tipe, setTipe] = useState("gebruiker");
@@ -8,20 +8,324 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
     const [algoritmeLinks, setAlgoritmeLinks] = useState("");
     const [algoritmeRegs, setAlgoritmeRegs] = useState("");
 
-    return (
-        <div className="Info Sorteer_Gebruiker" data-for-tab="AdminSorteer">
-            <div className="MobileHeader">
-                {collapsed && (
-                    <button className="Hamburger" onClick={() => {
-                        setCollapsed(false);
-                        setMobieleLPaneel(true)
-                    }}>
-                        ☰
-                    </button>
-                )}
+    const linksRef = useRef(null);
+    const regsRef = useRef(null);
 
-                <h3>Sorteer</h3>
-            </div>
+    // Vir die herstel funksionaliteit
+    const linksTimerRef = useRef(null);
+    const regsTimerRef = useRef(null);
+
+    const linksRunRef = useRef(0);
+    const regsRunRef = useRef(0);
+
+    // Timer veranderlikes vir die algoritme
+    const [tydLinks, setTydLinks] = useState(0);
+    const linksHorlosieRef = useRef(null);
+    const linksStopTydRef = useRef(null);
+    const linksBeginTydRef = useRef(null);
+
+    const [tydRegs, setTydRegs] = useState(0);
+    const RegsHorlosieRef = useRef(null);
+    const RegsStopTydRef = useRef(null);
+    const RegsBeginTydRef = useRef(null);
+
+    // Begin van die animasie useEffects 
+    useEffect(() => { haalGebruikers();}, [tipe]);
+
+    const haalGebruikers = async () => {
+        try {
+            const response = await fetch("http://localhost:8000/users");
+
+            if (!response.ok) {
+                throw new Error("Kon nie gebruikers laai nie.");
+            }
+
+            const data = await response.json();
+
+            const gefiltreer = data.filter((gebruiker) => {
+                if (tipe === "admin") {
+                    return gebruiker.is_admin === true;
+                }
+
+                if (tipe === "gebruiker") {
+                    return gebruiker.is_admin === false;
+                }
+
+                return true;
+            });
+
+            setGebruikersLinks(gefiltreer);
+            setGebruikersRegs(gefiltreer);
+
+        } catch (error) {
+            console.error("Fout met laai van gebruikers:", error);
+        }
+    };
+
+    const [gebruikersLinks, setGebruikersLinks] = useState([]);
+    const [gebruikersRegs, setGebruikersRegs] = useState([]);
+    const [vergelykLinks, setVergelykLinks] = useState([]);
+    const [vergelykRegs, setVergelykRegs] = useState([]);
+
+    // --------------------------- Sorteer Linker algoritme ----------------------------
+    useEffect(() => {
+        const runId = ++linksRunRef.current;
+        if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort" || algoritmeLinks === "Quick Sort" || algoritmeLinks === "Bubble Sort") && algoritmeRegs !== "") {
+            let stap = 1;
+
+            linksBeginTydRef.current = Date.now();
+            setTydLinks(0);
+
+            linksHorlosieRef.current = setInterval(() => {
+                setTydLinks(Date.now() - linksBeginTydRef.current);
+            }, 50);
+
+            const volgendeStap = () => {
+                sorteerStapLinks(stap, runId).then((sorted) => {
+                    if(runId !== linksRunRef.current) return;
+                    
+                    if (!sorted) {
+                        stap++;
+                        linksTimerRef.current = setTimeout(volgendeStap, 2000);
+                    }
+                    else {
+                        linksStopTydRef.current = setTimeout(() => {
+                            clearInterval(linksHorlosieRef.current);
+                            setTydLinks(Date.now() - linksBeginTydRef.current);
+                        }, 2300);
+                    }
+                });
+            };
+
+            volgendeStap();
+        }
+
+        return () => { clearTimeout(linksTimerRef.current);};
+
+    }, [algoritmeLinks, algoritmeRegs]);
+
+    const sorteerStapLinks = async (stap, runId) => {
+        const veld = volgens === "Naam" ? "fname" : "sname";
+        const sortOrder = volgorde === "Asc";
+        const endpoint = algoritmeLinks === "Insertion Sort"
+            ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
+            : algoritmeLinks === "Heap Sort" 
+                ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort")
+                : algoritmeLinks === "Quick Sort"
+                    ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
+                    : algoritmeLinks === "Bubble Sort"
+                        ? (tipe === "admin" ? "users/bubblesort/admin" : "users/bubblesort")
+                        :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+
+        const Response = await fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`);
+
+        const Data = await Response.json();
+        console.log("In Admin", stap, Data);
+
+        if (runId !== linksRunRef.current) return true;
+                
+            // Kry die huidige posisies van die elemente wat nou vergelyk word
+            const eerste = linksRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
+            const tweede = linksRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
+
+            // getBoudingClientReact gee vir my waar die blokkies op die skerm is vir die animasie
+            const eerstePosisie = eerste.getBoundingClientRect();
+            const tweedePosisie = tweede.getBoundingClientRect();
+
+            setVergelykLinks(Data.compare);
+
+            // Lry die posisies van die elemente na die verandering
+            setTimeout(() => {
+                setGebruikersLinks(Data.users);
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        const nuweEerste = linksRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
+
+                        const nuweTweede = linksRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
+
+                        const nuweEerstePosisie = nuweEerste.getBoundingClientRect();
+                        const nuweTweedePosisie = nuweTweede.getBoundingClientRect();
+                        
+                        // Bereken gebaseer op waar hy was, waantoe moet hy skuif in px
+                        const eersteBeweging = eerstePosisie.left - nuweEerstePosisie.left;
+                        const tweedeBeweging = tweedePosisie.left - nuweTweedePosisie.left;
+                    
+                        // Sit hulle onmiddellik op hulle ou posisie
+                        nuweEerste.style.transition = "none";
+                        nuweTweede.style.transition = "none";
+
+                        nuweEerste.style.transform = `translateX(${eersteBeweging}px)`;
+                        nuweTweede.style.transform = `translateX(${tweedeBeweging}px)`;
+
+                        // Laat hulle daarna na hulle nuwe posisie beweeg
+                        requestAnimationFrame(() => {
+                            nuweEerste.style.transition = "transform 1.5s ease";
+                            nuweTweede.style.transition = "transform 1.5s ease";
+
+                            nuweEerste.style.transform = "translateX(0)";
+                            nuweTweede.style.transform = "translateX(0)";
+                        });
+                    });
+                });
+            }, 600);
+        return Data.sorted;       
+    };
+
+    // ------------------------------------- Sorteer Regter algoritme ------------------------------------
+    useEffect(() => {
+        const runId = ++ regsRunRef.current;
+        if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort" || algoritmeRegs === "Quick Sort" || algoritmeRegs === "Bubble Sort") && algoritmeLinks !== "") {
+            let stap = 1;
+
+            RegsBeginTydRef.current = Date.now();
+            setTydRegs(0);
+
+            RegsHorlosieRef.current = setInterval(() => {
+                setTydRegs(Date.now() - RegsBeginTydRef.current);
+            }, 50);
+
+            const volgendeStap = () => {
+                sorteerStapRegs(stap, runId).then((sorted) => {
+                    if(runId !== regsRunRef.current) return;
+                    
+                    if (!sorted) {
+                        stap++;
+                        regsTimerRef.current = setTimeout(volgendeStap, 2000);
+                    }
+                    else{
+                        RegsStopTydRef.current = setTimeout(() => {
+                            clearInterval(RegsHorlosieRef.current);
+                            setTydRegs(Date.now() - RegsBeginTydRef.current);
+                        }, 2300);
+                    }
+                });
+            };
+
+            volgendeStap();
+        }
+
+        return () => {clearTimeout(regsTimerRef.current);};
+
+    }, [algoritmeRegs, algoritmeLinks]);
+
+    const sorteerStapRegs = async (stap, runId) => {
+        const veld = volgens === "Naam" ? "fname" : "sname";
+        const sortOrder = volgorde === "Asc";
+
+        const endpoint = algoritmeRegs === "Insertion Sort"
+        ? (tipe === "admin" ? "users/insertionsort/admin" : "users/insertionsort")
+        : algoritmeRegs === "Heap Sort"
+            ? (tipe === "admin" ? "users/heapsort/admin" : "users/heapsort") 
+            : algoritmeRegs === "Quick Sort"
+                ? (tipe === "admin" ? "users/quicksort/admin" : "users/quicksort")
+                : algoritmeRegs === "Bubble Sort"
+                    ? (tipe === "admin" ? "users/bubblesort/admin" : "users/bubblesort")
+                    :(tipe === "admin" ? "users/mergesort/admin" : "users/mergesort");
+
+        const Response = await fetch(`http://localhost:8000/${endpoint}/${veld}/${sortOrder}/${stap}`);
+
+        const Data = await Response.json();
+
+        if (runId !== regsRunRef.current) return true;
+            const eerste = regsRef.current.querySelector(`[data-user-id="${Data.compare[0]}"]`);
+            const tweede = regsRef.current.querySelector(`[data-user-id="${Data.compare[1]}"]`);
+
+            const eerstePosisie = eerste.getBoundingClientRect();
+            const tweedePosisie = tweede.getBoundingClientRect();
+
+            setVergelykRegs(Data.compare);
+
+            setTimeout(() => {
+                setGebruikersRegs(Data.users);
+
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        const nuweEerste = regsRef.current.querySelector(
+                            `[data-user-id="${Data.compare[0]}"]`
+                        );
+
+                        const nuweTweede = regsRef.current.querySelector(
+                            `[data-user-id="${Data.compare[1]}"]`
+                        );
+
+                        const nuweEerstePosisie = nuweEerste.getBoundingClientRect();
+                        const nuweTweedePosisie = nuweTweede.getBoundingClientRect();
+
+                        const eersteBeweging =
+                            eerstePosisie.left - nuweEerstePosisie.left;
+
+                        const tweedeBeweging =
+                            tweedePosisie.left - nuweTweedePosisie.left;
+
+                        nuweEerste.style.transition = "none";
+                        nuweTweede.style.transition = "none";
+
+                        nuweEerste.style.transform =`translateX(${eersteBeweging}px)`;
+
+                        nuweTweede.style.transform =`translateX(${tweedeBeweging}px)`;
+
+                        requestAnimationFrame(() => {
+                            nuweEerste.style.transition = "transform 1.5s ease";
+                            nuweTweede.style.transition = "transform 1.5s ease";
+
+                            nuweEerste.style.transform = "translateX(0)";
+                            nuweTweede.style.transform = "translateX(0)";
+                        });
+                    });
+                });
+            }, 600);
+
+        return Data.sorted;
+    };
+
+    // Herstel funksie sodat jy meer as 1 algoritme kan toets
+    const herstel = () => {
+        clearTimeout(linksTimerRef.current);
+        clearTimeout(regsTimerRef.current);
+
+        linksRunRef.current++
+        regsRunRef.current++
+
+        setAlgoritmeLinks("");
+        setAlgoritmeRegs("");
+
+        setVergelykLinks([]);
+        setVergelykRegs([]);
+
+        clearInterval(linksHorlosieRef.current);
+        clearTimeout(linksStopTydRef.current);
+        linksBeginTydRef.current = null;
+        setTydLinks(0);
+
+        clearInterval(RegsHorlosieRef.current);
+        clearTimeout(RegsStopTydRef.current);
+        RegsBeginTydRef.current = null;
+        setTydRegs(0);
+
+        haalGebruikers();
+    }
+
+    const kryGrootO = (algoritme) => {
+        if (algoritme === "Bubble Sort") 
+            {return "O(n²)";} 
+
+        else if (algoritme === "Insertion Sort") 
+            {return "O(n²)";} 
+
+        else if (algoritme === "Heap Sort") 
+            {return "O(n log n)";} 
+
+        else if (algoritme === "Quick Sort") 
+            {return "O(n log n) gemiddeld";} 
+
+        else if (algoritme === "Merge Sort") 
+            {return "O(n log n)";} 
+
+        else {return "";}
+    };
+
+    return(
+        <div className="Info Sorteer_Gebruiker" data-for-tab = "AdminSorteer">
             <div>
                 <h2>Sorteer gebruikers</h2>
             </div>
@@ -102,6 +406,7 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
                         Volgens Van
                     </label>
                 </div>
+                <button onClick={herstel}>Herstel</button>
             </div>
             <div className="Sorteer_Blokke">
                 <div className="Algoritme">
@@ -110,12 +415,25 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
                             value={algoritmeLinks}
                             onChange={(e) => setAlgoritmeLinks(e.target.value)}
                         >
-                            <option value="bubblesort">Bubble Sort</option>
+                            <option value="">Kies algoritme</option>
+                            <option value="Bubble Sort">Bubble Sort</option>
                             <option value="Insertion Sort">Insertion Sort</option>
+                            <option value="Heap Sort">Heap Sort</option>
+                            <option value="Quick Sort">Quick Sort</option>
+                            <option value="Merge Sort">Merge Sort</option>
                         </select>
+
+                        <h3 className="GrootO"> {kryGrootO(algoritmeLinks)}</h3>
+
+                        <h3>Tyd: {(tydLinks / 1000).toFixed(2)} sek</h3>
+                        
                     </div>
-                    <div className="Organiseering">
-                        Bubbles
+                    <div className="Organiseering" ref={linksRef}>
+                        {gebruikersLinks.map((gebruiker) => (
+                            <div key={gebruiker.user_id} data-user-id={gebruiker.user_id} className={vergelykLinks.includes(gebruiker.user_id) ? "Vergelyk" : "blokkie"}>
+                                {gebruiker.fname} {gebruiker.sname}
+                            </div>
+                        ))}
                     </div>
                 </div>
                 <div className="Algoritme">
@@ -124,12 +442,24 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
                             value={algoritmeRegs}
                             onChange={(e) => setAlgoritmeRegs(e.target.value)}
                         >
-                            <option value="bubblesort">Bubble Sort</option>
+                            <option value="">Kies algoritme</option>
+                            <option value="Bubble Sort">Bubble Sort</option>
                             <option value="Insertion Sort">Insertion Sort</option>
+                            <option value="Heap Sort">Heap Sort</option>
+                            <option value="Quick Sort">Quick Sort</option>
+                            <option value="Merge Sort">Merge Sort</option>
                         </select>
+
+                        <h3 className="GrootO"> {kryGrootO(algoritmeRegs)}</h3>
+                        
+                        <h3>Tyd: {(tydRegs / 1000).toFixed(2)} sek</h3>
                     </div>
-                    <div className="Organiseering">
-                        Insertion
+                    <div className="Organiseering" ref={regsRef}>
+                        {gebruikersRegs.map((gebruiker) => (
+                            <div key={gebruiker.user_id} data-user-id={gebruiker.user_id} className={vergelykRegs.includes(gebruiker.user_id) ? "Vergelyk" : ""}>
+                                {gebruiker.fname} {gebruiker.sname}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
