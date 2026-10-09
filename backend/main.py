@@ -13,6 +13,7 @@ import bcrypt
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from mst import prim
+from edmond_karp import edmond_karp, load_campus_graph
 
 app = FastAPI()
 
@@ -1190,3 +1191,31 @@ def get_mst(campus_id : int):
         }
         for a, b, w in edges
     ]
+    
+# ==================== EDMONDS-KARP ALGORITHM ====================
+@app.get('/evacuation-vertices/{campus_id}')
+def get_evacuation_vertices(campus_id : int):
+    if campus_id <= 0:
+        raise HTTPException(status_code=400, detail='Campus id needs to be greater than 0')
+    try:
+        vertices, _ = load_campus_graph(campus_id, include_capacity=False)
+        return list(vertices.values())
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@app.get('/max-flow/{campus_id}/{start}/{end}')
+def get_max_flow(campus_id : int, start : int, end : int):
+    if campus_id <= 0 or start <= 0 or end <= 0:
+        raise HTTPException(status_code=400, detail='Ids need to be greater than 0')
+    try:
+        vertices, edges = load_campus_graph(campus_id)
+        max_flow, flow_edges = edmond_karp(edges, vertices, start, end)
+        return {
+            'campus_id': campus_id, 'start': start, 'end': end,
+            'max_flow': max_flow, 'edges': flow_edges
+        }
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))

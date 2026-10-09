@@ -742,6 +742,85 @@ td {
     transform: scale(1.05);
 }
 
+/* ==================== Grafiek algoritmes ==================== */
+.GraphInfo { 
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.GraphControls {
+    display: flex;
+    flex-wrap: wrap; 
+    align-items: end;
+    gap: 15px;
+    background-color: var(--pine);
+    border-radius: var(--default-border-radius);
+    padding: 15px;
+    color: var(--paper);
+    justify-content: space-between;
+    width: 60vw;
+    margin: auto;
+}
+
+.GraphControls label { 
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.GraphControls select{ 
+    padding: 2px;
+    font: inherit;
+}
+
+.Lokaal__titel button { 
+    padding: 8px;
+    font: inherit;
+    width: 10vw;
+}
+
+.GraphMap { 
+    height: 550px;
+    min-height: 350px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+/* ======================== Spanboom styling ====================== */
+.GraphInfo .Lokale__kampus{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    width: 60vw;
+    margin: auto;
+}
+
+.GraphInfo .Lokale__kampus h3{
+    color: var(--paper);
+}
+
+.GraphInfo .Lokale__kampus div{
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
+.GraphInfo .Lokale__kampus select{
+    width: 10vw;
+}
+
+.GraphInfo .Lokale__kampus p{
+    background-color: var(--paper);
+    color: var(--ink);
+    border-radius: var(--default-border-radius);
+    padding: 5px;
+}
+
+
 .MobileHeader,
 .Hamburger {
     display: none;
