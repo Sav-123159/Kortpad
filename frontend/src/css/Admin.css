@@ -79,7 +79,7 @@ button {
     background-color: var(--paper);
     color: var(--ink);
 
-    height: 100vh;
+    height: 100%;
     width: 100%;
     padding: 10px;
 
@@ -126,7 +126,6 @@ h2 {
 
 .voegby_vorm {
     width: auto;
-    min-width: 300px;
     height: fit-content;
     background-color: var(--paper);
     border-radius: var(--default-border-radius);
@@ -495,6 +494,10 @@ div .Sorteer_Blokke {
 
 .Gebruiker__item .Edit_Admin_Label {
     width: auto;
+}
+
+.Gebruiker_Lys {
+    margin-bottom: 50px;
 }
 
 .Edit_Admin_Label {
@@ -903,6 +906,32 @@ td {
 
     .Gebruiker_Keuse {
         gap: 20px !important;
+    }
+
+    .Gebruiker__item {
+        box-sizing: border-box;
+        gap: 6px;
+        padding: 12px;
+    }
+
+    /* Naam en e-pos mag krimp en breek */
+    .Gebruiker__item label,
+    .Gebruiker__item>span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-size: small;
+    }
+
+    /* E-pos vat die oorblywende spasie */
+    .Gebruiker__item>span:not(.Gebruiker__is_admin) {
+        flex: 1 1 0;
+    }
+
+    /* Delete-knoppie bly altyd binne die blokkie */
+    .Gebruiker__item>button {
+        flex-shrink: 0;
+        margin-left: 0;
+        padding: 6px;
     }
 
 }
