@@ -1205,6 +1205,80 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
     finally:
         conn.close()
 
+@app.get('/users/bubblesort/admin/{field}/{sort_order}/{steps}')
+def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
+    conn = get_db()
+
+    try:
+        cursor = conn.cursor()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        is_sorted = True
+        compare = []
+        columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
+
+        field_names = [column[1] for column in columns]
+
+        if field not in field_names or field in ("is_admin", "user_id"):
+            raise HTTPException(status_code=400,detail='Field is invalid')
+
+        if steps < -1:
+            raise HTTPException(status_code=400,detail='Invalid steps')
+
+        def bubble_sort(bubbledata: list) -> list:
+            nonlocal steps, is_sorted, compare
+            result = bubbledata.copy()
+
+            if steps == 0:
+                is_sorted = False
+                return result
+
+            for right_index in range(len(result)-1):
+                for left_index in range(len(result)-right_index-1):
+
+                    compare = [
+                        result[left_index]["user_id"],
+                        result[left_index+1]["user_id"]
+                    ]     
+
+                    if sort_order:
+                        if result[left_index+1][field] < result[left_index][field]:
+                            temp = result[left_index]
+                            result[left_index] = result[left_index+1]
+                            result[left_index+1] = temp
+
+                            if steps > 0:
+                                steps -= 1
+
+                            if steps == 0:
+                                is_sorted = False
+                                return result                        
+                    else:
+                        if result[left_index][field] < result[left_index+1][field]:
+                            temp = result[left_index]
+                            result[left_index] = result[left_index+1]
+                            result[left_index+1] = temp
+
+                            if steps > 0:
+                                steps -= 1
+
+                            if steps == 0:
+                                is_sorted = False
+                                return result
+            return result
+
+        sorted_users = bubble_sort(data)
+
+        return{
+            "users": sorted_users,
+            "sorted": is_sorted,
+            "compare": compare
+        }
+    except Exception:
+        conn.rollback()
+        raise HTTPException(status_code=400,detail='Something went wrong')
+    finally:
+        conn.close()
+
 #Gebruikers se informasie word in twee verdeel
 #   User (app_user) -> naam, van, epos, is_admin
 #   Auth (auth) -> wagwoord, epos
