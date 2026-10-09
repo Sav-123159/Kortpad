@@ -10,6 +10,7 @@ import AdminSorteer from "./AdminSorteer.jsx";
 import AdminMST from "./AdminMST.jsx";
 import '../css/Admin.css';
 import "../css/Style.css";
+import AdminEvacuation from "./AdminEvacuation.jsx";
 
 // Hoof komponent wat uit gevoer word
 function AdminContainer() {
@@ -43,6 +44,7 @@ function AdminContainer() {
                     {aktieweTab === "AdminRoosters" && (<AdminRoosters  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminBesprekings" && (<AdminBesprekings  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
                     {aktieweTab === "AdminMST" && (<AdminMST  setCollapsed={setCollapsed} collapsed={collapsed} setMobieleLPaneel={setMobieleLPaneel} />)}
+                    {aktieweTab === "AdminEvacuation" && <AdminEvacuation/>}
                 </div>
             </div>
         </div>

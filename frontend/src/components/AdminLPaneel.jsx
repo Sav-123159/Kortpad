@@ -90,6 +90,10 @@ export default function AdminLPaneel({ aktieweTab, setAktieweTab, collapsed, set
                     }} >
                     | Minimum Spanboom
                 </button>
+                <button className={aktieweTab === "AdminEvacuation" ? "Opsie_Knoppie Opsie_Knoppie--active": "Opsie_Knoppie"}
+                onClick={() => setAktieweTab("AdminEvacuation")}>
+                    | Ontruimingsvloei
+                </button>
             </div>
         </motion.section>
     )
