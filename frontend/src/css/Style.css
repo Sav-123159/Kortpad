@@ -16,7 +16,7 @@
 
 /* Skuifbalk nie sigbaar totdat muis oor dit beweeg */
 * {
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
 }
