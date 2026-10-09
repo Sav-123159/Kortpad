@@ -78,7 +78,14 @@ export default function AdminEvacuation() {
 
     return (
         <div className="Info GraphInfo">
-            <div className="Lokaal__titel"><h2>Maksimum Ontruimingsvloei</h2></div>
+            <div className="Lokaal__titel">
+                <div>
+                    <h2>Maksimum Ontruimingsvloei</h2>
+                    <p>Klik eers A en dan B op die kaart, of gebruik die keuselyste. Groen: A; rooi: B.</p>
+                </div>
+
+                <button onClick={() => { selectVertex('', 'start'); setEnd(''); }}>Herstel punte</button> 
+            </div>
             <div className="GraphControls">
                 <label>Kampus
                     <select value={selectedCampus} onChange={e => selectCampus(e.target.value)}>
@@ -94,9 +101,9 @@ export default function AdminEvacuation() {
                         </select>
                     </label>
                 ))}
-                <button onClick={() => { selectVertex('', 'start'); setEnd(''); }}>Herstel punte</button>
+                
             </div>
-            <p>Klik eers A en dan B op die kaart, of gebruik die keuselyste. Groen: A; rooi: B.</p>
+            
             {start && start === end && <p role="alert">Kies twee verskillende hoekpunte.</p>}
             {error && <p role="alert">{error}</p>}
             {loading && <p role="status">Bereken vloei...</p>}

@@ -71,24 +71,34 @@ export default function AdminMST() {
                 <h2>Minimum Spanboom</h2>
             </div>
 
-            <select value={selectedCampus} onChange={e => {
-                setSelectedCampus(e.target.value);
-                setMap(null); setEdges([]); setVertices([]); setError("");
-                setLoading(Boolean(e.target.value));
-            }}>
-                <option value="">Kies kampus</option>
-                {campuses.map(campus => (
-                    <option key={campus.campus_id} value={campus.campus_id}>
-                        {campus.campus_name}
-                    </option>
-                ))}
-            </select>
+            <div className="Lokale__kampus">
+                <div>
+                    <h3>Kampus: </h3>
+                    <select value={selectedCampus} onChange={e => {
+                        setSelectedCampus(e.target.value);
+                        setMap(null); setEdges([]); setVertices([]); setError("");
+                        setLoading(Boolean(e.target.value));
+                    }}>
+                        <option value="">Kies kampus</option>
+                        {campuses.map(campus => (
+                            <option key={campus.campus_id} value={campus.campus_id}>
+                                {campus.campus_name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
 
-            {loading && <p role="status">Laai kampuskaart en spanboom...</p>}
-            {error && <p role="alert">{error}</p>}
-            {map && <p>{vertexCount} hoekpunte; {edges.length} rande; totale gewig: {edges.reduce((sum, edge) => sum + edge.weight, 0).toFixed(2)}.
-                {vertexCount > 0 && edges.length < vertexCount - 1 && ` Die grafiek is ontkoppel: ${vertexCount - edges.length} komponente (minimum spanwoud).`}
-            </p>}
+                <div>
+                    <h3>Inligting: </h3>
+                    {loading && <p role="status">Laai kampuskaart en spanboom...</p>}
+                    {error && <p role="alert">{error}</p>}
+                    {map && <p>{vertexCount} hoekpunte; {edges.length} rande; totale gewig: {edges.reduce((sum, edge) => sum + edge.weight, 0).toFixed(2)}.
+                        {vertexCount > 0 && edges.length < vertexCount - 1 && ` Die grafiek is ontkoppel: ${vertexCount - edges.length} komponente (minimum spanwoud).`}
+                    </p>}
+                </div>
+
+            </div>
+
             {map && (
                 <MapContainer
                     key={selectedCampus}
