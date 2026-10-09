@@ -89,6 +89,7 @@ def create_tables():
             vertex_a INTEGER NOT NULL,
             vertex_b INTEGER NOT NULL,
             weight DECIMAL(8,2) NOT NULL,
+            capacity INTEGER DEFAULT(0) NOT NULL,
             FOREIGN KEY (vertex_a) REFERENCES vertex(vertex_id),
             FOREIGN KEY (vertex_b) REFERENCES vertex(vertex_id),
             CHECK (vertex_a < vertex_b),
