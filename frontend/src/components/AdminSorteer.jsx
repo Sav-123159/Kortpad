@@ -254,6 +254,24 @@ export default function AdminSorteer(){
         haalGebruikers();
     }
 
+    const kryGrootO = (algoritme) => {
+        if (algoritme === "Bubble Sort") 
+            {return "O(n²)";} 
+
+        else if (algoritme === "Insertion Sort") 
+            {return "O(n²)";} 
+
+        else if (algoritme === "Heap Sort") 
+            {return "O(n log n)";} 
+
+        else if (algoritme === "Quick Sort") 
+            {return "O(n log n) gemiddeld";} 
+
+        else if (algoritme === "Merge Sort") 
+            {return "O(n log n)";} 
+
+        else {return "";}
+    };
 
     return(
         <div className="Info Sorteer_Gebruiker" data-for-tab = "AdminSorteer">
@@ -343,6 +361,9 @@ export default function AdminSorteer(){
                             <option value="Quick Sort">Quick Sort</option>
                             <option value="Merge Sort">Merge Sort</option>
                         </select>
+
+                        <h3 className="GrootO"> {kryGrootO(algoritmeLinks)}</h3>
+                        
                     </div>
                     <div className="Organiseering" ref={linksRef}>
                         {gebruikersLinks.map((gebruiker) => (
@@ -365,6 +386,8 @@ export default function AdminSorteer(){
                             <option value="Quick Sort">Quick Sort</option>
                             <option value="Merge Sort">Merge Sort</option>
                         </select>
+
+                        <h3 className="GrootO"> {kryGrootO(algoritmeRegs)}</h3>
                     </div>
                     <div className="Organiseering" ref={regsRef}>
                         {gebruikersRegs.map((gebruiker) => (

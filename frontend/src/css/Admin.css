@@ -472,6 +472,23 @@ div .Sorteer_Blokke{
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.Algoritme .Lokale__kampus{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.Algoritme .Lokale__kampus h3{
+    background-color: var(--paper);
+    color: var(--ink);
+    width: 10vw;
+    border-radius: var(--default-border-radius);
+    border: var(--default-border);
+    padding: 5px;
+    font-size: medium;
+    font-weight: normal;
+}
+
 /* ================ Gebruikers vertoon Ontwerp ==========================*/
 
 .Gebruiker__item div button,
