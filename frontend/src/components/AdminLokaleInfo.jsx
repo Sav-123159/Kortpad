@@ -8,7 +8,7 @@ import AdminVoegByPopUp from "../components/AdminVoegByPopUp.jsx";
 import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 
 // Kan hierdie komponent vanuit ander lêers invoer bv. vir die AdminContainer
-export default function AdminLokaleInfo(){
+export default function AdminLokaleInfo({setCollapsed, collapsed, setMobieleLPaneel}){
     // Boolean state om die popup oop en toe te maak
     const [isPopupOop, setIsPopupOop] = useState(false);
     
@@ -67,9 +67,20 @@ export default function AdminLokaleInfo(){
     return(
 
         <div className="Info Lokale__Inligting" data-for-tab="Lokale">
+            <div className="MobileHeader">
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => { setCollapsed(false); 
+                        setMobieleLPaneel(true); }}>
+                        ☰
+                    </button>
+                )}
+
+                <h3>Lokale</h3>
+            </div>
+
             {/* Lokale se opskrif en die knoppie om 'n nuwe lokaal by te voeg */}
             {/* Stuur data na die AdminVoegByPopUp deur props te gebruik */}
-            <div className="Lokaal__titel">
+            <div className="Lokaal__titel">           
                 <h2>Lokale</h2>
             </div>
             &ensp;Lokale gerigistreerd <br/>

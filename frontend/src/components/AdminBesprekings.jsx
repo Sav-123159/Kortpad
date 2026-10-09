@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import "../css/Admin.css"
 import AdminConfirmPopUp from "./AdminConfirmPopUp.jsx";
 import { useAuth } from "./AuthContext.jsx";
+import AdminContainer from "./AdminContainer.jsx";
 
 // Formateer die datum laat ek hom kan stoor/gebruik
 // Die offsetDate maak dat ek die korrekte tyd kry vir as ek dit na ISO formaat omskakel
@@ -126,13 +127,41 @@ async function hanteerConfirm(selectedVenue, duur, datumTyd, user_id) {
 }
 
 // hierdie funksie is waar die vorm is om n bespreking te skep
-export default function AdminBesprekings() {
+export default function AdminBesprekings({ setCollapsed, collapsed, setMobieleLPaneel }) {
     const [isConfirmOop, setIsConfirmOop] = useState(false);
 
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
 
-    const {user} = useAuth();
+    const { user } = useAuth();
+
+    function MapSizeHandler({ collapsed }) {
+        const map = useMap();
+
+        useEffect(() => {
+            let animationFrame;
+
+            const updateMap = () => {
+                map.invalidateSize({ animate: false });
+                animationFrame = requestAnimationFrame(updateMap);
+            };
+
+            animationFrame = requestAnimationFrame(updateMap);
+
+            const timeout = setTimeout(() => {
+                cancelAnimationFrame(animationFrame);
+            }, 450);
+
+            return () => {
+                cancelAnimationFrame(animationFrame);
+                clearTimeout(timeout);
+            };
+        }, [collapsed, map]);
+
+        return null;
+    }
+
+
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
             .then(res => res.json())
@@ -185,8 +214,17 @@ export default function AdminBesprekings() {
 
     return (
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
+            <div className="MobileHeader">
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => { setCollapsed(false); setMobieleLPaneel(true); }}>
+                        ☰
+                    </button>
+                )}
+
+                <h3>Besprekings</h3>
+            </div>
             <h2>Besprekings</h2>
-            &ensp;Besprekings kan hier gemaak word om ander besprekings te oorskryf.
+            &ensp;Besprekings kan hier gemaak of oorskryf word.
             <form onSubmit={(e) => { e.preventDefault(); setIsConfirmOop(true); }}>
                 <fieldset>
                     <label htmlFor="kampus">Kampus: </label>

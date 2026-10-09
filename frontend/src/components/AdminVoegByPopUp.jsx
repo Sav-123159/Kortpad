@@ -245,7 +245,7 @@ export default function AdminVoegByPopUp({isPopupOop, setIsPopupOop, tipe, lokaa
         // So in die ander komponente spesifiseer ek die tipe en dan kies hy hier watse vorm om oop te maak
         <div className="Popup_Houer" onClick={() => setIsPopupOop(false)}>
             {/* As iemand binne die vorm klik moet hy nie toe maak nie */}
-            <PopupAnimation as="div" ref={modalRef}>
+            <PopupAnimation as="div" ref={modalRef} className="popup-container">
                 <form className="voegby_vorm" onClick={(e)=> e.stopPropagation()}>
                     {tipe === "VoegToerustingBy" && 
                         <AddToerusting 

@@ -1,14 +1,27 @@
 import "../css/Admin.css";
 import { useState } from "react";
 
-export default function AdminSorteer(){
+export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel}) {
     const [tipe, setTipe] = useState("gebruiker");
     const [volgorde, setVolgorde] = useState("Asc");
     const [volgens, setVolgens] = useState("Van");
     const [algoritmeLinks, setAlgoritmeLinks] = useState("");
     const [algoritmeRegs, setAlgoritmeRegs] = useState("");
-    return(
-        <div className="Info Sorteer_Gebruiker" data-for-tab = "AdminSorteer">
+
+    return (
+        <div className="Info Sorteer_Gebruiker" data-for-tab="AdminSorteer">
+            <div className="MobileHeader">
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => {
+                        setCollapsed(false);
+                        setMobieleLPaneel(true)
+                    }}>
+                        ☰
+                    </button>
+                )}
+
+                <h3>Sorteer</h3>
+            </div>
             <div>
                 <h2>Sorteer gebruikers</h2>
             </div>
@@ -38,7 +51,7 @@ export default function AdminSorteer(){
                         <input
                             type="radio"
                             name="gebruikerTipe"
-                            value= "almal"
+                            value="almal"
                             checked={tipe === "almal"}
                             onChange={() => setTipe("almal")}
                         />
@@ -50,7 +63,7 @@ export default function AdminSorteer(){
                         <input
                             type="radio"
                             name="sorteerVolgorde"
-                            value= "Desc"
+                            value="Desc"
                             checked={volgorde === "Desc"}
                             onChange={() => setVolgorde("Desc")}
                         />
@@ -60,7 +73,7 @@ export default function AdminSorteer(){
                         <input
                             type="radio"
                             name="sorteerVolgorde"
-                            value= "Asc"
+                            value="Asc"
                             checked={volgorde === "Asc"}
                             onChange={() => setVolgorde("Asc")}
                         />
@@ -72,7 +85,7 @@ export default function AdminSorteer(){
                         <input
                             type="radio"
                             name="sorteerVolgens"
-                            value= "Naam"
+                            value="Naam"
                             checked={volgens === "Naam"}
                             onChange={() => setVolgens("Naam")}
                         />
@@ -82,7 +95,7 @@ export default function AdminSorteer(){
                         <input
                             type="radio"
                             name="sorteerVolgens"
-                            value= "Van"
+                            value="Van"
                             checked={volgens === "Van"}
                             onChange={() => setVolgens("Van")}
                         />
@@ -102,14 +115,14 @@ export default function AdminSorteer(){
                         </select>
                     </div>
                     <div className="Organiseering">
-                        Bubbles 
+                        Bubbles
                     </div>
                 </div>
                 <div className="Algoritme">
                     <div className="Lokale__kampus">
                         <select
                             value={algoritmeRegs}
-                            onChange={(e) =>setAlgoritmeRegs(e.target.value)}
+                            onChange={(e) => setAlgoritmeRegs(e.target.value)}
                         >
                             <option value="bubblesort">Bubble Sort</option>
                             <option value="Insertion Sort">Insertion Sort</option>

@@ -3,7 +3,7 @@ import "../css/Admin.css";
 import React, { useState, useEffect } from "react";
 import GeneralPopupModal from "./GeneralPopupModal";
 
-export default function AdminRoosters() {
+export default function AdminRoosters({ setCollapsed, collapsed, setMobieleLPaneel }) {
     const [campuses, setCampuses] = useState([]);
     const [venues, setVenues] = useState([]);
     const [timetables, setTimetables] = useState([]);
@@ -50,7 +50,7 @@ export default function AdminRoosters() {
     const year = new Date().getFullYear();
 
     //----------------------- API FETCHES -----------------------
-    
+
     // Haal kampusse deur API, stel eerste kampus as die verstek waarde
     useEffect(() => {
         fetch("http://127.0.0.1:8000/campuses")
@@ -180,7 +180,7 @@ export default function AdminRoosters() {
     });
 
     //----------------------- GROUPING LOGIC -----------------------
-    
+
     /*
         Groepeer opeenvolgende tydgleuwe met dieselfde module in een blok, sodat die 
         submit dit as een klas stuur inplaas van aparte een uur gleuwe
@@ -235,7 +235,7 @@ export default function AdminRoosters() {
     const chosenSemester = semesters.find((s) => s.id === selectedSemester);
 
     //----------------------- SUBMIT HANDLER -----------------------
-    
+
     /*
         Stuur al die gegroepeerde inskrywings (POST) en al die gemerkte verwyderings (DELETE)
         gelyktydig na die API, en herlaai die rooster vir die geselekteerde lokaal en vee keuses uit
@@ -312,6 +312,17 @@ export default function AdminRoosters() {
 
     return (
         <div className="Roosters__Inligting" data-for-tab="Roosters">
+            <div className="MobileHeader">
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => {  setCollapsed(false); 
+                    setMobieleLPaneel(true)}}>
+                        ☰
+                    </button>
+                )}
+
+                <h3>Roosters</h3>
+            </div>
+
             <h2>Roosters</h2>
             &ensp;Semester roosters vir Lokale
             <div className="Lokale__kampus">
@@ -362,7 +373,10 @@ export default function AdminRoosters() {
                             <tr>
                                 <th>Tyd</th>
                                 {days.map((day) => (
-                                    <th key={day}>{day}</th>
+                                    <th key={day}>
+                                        <span className="day-full">{day}</span>
+                                        <span className="day-short">{day.charAt(0)}</span>
+                                    </th>
                                 ))}
                             </tr>
                         </thead>

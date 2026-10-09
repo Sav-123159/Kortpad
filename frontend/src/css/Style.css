@@ -16,7 +16,7 @@
 
 /* Skuifbalk nie sigbaar totdat muis oor dit beweeg */
 * {
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
 }
@@ -355,7 +355,8 @@ button.form-button:hover {
     width: 360px;
     height: 100vh;
     padding: 20px;
-    height: calc(100vh - 120px);
+    height: calc(100vh - 90px);
+    flex-shrink: 0;
     box-sizing: border-box;
 
     display: flex;
@@ -563,6 +564,10 @@ h3 {
     border: var(--default-border);
     border-radius: var(--default-border-radius);
     box-sizing: border-box;
+}
+
+.edit-container button {
+    margin: 5px;
 }
 
 /* Algemene gebruik popup houer */
@@ -1084,6 +1089,14 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 /* Mobile View */
 
 @media screen and (max-width: 480px) {
+
+    .Logo img {
+        width: 3.0rem;
+        height: 3.0rem;
+        border-radius: 10px;
+    }
+
+
     .global-intro-overlay {
         height: 100%;
     }
@@ -1125,14 +1138,16 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
     }
 
     .login-page,
-    .popup-page {
+    .popup-page,
+    .Popup_Houer {
         height: 100dvh;
         padding: 10px;
         box-sizing: border-box;
     }
 
     .login-container,
-    .edit-container {
+    .edit-container,
+    .popup-container{
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
@@ -1140,7 +1155,7 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 
         width: 100%;
         max-width: 100%;
-        height:auto;
+        height: auto;
         max-height: 100%;
         padding: 20px;
 
@@ -1175,5 +1190,10 @@ En laat dit in die rigting waarin dit geteken is verdwyn */
 
     .edit-container button{
         margin: 5px;
+    }
+
+    .LeftPanel,
+    .LinkerPaneel {
+        height:auto;
     }
 }

@@ -4,7 +4,7 @@ import { CRS } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import "../css/Admin.css";
 
-export default function AdminMST() {
+export default function AdminMST({ setCollapsed, collapsed, setMobieleLPaneel }) {
     const [campuses, setCampuses] = useState([]);
     const [selectedCampus, setSelectedCampus] = useState("");
     const [map, setMap] = useState(null);
@@ -33,6 +33,17 @@ export default function AdminMST() {
 
     return (
         <div className="Info">
+            <div className="MobileHeader">
+                {collapsed && (
+                    <button className="Hamburger" onClick={() => {  
+                    setCollapsed(false); 
+                    setMobieleLPaneel(true)}}>
+                        ☰
+                    </button>
+                )}
+
+                <h3>Minimum Spanboom</h3>
+            </div>
             <div className="Lokaal__titel">
                 <h2>Minimum Opspanboom</h2>
             </div>
