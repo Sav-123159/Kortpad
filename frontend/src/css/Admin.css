@@ -464,12 +464,12 @@ div .Sorteer_Blokke{
     margin: 5px;
     padding: 10px;
 
-    transition: transform 0.8s ease;
+    transition: transform 0.6s ease;
 }
 
 .Vergelyk{
     background-color: var(--pine) !important;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .Algoritme .Lokale__kampus{
@@ -487,6 +487,10 @@ div .Sorteer_Blokke{
     padding: 5px;
     font-size: medium;
     font-weight: normal;
+}
+
+.blokkie {
+    transition: all 1s ease-in-out !important;
 }
 
 /* ================ Gebruikers vertoon Ontwerp ==========================*/

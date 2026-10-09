@@ -18,6 +18,17 @@ export default function AdminSorteer(){
     const linksRunRef = useRef(0);
     const regsRunRef = useRef(0);
 
+    // Timer veranderlikes vir die algoritme
+    const [tydLinks, setTydLinks] = useState(0);
+    const linksHorlosieRef = useRef(null);
+    const linksStopTydRef = useRef(null);
+    const linksBeginTydRef = useRef(null);
+
+    const [tydRegs, setTydRegs] = useState(0);
+    const RegsHorlosieRef = useRef(null);
+    const RegsStopTydRef = useRef(null);
+    const RegsBeginTydRef = useRef(null);
+
     // Begin van die animasie useEffects 
     useEffect(() => { haalGebruikers();}, [tipe]);
 
@@ -56,11 +67,18 @@ export default function AdminSorteer(){
     const [vergelykLinks, setVergelykLinks] = useState([]);
     const [vergelykRegs, setVergelykRegs] = useState([]);
 
-    // --------------------------- Merge Linker algoritme ----------------------------
+    // --------------------------- Sorteer Linker algoritme ----------------------------
     useEffect(() => {
         const runId = ++linksRunRef.current;
         if ((algoritmeLinks === "Merge Sort" || algoritmeLinks === "Insertion Sort" || algoritmeLinks === "Heap Sort" || algoritmeLinks === "Quick Sort") && algoritmeRegs !== "") {
             let stap = 1;
+
+            linksBeginTydRef.current = Date.now();
+            setTydLinks(0);
+
+            linksHorlosieRef.current = setInterval(() => {
+                setTydLinks(Date.now() - linksBeginTydRef.current);
+            }, 50);
 
             const volgendeStap = () => {
                 sorteerStapLinks(stap, runId).then((sorted) => {
@@ -68,7 +86,13 @@ export default function AdminSorteer(){
                     
                     if (!sorted) {
                         stap++;
-                        linksTimerRef.current = setTimeout(volgendeStap, 2500);
+                        linksTimerRef.current = setTimeout(volgendeStap, 2000);
+                    }
+                    else {
+                        linksStopTydRef.current = setTimeout(() => {
+                            clearInterval(linksHorlosieRef.current);
+                            setTydLinks(Date.now() - linksBeginTydRef.current);
+                        }, 2300);
                     }
                 });
             };
@@ -140,16 +164,22 @@ export default function AdminSorteer(){
                         });
                     });
                 });
-            }, 800);
+            }, 600);
         return Data.sorted;       
     };
 
-    // ------------------------------------- Merge Regter algoritme ------------------------------------
+    // ------------------------------------- Sorteer Regter algoritme ------------------------------------
     useEffect(() => {
         const runId = ++ regsRunRef.current;
-
         if ((algoritmeRegs === "Merge Sort" || algoritmeRegs === "Insertion Sort" || algoritmeRegs === "Heap Sort" || algoritmeRegs === "Quick Sort") && algoritmeLinks !== "") {
             let stap = 1;
+
+            RegsBeginTydRef.current = Date.now();
+            setTydRegs(0);
+
+            RegsHorlosieRef.current = setInterval(() => {
+                setTydRegs(Date.now() - RegsBeginTydRef.current);
+            }, 50);
 
             const volgendeStap = () => {
                 sorteerStapRegs(stap, runId).then((sorted) => {
@@ -157,7 +187,13 @@ export default function AdminSorteer(){
                     
                     if (!sorted) {
                         stap++;
-                        regsTimerRef.current = setTimeout(volgendeStap, 2500);
+                        regsTimerRef.current = setTimeout(volgendeStap, 2000);
+                    }
+                    else{
+                        RegsStopTydRef.current = setTimeout(() => {
+                            clearInterval(RegsHorlosieRef.current);
+                            setTydRegs(Date.now() - RegsBeginTydRef.current);
+                        }, 2300);
                     }
                 });
             };
@@ -232,7 +268,7 @@ export default function AdminSorteer(){
                         });
                     });
                 });
-            }, 800);
+            }, 600);
 
         return Data.sorted;
     };
@@ -250,6 +286,16 @@ export default function AdminSorteer(){
 
         setVergelykLinks([]);
         setVergelykRegs([]);
+
+        clearInterval(linksHorlosieRef.current);
+        clearTimeout(linksStopTydRef.current);
+        linksBeginTydRef.current = null;
+        setTydLinks(0);
+
+        clearInterval(RegsHorlosieRef.current);
+        clearTimeout(RegsStopTydRef.current);
+        RegsBeginTydRef.current = null;
+        setTydRegs(0);
 
         haalGebruikers();
     }
@@ -363,11 +409,13 @@ export default function AdminSorteer(){
                         </select>
 
                         <h3 className="GrootO"> {kryGrootO(algoritmeLinks)}</h3>
+
+                        <h3>Tyd: {(tydLinks / 1000).toFixed(2)} sek</h3>
                         
                     </div>
                     <div className="Organiseering" ref={linksRef}>
                         {gebruikersLinks.map((gebruiker) => (
-                            <div key={gebruiker.user_id} data-user-id={gebruiker.user_id} className={vergelykLinks.includes(gebruiker.user_id) ? "Vergelyk" : ""}>
+                            <div key={gebruiker.user_id} data-user-id={gebruiker.user_id} className={vergelykLinks.includes(gebruiker.user_id) ? "Vergelyk" : "blokkie"}>
                                 {gebruiker.fname} {gebruiker.sname}
                             </div>
                         ))}
@@ -388,6 +436,8 @@ export default function AdminSorteer(){
                         </select>
 
                         <h3 className="GrootO"> {kryGrootO(algoritmeRegs)}</h3>
+                        
+                        <h3>Tyd: {(tydRegs / 1000).toFixed(2)} sek</h3>
                     </div>
                     <div className="Organiseering" ref={regsRef}>
                         {gebruikersRegs.map((gebruiker) => (
