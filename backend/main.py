@@ -1168,6 +1168,14 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
 
             for right_index in range(len(result)-1):
                 for left_index in range(len(result)-right_index-1):
+                    left_value_a = result[left_index][field]
+                    left_value_b = result[left_index+1][field]
+
+                    if isinstance(left_value_a, str):
+                        left_value_a = left_value_a.lower()
+
+                    if isinstance(left_value_b, str):
+                        left_value_b = left_value_b.lower()
 
                     compare = [
                         result[left_index]["user_id"],
@@ -1175,7 +1183,7 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
                     ]     
 
                     if sort_order:
-                        if result[left_index+1][field] < result[left_index][field]:
+                        if left_value_b < left_value_a:
                             temp = result[left_index]
                             result[left_index] = result[left_index+1]
                             result[left_index+1] = temp
@@ -1187,7 +1195,7 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
                                 is_sorted = False
                                 return result                        
                     else:
-                        if result[left_index][field] < result[left_index+1][field]:
+                        if left_value_a < left_value_b:
                             temp = result[left_index]
                             result[left_index] = result[left_index+1]
                             result[left_index+1] = temp
@@ -1242,6 +1250,14 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
 
             for right_index in range(len(result)-1):
                 for left_index in range(len(result)-right_index-1):
+                    left_value_a = result[left_index][field]
+                    left_value_b = result[left_index+1][field]
+
+                    if isinstance(left_value_a, str):
+                        left_value_a = left_value_a.lower()
+
+                    if isinstance(left_value_b, str):
+                        left_value_b = left_value_b.lower()
 
                     compare = [
                         result[left_index]["user_id"],
@@ -1249,7 +1265,7 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
                     ]     
 
                     if sort_order:
-                        if result[left_index+1][field] < result[left_index][field]:
+                        if left_value_b < left_value_a:
                             temp = result[left_index]
                             result[left_index] = result[left_index+1]
                             result[left_index+1] = temp
@@ -1261,7 +1277,7 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
                                 is_sorted = False
                                 return result                        
                     else:
-                        if result[left_index][field] < result[left_index+1][field]:
+                        if left_value_a < left_value_b:
                             temp = result[left_index]
                             result[left_index] = result[left_index+1]
                             result[left_index+1] = temp
