@@ -167,6 +167,69 @@ def seed_modules(cursor):
 
     return modules
 
+def seed_toerusting(cursor):
+    lokaal_toerusting = [
+        ("Projektor", 1),
+        ("Witbord", 1),
+        ("Stoele", 10),
+        ("Tafels", 10),
+        ("Klank Sisteem", 1),
+        ("Mikrofoon", 1),
+        ("Tablet", 1),
+        ("Drukker", 1),
+        ("Skandeerder", 1),
+        ("Wi-Fi", 1)
+    ]
+    
+    MIN_TOERUSTING_PER_VENUE = 3
+    MAX_TOERUSTING_PER_VENUE = 8
+    
+    venues = get_venues(cursor)
+
+    if not venues:
+        raise RuntimeError(
+            "No venues exist in the database. "
+            "Add venues before running filler_data.py."
+        )
+
+    random.seed(2026)
+
+    toerusting_records = []
+
+    for venue_id in venues:
+
+        number_of_items = random.randint(
+            MIN_TOERUSTING_PER_VENUE,
+            min(MAX_TOERUSTING_PER_VENUE, len(lokaal_toerusting))
+        )
+
+        # random.sample kies nooit dieselfde item twee keer nie
+        chosen_items = random.sample(
+            lokaal_toerusting,
+            number_of_items
+        )
+
+        for equip_name, equip_qty in chosen_items:
+            toerusting_records.append((
+                venue_id,
+                equip_name,
+                equip_qty
+            ))
+
+    cursor.executemany("""
+        INSERT INTO equipment
+            (
+                venue_id,
+                equip_name,
+                equip_qty
+            )
+        VALUES
+            (?, ?, ?)
+    """, toerusting_records)
+
+    
+    return lokaal_toerusting
+
 def get_venues(cursor):
     cursor.execute("""
         SELECT venue_id
@@ -491,6 +554,7 @@ def seed_database():
         seed_modules(cursor)
         seed_timetable(cursor)
         seed_bookings(cursor, users)
+        seed_toerusting(cursor)
 
         connection.commit()
 
