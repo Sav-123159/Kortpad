@@ -121,7 +121,7 @@ function RegisterModal({ onRegister, error }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d]{8,}$"
-                title="Wagwoord moet minstens 'n hoofletter, kleinletter en getal bevat"
+                title="Wagwoord moet minstens 'n hoofletter, kleinletter en geen simbole nie"
                 required
             />
 
