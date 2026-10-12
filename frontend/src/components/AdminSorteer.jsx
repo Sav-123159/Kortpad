@@ -96,7 +96,12 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
             volgendeStap();
         }
 
-        return () => { clearTimeout(linksTimerRef.current);};
+        return () => {    
+            clearTimeout(linksTimerRef.current);
+            clearTimeout(linksStopTydRef.current);
+            clearInterval(linksHorlosieRef.current);
+            setTydLinks(0);
+        };
 
     }, [algoritmeLinks, algoritmeRegs]);
 
@@ -200,7 +205,12 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
             volgendeStap();
         }
 
-        return () => {clearTimeout(regsTimerRef.current);};
+        return () => {
+            clearTimeout(regsTimerRef.current);
+            clearTimeout(RegsStopTydRef.current);
+            clearInterval(RegsHorlosieRef.current);
+            setTydRegs(0);
+        };
 
     }, [algoritmeRegs, algoritmeLinks]);
 
@@ -295,7 +305,7 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
 
         clearInterval(RegsHorlosieRef.current);
         clearTimeout(RegsStopTydRef.current);
-        RegsBeginTydRef.current = null;
+        RegsBeginTydRef.current = null;  
         setTydRegs(0);
 
         haalGebruikers();
