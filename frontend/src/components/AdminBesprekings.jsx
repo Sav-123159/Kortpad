@@ -212,9 +212,11 @@ export default function AdminBesprekings({ setCollapsed, collapsed, setMobieleLP
         setCapacity("");
     }
 
+    console.log(setMobieleLPaneel);
+
     return (
         <div className="Info Besprekings__Inligting" data-for-tab="Besprekings">
-            <div className="MobileHeader">
+            {/* <div className="MobileHeader">
                 {collapsed && (
                     <button className="Hamburger" onClick={() => { setCollapsed(false); setMobieleLPaneel(true); }}>
                         ☰
@@ -222,7 +224,7 @@ export default function AdminBesprekings({ setCollapsed, collapsed, setMobieleLP
                 )}
 
                 <h3>Besprekings</h3>
-            </div>
+            </div> */}
             <h2>Besprekings</h2>
             &ensp;Besprekings kan hier gemaak of oorskryf word.
             <form onSubmit={(e) => { e.preventDefault(); setIsConfirmOop(true); }}>
