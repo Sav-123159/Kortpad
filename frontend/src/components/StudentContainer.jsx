@@ -17,7 +17,7 @@ function StudentContainer() {
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageCount, setPageCount] = useState(0);
-    
+
     const [hasSearched, setHasSearched] = useState(false);
 
     const [collapsed, setCollapsed] = useState(false);
@@ -54,7 +54,7 @@ function StudentContainer() {
 
                 {/* Houer vir die kaart */}
                 <div className="MapPaneel">
-                    <KortpadMap 
+                    <KortpadMap
                         selectedCampus={selectedCampus}
                         startVenue={startVenue}
                         endVenue={endVenue}
@@ -64,7 +64,8 @@ function StudentContainer() {
                     />
 
                     {pageCount > 1 && (
-                        <div className="RoutePager">
+                        <div key={`pager-${startVenue}-${endVenue}`}
+                            className={"RoutePager RoutePager--pulse"}>
                             <button disabled={pageIndex === 0} onClick={() => setPageIndex(i => i - 1)}>&larr; Terug</button>
                             <span>{pageIndex + 1} / {pageCount}</span>
                             <button disabled={pageIndex === pageCount - 1} onClick={() => setPageIndex(i => i + 1)}>Volgende &rarr;</button>
@@ -73,7 +74,8 @@ function StudentContainer() {
 
                     {/*  Knoppie om die huidige roete te eindig, net sigbaar terwyl die paneel ingetrek is */}
                     {pageCount > 1 && (
-                        <div className="RoutePager">
+                        <div key={`pager-${startVenue}-${endVenue}`}
+                            className={"RoutePager RoutePager--pulse"}>
                             <button disabled={pageIndex === 0} onClick={() => setPageIndex(i => i - 1)}>&larr; Terug</button>
                             <span>{pageIndex + 1} / {pageCount}</span>
                             <button disabled={pageIndex === pageCount - 1} onClick={() => setPageIndex(i => i + 1)}>Volgende &rarr;</button>
@@ -91,8 +93,8 @@ function StudentContainer() {
                     )}
                 </div>
             </div>
-            
-        </div>
+
+        </div >
     );
 }
 
