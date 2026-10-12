@@ -103,7 +103,7 @@ export default function AdminEvacuation({ setCollapsed, collapsed, setMobieleLPa
             <div className="Lokaal__titel">
                 <div>
                     <h2>Maksimum Ontruimingsvloei</h2>
-                    <p>Klik eers A en dan B op die kaart, of gebruik die keuselyste. Groen: A; rooi: B.</p>
+                    <p>Klik eers A en dan B op die kaart, of gebruik die keuselyste. Blou: A; rooi: B.</p>
                 </div>
 
                 <button className="Herstel" onClick={() => { selectVertex('', 'start'); setEnd(''); }}>Herstel punte</button> 

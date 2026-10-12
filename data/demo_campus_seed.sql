@@ -1,10 +1,10 @@
--- Gegenereer deur generate_demo_campus.py -- MOENIE hierdie lêer met die hand wysig nie.
+-- Gegenereer deur generate_demo_campus.py -- MOENIE hierdie lï¿½er met die hand wysig nie.
 -- RANDOM_SEED=42, ROWS=36, COLS=36 -- loop die skrip weer vir nuwe/ander data.
 
 INSERT INTO campus (campus_id, campus_name) VALUES (3, 'Nuwe Kampus (Demo)');
 
 INSERT INTO campus_map (campus_id, image_path, bounds_lat, bounds_lon) VALUES
-  (3, '/maps/demo_campus_maps.jpg', 4360, 4360);
+  (3, '/demo_campus_map.jpg', 4360, 4360);
 
 -- VERTICES
 INSERT INTO vertex (level, campus_id, building_id, venue_id, floor, latitude, longitude) VALUES
@@ -1305,7 +1305,7 @@ INSERT INTO vertex (level, campus_id, building_id, venue_id, floor, latitude, lo
     ('campus', 3, NULL, NULL, NULL, 4280.00, 4160.00),
     ('campus', 3, NULL, NULL, NULL, 4280.00, 4280.00);
 
--- EDGES (koördinaat-ooreenstemming, veilig ongeag werklike autoincrement-id's)
+-- EDGES (koï¿½rdinaat-ooreenstemming, veilig ongeag werklike autoincrement-id's)
 INSERT INTO edge (vertex_a, vertex_b, weight, capacity)
 SELECT MIN(x.vertex_id, y.vertex_id), MAX(x.vertex_id, y.vertex_id), 121.7, 6
 FROM vertex x, vertex y
