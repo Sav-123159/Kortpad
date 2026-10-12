@@ -233,7 +233,7 @@ button:hover {
 
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
     /* matches the .greeting:hover shadow weight already in your CSS */
-    z-index: 999;
+    z-index: 9999;
 
     animation: dropdownIn 0.2s ease;
 }
@@ -421,8 +421,9 @@ button.form-button:hover {
 
 .RoutePager {
     background: var(--paper);
-    height: auto;
-    width: auto;
+
+    height: 60px;
+    width: 300px;
     padding: 8px 5px;
     border-radius: 14px;
     position: absolute;
@@ -497,7 +498,20 @@ button.form-button:hover {
     }
 }
 
-
+.RoutePager {
+    background: var(--paper);
+    height: auto;
+    width: auto;
+    padding: 8px 5px;
+    border-radius: 14px;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
 
 /* Beëing rit knoppie */
 .endJourneyBtn {

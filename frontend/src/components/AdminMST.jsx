@@ -223,8 +223,8 @@ export default function AdminMST({ setCollapsed, collapsed, setMobieleLPaneel })
                     {isPlaying && visibleEdgeCount < edges.length
                         ? "Stop"
                         : visibleEdgeCount >= edges.length
-                            ? "Vertoon weer"
-                            : "Vertoon"}
+                            ? "Begin weer"
+                            : "Begin"}
                 </button>
 
                 <button
