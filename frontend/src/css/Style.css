@@ -435,7 +435,7 @@ button.form-button:hover {
 }
 
 .RoutePager--pulse {
-    animation: pager-pulse 1s ease-out infinite;
+    animation: pager-pulse 1.5s ease-out infinite;
 }
 
 @keyframes pager-pulse {

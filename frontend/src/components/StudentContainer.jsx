@@ -64,8 +64,7 @@ function StudentContainer() {
                     />
 
                     {pageCount > 1 && (
-                        <div key={`pager-${startVenue}-${endVenue}`}
-                            className={"RoutePager RoutePager--pulse"}>
+                        <div className={`RoutePager ${pageIndex < pageCount - 1 ? 'RoutePager--pulse' : ''}`}>
                             <button disabled={pageIndex === 0} onClick={() => setPageIndex(i => i - 1)}>&larr; Terug</button>
                             <span>{pageIndex + 1} / {pageCount}</span>
                             <button disabled={pageIndex === pageCount - 1} onClick={() => setPageIndex(i => i + 1)}>Volgende &rarr;</button>
@@ -74,8 +73,7 @@ function StudentContainer() {
 
                     {/*  Knoppie om die huidige roete te eindig, net sigbaar terwyl die paneel ingetrek is */}
                     {pageCount > 1 && (
-                        <div key={`pager-${startVenue}-${endVenue}`}
-                            className={"RoutePager RoutePager--pulse"}>
+                        <div className={`RoutePager ${pageIndex < pageCount - 1 ? 'RoutePager--pulse' : ''}`}>
                             <button disabled={pageIndex === 0} onClick={() => setPageIndex(i => i - 1)}>&larr; Terug</button>
                             <span>{pageIndex + 1} / {pageCount}</span>
                             <button disabled={pageIndex === pageCount - 1} onClick={() => setPageIndex(i => i + 1)}>Volgende &rarr;</button>
