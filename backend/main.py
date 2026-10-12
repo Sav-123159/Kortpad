@@ -1635,6 +1635,60 @@ def get_booking(booking_id : int):
     finally:
         conn.close()
 
+@app.get('/booking/by-user/{user_id}')
+def get_bookings_by_user(user_id : int):
+    if user_id <= 0:
+        raise HTTPException(
+            status_code=400,
+            detail='User id needs to be greater than 0'
+        )
+
+    conn = get_db()
+
+    try:
+        cursor = conn.cursor()
+
+        user_exists = cursor.execute(
+            'SELECT user_id FROM app_user WHERE user_id = ?',
+            (user_id,)
+        ).fetchone()
+
+        if user_exists is None:
+            raise HTTPException(
+                status_code=404,
+                detail='User does not exist'
+            )
+
+        data = cursor.execute(
+            '''
+            SELECT
+                b.booking_id,
+                b.user_id,
+                b.venue_id,
+                b.booking_date,
+                b.start_time,
+                b.end_time,
+                b.booking_created_at,
+                v.venue_name,
+                bu.building_name
+            FROM booking AS b
+            JOIN venue AS v
+                ON v.venue_id = b.venue_id
+            JOIN building AS bu
+                ON bu.building_id = v.building_id
+            WHERE b.user_id = ?
+            ORDER BY
+                b.booking_date ASC,
+                b.start_time ASC
+            ''',
+            (user_id,)
+        ).fetchall()
+
+        return [dict(booking) for booking in data]
+
+    finally:
+        conn.close()
+
 # Sonder ?booking_date= gee dit alle besprekings van die lokaal (soos voorheen).
 # Met ?booking_date=2026-09-21 kom die antwoord uit die Rooi-Swart Boom (reeks-navraag).
 @app.get('/booking/by-venue/{venue_id}')

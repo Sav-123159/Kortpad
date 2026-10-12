@@ -76,9 +76,12 @@
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 25px;
+    align-content: start;
 
     width: 90%;
     max-width: 1200px;
+
+    height: 65vh;
     max-height: 90vh;
 
     padding: 25px;
@@ -86,6 +89,24 @@
     background: var(--paper);
     border: var(--default-border);
     border-radius: var(--default-border-radius);
+
+    overflow-y: auto;
+}
+
+.booking-tabs {
+    grid-column: 1 / -1;
+
+    display: flex;
+    gap: 8px;
+
+    height: 40px;
+
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--paper-deep);
+}
+
+.booking-tabs button:disabled {
+    cursor: not-allowed;
 }
 
 /* Linkerkant van die bespreking modal */
@@ -124,6 +145,99 @@
 
     cursor: pointer;
     text-decoration: underline;
+}
+
+.my-bookings {
+    grid-column: 1 / -1;
+    align-self: start;
+    width: 100%;
+
+    margin: 0;
+    padding: 0 10px 10px;
+}
+
+.my-bookings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 15px;
+}
+
+.my-bookings-header h3 {
+    margin: 0;
+}
+
+.my-bookings-header span {
+    font-weight: bold;
+    color: var(--pine);
+}
+
+.my-bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.my-booking-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+
+    padding: 15px;
+    color: var(--paper);
+    background-color: var(--pine);
+    border: var(--default-border);
+    border-radius: var(--default-border-radius);
+}
+
+.my-booking-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.my-booking-info h4 {
+    color: var(--paper);
+    font-size: 1.1rem;
+}
+
+.my-booking-delete {
+    flex-shrink: 0;
+    padding: 10px 15px;
+    border: none;
+    color: white;
+    background-color: var(--pine);
+    cursor: pointer;
+}
+
+.my-booking-delete:hover:not(:disabled) {
+    background-color: var(--pine-dark);
+}
+
+.my-booking-delete:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.my-bookings-error {
+    margin-bottom: 15px;
+    color: #9b2929;
+    font-weight: bold;
+}
+
+.my-bookings-empty {
+    padding: 30px;
+    text-align: center;
+    border: 2px dashed var(--paper-deep);
+    border-radius: var(--default-border-radius);
+}
+
+.booking-sidebar,
+.booking-grid,
+.my-bookings {
+    min-height: 0;
+    overflow-y: auto;
 }
 
 /* Knoppie groep, onder in kant paneel */

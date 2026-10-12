@@ -3,6 +3,186 @@ import PopupAnimation from "./PopupAnimation";
 import LogIn from "./LogIn";
 import { useAuth } from "./AuthContext";
 
+function MyBookings({ userId }) {
+    const [myBookings, setMyBookings] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [deletingId, setDeletingId] = useState(null);
+
+    useEffect(() => {
+        if (!userId) {
+            setLoading(false);
+            return;
+        }
+
+        const controller = new AbortController();
+
+        async function loadMyBookings() {
+            try {
+                setLoading(true);
+                setError("");
+
+                const response = await fetch(
+                    `http://127.0.0.1:8000/booking/by-user/${userId}`,
+                    { signal: controller.signal }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail || "Besprekings kon nie gelaai word nie."
+                    );
+                }
+
+                setMyBookings(data);
+            } catch (error) {
+                if (error.name !== "AbortError") {
+                    setError(error.message);
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadMyBookings();
+
+        return () => controller.abort();
+    }, [userId]);
+
+    async function deleteBooking(bookingId) {
+        const confirmed = window.confirm(
+            "Is jy seker jy wil hierdie bespreking kanselleer?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setDeletingId(bookingId);
+            setError("");
+
+            const response = await fetch(
+                `http://127.0.0.1:8000/booking/${bookingId}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.detail || "Bespreking kon nie gekanselleer word nie."
+                );
+            }
+
+            // Verwyder die bespreking onmiddellik uit die lys.
+            setMyBookings((currentBookings) =>
+                currentBookings.filter(
+                    (booking) => booking.booking_id !== bookingId
+                )
+            );
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setDeletingId(null);
+        }
+    }
+
+    if (!userId) {
+        return (
+            <section className="my-bookings">
+                <p>Teken asseblief in om jou besprekings te sien.</p>
+            </section>
+        );
+    }
+
+    if (loading) {
+        return (
+            <section className="my-bookings">
+                <p>Besprekings word gelaai...</p>
+            </section>
+        );
+    }
+
+    return (
+        <section className="my-bookings">
+            <div className="my-bookings-header">
+                <h3>My Besprekings</h3>
+
+                <span>
+                    {myBookings.length} bespreking
+                    {myBookings.length === 1 ? "" : "s"}
+                </span>
+            </div>
+
+            {error && (
+                <p className="my-bookings-error" role="alert">
+                    {error}
+                </p>
+            )}
+
+            {myBookings.length === 0 ? (
+                <div className="my-bookings-empty">
+                    <p>Jy het tans geen besprekings nie.</p>
+                </div>
+            ) : (
+                <div className="my-bookings-list">
+                    {myBookings.map((booking) => (
+                        <article
+                            className="my-booking-card"
+                            key={booking.booking_id}
+                        >
+                            <div className="my-booking-info">
+                                <h4>
+                                    {booking.venue_name ||
+                                        `Lokaal ${booking.venue_id}`}
+                                </h4>
+
+                                {booking.building_name && (
+                                    <p>
+                                        <strong>Gebou:</strong>{" "}
+                                        {booking.building_name}
+                                    </p>
+                                )}
+
+                                <p>
+                                    <strong>Datum:</strong>{" "}
+                                    {booking.booking_date}
+                                </p>
+
+                                <p>
+                                    <strong>Tyd:</strong>{" "}
+                                    {booking.start_time.slice(0, 5)}
+                                    {" – "}
+                                    {booking.end_time.slice(0, 5)}
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                className="my-booking-delete"
+                                disabled={deletingId === booking.booking_id}
+                                onClick={() =>
+                                    deleteBooking(booking.booking_id)
+                                }
+                            >
+                                {deletingId === booking.booking_id
+                                    ? "Kanselleer..."
+                                    : "\u{1F5D1}"}
+                            </button>
+                        </article>
+                    ))}
+                </div>
+            )}
+        </section>
+    );
+}
+
 function Booking({ show, onConfirm, onCancel, onClose }) {
 
     //Kyk of 'n gebruiker in geteken is, anders gaan 'n bespreking nie gemaak kan word nie
@@ -26,6 +206,7 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
     });
 
     const [showLogIn, setShowLogin] = useState(false);
+    const [activeTab, setActiveTab] = useState("create");
 
     // Wys die login modal
     const showLoginModal = () => {
@@ -176,6 +357,12 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
             document.removeEventListener("keydown", closeModalOnEscKeyDown);
         };
     }, [show, onClose, showLogIn]);
+
+    useEffect(() => {
+        if (show) {
+            setActiveTab("create");
+        }
+    }, [show]);
 
     //Maak geselekteerde tydgleuwe skoon
     function clearSelection() {
@@ -329,224 +516,248 @@ function Booking({ show, onConfirm, onCancel, onClose }) {
     return (
         <section className="booking-page">
             <PopupAnimation as="section" className="booking-modal" ref={modalRef}>
-
-                <form className="booking-sidebar" onSubmit={handleSubmit} onReset={onCancelClicked}>
-
-                    <h3>Maak 'n Bespreking</h3>
-
-                    <label htmlFor="campus">Kampus:</label>
-                    <select
-                        id="campus"
-                        value={selectedCampus}
-                        onChange={(e) => setSelectedCampus(e.target.value)}
+                <div className="booking-tabs">
+                    <button
+                        type="button"
+                        className={activeTab === "create" ? "booking-tab active" : "booking-tab"}
+                        onClick={() => setActiveTab("create")}
                     >
-                        {campuses.map((campus) => (
-                            <option
-                                key={campus.campus_id}
-                                value={campus.campus_id}
-                            >
-                                {campus.campus_name}
-                            </option>
-                        ))}
-                    </select>
+                        Bespreek lokaal
+                    </button>
 
-                    <label htmlFor="venue">Lokaal:</label>
-                    <select
-                        id="venue"
-                        value={selectedVenue}
-                        onChange={(e) => setSelectedVenue(e.target.value)}
+                    <button
+                        type="button"
+                        className={activeTab === "list" ? "booking-tab active" : "booking-tab"}
+                        onClick={() => setActiveTab("list")}
+                        disabled={!isLoggedIn}
                     >
-                        {venues.map((venue) => (
-                            <option
-                                key={venue.venue_id}
-                                value={venue.venue_id}
+                        My besprekings
+                    </button>
+                </div>
+                {activeTab == "create" && (
+                    <>
+                        <form className="booking-sidebar" onSubmit={handleSubmit} onReset={onCancelClicked}>
+
+                            <h3>Maak 'n Bespreking</h3>
+
+                            <label htmlFor="campus">Kampus:</label>
+                            <select
+                                id="campus"
+                                value={selectedCampus}
+                                onChange={(e) => setSelectedCampus(e.target.value)}
                             >
-                                {venue.venue_name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <label htmlFor="date">Datum:</label>
-                    <input
-                        id="date"
-                        type="date"
-                        value={date}
-                        // Voorkom datums wat in die verlede is
-                        min={new Date().toISOString().split("T")[0]}
-                        onChange={(e) => {
-                            setDate(e.target.value);
-                            // Maak keuse leeg, want die tyd gleuwe tel nie vir die nuwe datum nie
-                            setSelectedSlots([]);
-                        }}
-                    />
-
-                    {/* Wys net as daar tye al gekies is */}
-                    {selectedSlots.length > 0 && (
-                        <div className="booking-selection">
-                            <strong>Gekose Tye ({activeDay}):</strong>
-                            <div className="booking-selection-times">
-                                {selectedSlots
-                                    .map((slot) => slot.split("-")[1])
-                                    .sort()
-                                    .join(", ")}
-                            </div>
-
-                            <button
-                                type="button"
-                                className="booking-clear"
-                                onClick={clearSelection}
-                            >
-                                Vee keuse skoon
-                            </button>
-                        </div>
-                    )}
-
-                    <div className="booking-actions">
-                        {/* Wys login prompt as die gebruiker nie ingeteken is nie, kan daarop klik om die login modal oop te maak */}
-                        {isLoggedIn === false && (
-                            <div className="Sign-In-Prompt">
-                                <a onClick={showLoginModal}><strong><i>Teken In om 'n bespreking te maak.</i></strong></a>
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            className="booking-confirm"
-                            // Kan nie indien as daar geen tye gekies is nie, of as die gebruiker nie ingeteken is nie
-                            disabled={selectedSlots.length === 0 || isLoggedIn === false}
-                        >
-                            Bevestig Bespreking
-                        </button>
-
-                        <button
-                            type="reset"
-                            className="booking-cancel"
-                        >
-                            Kanselleer
-                        </button>
-                    </div>
-
-                </form>
-
-                <section className="booking-grid">
-
-                    <div className="booking-grid-header">
-                        <h4>Skedule Rooster</h4>
-
-                        <p>
-                            {activeDay
-                                ? `Klik op selle om tye op ${activeDay} te kies.`
-                                : "Kies eers 'n datum om tydgleuwe te aktiveer."}
-                        </p>
-                    </div>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tyd</th>
-
-                                {days.map((day) => (
-                                    <th
-                                        key={day}
-                                        // Disable dae wat nie die gekose datum se dag is nie
-                                        className={
-                                            activeDay && day !== activeDay
-                                                ? "disabled-header"
-                                                : "active-header"
-                                        }
+                                {campuses.map((campus) => (
+                                    <option
+                                        key={campus.campus_id}
+                                        value={campus.campus_id}
                                     >
-                                        <span className="day-full">{day}</span>
-                                        <span className="day-short">{day.charAt(0)}</span>
-                                    </th>
+                                        {campus.campus_name}
+                                    </option>
                                 ))}
-                            </tr>
-                        </thead>
+                            </select>
 
-                        <tbody>
-                            {times.map((time) => (
-                                <tr key={time}>
+                            <label htmlFor="venue">Lokaal:</label>
+                            <select
+                                id="venue"
+                                value={selectedVenue}
+                                onChange={(e) => setSelectedVenue(e.target.value)}
+                            >
+                                {venues.map((venue) => (
+                                    <option
+                                        key={venue.venue_id}
+                                        value={venue.venue_id}
+                                    >
+                                        {venue.venue_name}
+                                    </option>
+                                ))}
+                            </select>
 
-                                    <td className="time-label">{time}</td>
+                            <label htmlFor="date">Datum:</label>
+                            <input
+                                id="date"
+                                type="date"
+                                value={date}
+                                // Voorkom datums wat in die verlede is
+                                min={new Date().toISOString().split("T")[0]}
+                                onChange={(e) => {
+                                    setDate(e.target.value);
+                                    // Maak keuse leeg, want die tyd gleuwe tel nie vir die nuwe datum nie
+                                    setSelectedSlots([]);
+                                }}
+                            />
 
-                                    {days.map((day) => {
-                                        const slot = `${day}-${time}`;
+                            {/* Wys net as daar tye al gekies is */}
+                            {selectedSlots.length > 0 && (
+                                <div className="booking-selection">
+                                    <strong>Gekose Tye ({activeDay}):</strong>
+                                    <div className="booking-selection-times">
+                                        {selectedSlots
+                                            .map((slot) => slot.split("-")[1])
+                                            .sort()
+                                            .join(", ")}
+                                    </div>
 
-                                        // Die tydgleuf is deur die rooster beset of 'n bestaande bespreking is op daai tyd
-                                        // *Die tyd in die tabel en die API moet dieselfde formaat hê*
+                                    <button
+                                        type="button"
+                                        className="booking-clear"
+                                        onClick={clearSelection}
+                                    >
+                                        Vee keuse skoon
+                                    </button>
+                                </div>
+                            )}
 
-                                        // Kyk of die tydgleuf beset is deur die rooster
-                                        const timetableOccupied = timetables.some(
-                                            (timetable) => {
-                                                const startTime = timetable.start_time.slice(0, 5);
-                                                const endTime = timetable.end_time.slice(0, 5);
+                            <div className="booking-actions">
+                                {/* Wys login prompt as die gebruiker nie ingeteken is nie, kan daarop klik om die login modal oop te maak */}
+                                {isLoggedIn === false && (
+                                    <div className="Sign-In-Prompt">
+                                        <a onClick={showLoginModal}><strong><i>Teken In om 'n bespreking te maak.</i></strong></a>
+                                    </div>
+                                )}
 
-                                                return (
-                                                    timetable.day_of_week === day &&
-                                                    startTime <= time &&
-                                                    endTime > time
-                                                );
-                                            }
-                                        );
-                                        // Kyk of die tydgleuf beset is deur 'n bestaande bespreking
-                                        const bookingOccupied =
-                                            day === activeDay &&
-                                            date !== "" &&
-                                            bookings.some(
-                                                (booking) => {
-                                                    const startTime = booking.start_time.slice(0, 5);
-                                                    const endTime = booking.end_time.slice(0, 5);
+                                <button
+                                    type="submit"
+                                    className="booking-confirm"
+                                    // Kan nie indien as daar geen tye gekies is nie, of as die gebruiker nie ingeteken is nie
+                                    disabled={selectedSlots.length === 0 || isLoggedIn === false}
+                                >
+                                    Bevestig Bespreking
+                                </button>
 
-                                                    return (
-                                                        booking.booking_date === date &&
-                                                        startTime <= time &&
-                                                        endTime > time
-                                                    );
-                                                }
-                                            );
+                                <button
+                                    type="reset"
+                                    className="booking-cancel"
+                                >
+                                    Kanselleer
+                                </button>
+                            </div>
 
-                                        // Die tydgleuf is beset as dit deur die rooster of 'n bestaande bespreking beset is
-                                        const occupied = timetableOccupied || bookingOccupied;
+                        </form>
 
-                                        const selected = selectedSlots.includes(slot);
+                        <section className="booking-grid">
 
-                                        // Net die aktiewe dag is aktief
-                                        const disabled =
-                                            !activeDay || day !== activeDay;
+                            <div className="booking-grid-header">
+                                <h4>Skedule Rooster</h4>
 
-                                        return (
-                                            <td
-                                                key={slot}
+                                <p>
+                                    {activeDay
+                                        ? `Klik op selle om tye op ${activeDay} te kies.`
+                                        : "Kies eers 'n datum om tydgleuwe te aktiveer."}
+                                </p>
+                            </div>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tyd</th>
+
+                                        {days.map((day) => (
+                                            <th
+                                                key={day}
+                                                // Disable dae wat nie die gekose datum se dag is nie
                                                 className={
-                                                    occupied
-                                                        ? "occupied"
-                                                        : selected
-                                                            ? "selected"
-                                                            : disabled
-                                                                ? "disabled"
-                                                                : "available"
-                                                }
-                                                onClick={() =>
-                                                    handleCellClick(
-                                                        day,
-                                                        time,
-                                                        occupied
-                                                    )
+                                                    activeDay && day !== activeDay
+                                                        ? "disabled-header"
+                                                        : "active-header"
                                                 }
                                             >
-                                                {occupied
-                                                    ? "Beset"
-                                                    : selected
-                                                        ? "Gekies"
-                                                        : "Beskikbaar"}
-                                            </td>
-                                        );
-                                    })}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                                <span className="day-full">{day}</span>
+                                                <span className="day-short">{day.charAt(0)}</span>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
 
-                </section>
+                                <tbody>
+                                    {times.map((time) => (
+                                        <tr key={time}>
+
+                                            <td className="time-label">{time}</td>
+
+                                            {days.map((day) => {
+                                                const slot = `${day}-${time}`;
+
+                                                // Die tydgleuf is deur die rooster beset of 'n bestaande bespreking is op daai tyd
+                                                // *Die tyd in die tabel en die API moet dieselfde formaat hê*
+
+                                                // Kyk of die tydgleuf beset is deur die rooster
+                                                const timetableOccupied = timetables.some(
+                                                    (timetable) => {
+                                                        const startTime = timetable.start_time.slice(0, 5);
+                                                        const endTime = timetable.end_time.slice(0, 5);
+
+                                                        return (
+                                                            timetable.day_of_week === day &&
+                                                            startTime <= time &&
+                                                            endTime > time
+                                                        );
+                                                    }
+                                                );
+                                                // Kyk of die tydgleuf beset is deur 'n bestaande bespreking
+                                                const bookingOccupied =
+                                                    day === activeDay &&
+                                                    date !== "" &&
+                                                    bookings.some(
+                                                        (booking) => {
+                                                            const startTime = booking.start_time.slice(0, 5);
+                                                            const endTime = booking.end_time.slice(0, 5);
+
+                                                            return (
+                                                                booking.booking_date === date &&
+                                                                startTime <= time &&
+                                                                endTime > time
+                                                            );
+                                                        }
+                                                    );
+
+                                                // Die tydgleuf is beset as dit deur die rooster of 'n bestaande bespreking beset is
+                                                const occupied = timetableOccupied || bookingOccupied;
+
+                                                const selected = selectedSlots.includes(slot);
+
+                                                // Net die aktiewe dag is aktief
+                                                const disabled =
+                                                    !activeDay || day !== activeDay;
+
+                                                return (
+                                                    <td
+                                                        key={slot}
+                                                        className={
+                                                            occupied
+                                                                ? "occupied"
+                                                                : selected
+                                                                    ? "selected"
+                                                                    : disabled
+                                                                        ? "disabled"
+                                                                        : "available"
+                                                        }
+                                                        onClick={() =>
+                                                            handleCellClick(
+                                                                day,
+                                                                time,
+                                                                occupied
+                                                            )
+                                                        }
+                                                    >
+                                                        {occupied
+                                                            ? "Beset"
+                                                            : selected
+                                                                ? "Gekies"
+                                                                : "Beskikbaar"}
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                        </section>
+                    </>
+                )}
+                {activeTab === "list" && (
+                    <MyBookings userId={user?.user_id} />
+                )}
             </PopupAnimation>
 
             <LogIn show={showLogIn} onClose={hideLoginModal} />

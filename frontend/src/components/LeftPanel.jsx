@@ -125,7 +125,7 @@ export default function LeftPanel({
         >
 
             <button onClick={showModal}>
-                Bespreek Lokaal
+                Besprekings
             </button>
 
             <Booking
