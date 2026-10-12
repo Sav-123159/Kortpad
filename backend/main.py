@@ -117,7 +117,7 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
     
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false LIMIT 10').fetchall()
         is_sorted = True
         compare = []
 
@@ -209,7 +209,7 @@ def get_users_merge_sort(field : str, sort_order : bool, steps : int):
     
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true LIMIT 10').fetchall()
         is_sorted = True
         compare = []
 
@@ -301,7 +301,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
     
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false LIMIT 10').fetchall()
         is_sorted = True
         compare = []
 
@@ -402,7 +402,7 @@ def get_users_insertion_sort(field : str, sort_order : bool, steps : int):
     
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true LIMIT 10').fetchall()
         is_sorted = True
         compare = []
 
@@ -503,7 +503,7 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
     
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false LIMIT 10').fetchall()
         is_sorted = True
         compare = []
 
@@ -726,7 +726,7 @@ def get_users_heap_sort(field : str, sort_order : bool, steps : int):
     
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true LIMIT 10').fetchall()
         is_sorted = True
         compare = []
 
@@ -949,7 +949,7 @@ def get_users_quick_sort(field: str, sort_order: bool, steps: int):
 
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false LIMIT 10').fetchall()
         is_sorted = True
         compare = []
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
@@ -1047,7 +1047,7 @@ def get_users_quick_sort(field: str, sort_order: bool, steps: int):
 
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true LIMIT 10').fetchall()
         is_sorted = True
         compare = []
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
@@ -1145,7 +1145,7 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
 
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false LIMIT 10').fetchall()
         is_sorted = True
         compare = []
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()
@@ -1227,7 +1227,7 @@ def get_users_bubble_sort(field: str, sort_order: bool, steps: int):
 
     try:
         cursor = conn.cursor()
-        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true').fetchall()
+        data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true LIMIT 10').fetchall()
         is_sorted = True
         compare = []
         columns = cursor.execute("PRAGMA table_info(app_user)").fetchall()

@@ -13,6 +13,7 @@ Waarom 'n rooster (grid) en nie 'n ewekansige verspreiding nie:
 import math
 import random
 from PIL import Image, ImageDraw
+from pathlib import Path
 
 # ==================== PARAMETERS ====================
 CAMPUS_ID = 3                     # moet 'n campus_id wees wat nog nie in jou DB bestaan nie
@@ -32,10 +33,11 @@ CAPACITY_MIN = 5
 CAPACITY_MAX = 50
 
 RANDOM_SEED = 42                  # VAS -- moet dieselfde bly tussen laai, vir herhaalbare demo's
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-OUTPUT_SQL_PATH = "/home/Coenrad/Coding/ngpro262_projek/data/demo_campus_seed.sql"
-OUTPUT_IMAGE_PATH = "/home/Coenrad/Coding/ngpro262_projek/frontend/public/maps/demo_campus_map.jpg"
-IMAGE_WEB_PATH = "/demo_campus_map.jpg"   # pad soos dit in campus_map.image_path gestoor word
+OUTPUT_SQL_PATH = PROJECT_ROOT / "data" / "demo_campus_seed.sql"
+OUTPUT_IMAGE_PATH = (PROJECT_ROOT / "frontend" / "public" / "maps" / "demo_campus_map.jpg")
+IMAGE_WEB_PATH = "/maps/demo_campus_maps.jpg"  # pad soos dit in campus_map.image_path gestoor word
 
 random.seed(RANDOM_SEED)
 
