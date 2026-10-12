@@ -34,28 +34,24 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
 
     const haalGebruikers = async () => {
         try {
-            const response = await fetch("http://localhost:8000/users");
+
+            if (tipe === "gebruiker"){
+                const response = await fetch("http://localhost:8000/users/sorting");
+                const data = await response.json();
+                setGebruikersLinks(data);
+                setGebruikersRegs(data);
+            }
+
+            if (tipe === "admin"){
+                const response = await fetch("http://localhost:8000/users/sorting/admin");
+                const data = await response.json();
+                setGebruikersLinks(data);
+                setGebruikersRegs(data);
+            }
 
             if (!response.ok) {
                 throw new Error("Kon nie gebruikers laai nie.");
             }
-
-            const data = await response.json();
-
-            const gefiltreer = data.filter((gebruiker) => {
-                if (tipe === "admin") {
-                    return gebruiker.is_admin === true;
-                }
-
-                if (tipe === "gebruiker") {
-                    return gebruiker.is_admin === false;
-                }
-
-                return true;
-            });
-
-            setGebruikersLinks(gefiltreer);
-            setGebruikersRegs(gefiltreer);
 
         } catch (error) {
             console.error("Fout met laai van gebruikers:", error);
@@ -350,16 +346,6 @@ export default function AdminSorteer({setCollapsed, collapsed, setMobieleLPaneel
                             onChange={() => setTipe("admin")}
                         />
                         Admins
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="gebruikerTipe"
-                            value="almal"
-                            checked={tipe === "almal"}
-                            onChange={() => setTipe("almal")}
-                        />
-                        Almal
                     </label>
                 </div>
                 <div className="Sorteer_Keuse">

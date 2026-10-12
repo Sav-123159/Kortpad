@@ -111,6 +111,28 @@ def get_users():
     conn.close()
     return users
 
+@app.get('/users/sorting')
+def get_users():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute('SELECT * FROM app_user WHERE is_admin = false LIMIT 10').fetchall()
+    users = [User(**dict(d)) for d in data]
+
+    conn.close()
+    return users
+
+@app.get('/users/sorting/admin')
+def get_users():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    data = cursor.execute('SELECT * FROM app_user WHERE is_admin = true LIMIT 10').fetchall()
+    users = [User(**dict(d)) for d in data]
+
+    conn.close()
+    return users
+
 @app.get('/users/mergesort/{field}/{sort_order}/{steps}')
 def get_users_merge_sort(field : str, sort_order : bool, steps : int):
     conn = get_db()
